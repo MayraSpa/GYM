@@ -192,9 +192,8 @@
             picker.max = maxDate.toISOString().split('T')[0];
         }
 
-        // LEER LOS DATOS DEL HISTORIAL MEDIANTE EL FEED PÚBLICO DEL ENLACE ALIAS
+        // LEER MENSAJES DEL CANAL MEDIANTE EL FEED PÚBLICO DEL ALIAS
         async function fetchAppointmentsFromTelegram() {
-            // Usamos la variante de feed público nativa de Telegram "MayraSpaCitas" para la lectura RSS abierta
             const cleanChannel = "MayraSpaCitas";
             try {
                 const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://t.me/s/${cleanChannel}`);
@@ -397,17 +396,17 @@
                               `🕒 Hora: ${nuevaCita.time}\n` +
                               `\nDATA_TAG:${JSON.stringify(nuevaCita)}`;
 
+            // URL optimizada que envía los datos de forma directa en cadena para evitar bloqueos CORS
+            const urlCanal = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHANNEL_USERNAME}&text=${encodeURIComponent(postTexto)}&parse_mode=Markdown`;
+
             try {
-                // Al enviar directo al ID numérico forzamos que el bot lo guarde sin fallos
-                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: `chat_id=${encodeURIComponent(TELEGRAM_CHANNEL_USERNAME)}&text=${encodeURIComponent(postTexto)}&parse_mode=Markdown`
-                });
+                // El modo 'no-cors' obliga al navegador a saltar las restricciones de envío de datos
+                await fetch(urlCanal, { mode: 'no-cors' });
             } catch(err) {
                 console.error("Error guardando en el Canal:", err);
             }
 
+            // 2. ENVIAR TU ALERTA PERSONAL PRIVADA AL CELULAR
             enviarNotificacionDirecta(nuevaCita);
 
             alert("✨ Cita enviada con éxito. Tu panel se actualizará en unos instantes.");
@@ -424,11 +423,9 @@
                                  `🔢 *Código/Ref:* \`${cita.code}\`\n\n` +
                                  `👉 _Inicia sesión como admin en la web para gestionarla._`;
 
-            fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: `chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(textoMensaje)}&parse_mode=Markdown`
-            }).catch(err => console.log(err));
+            const urlPrivada = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(textoMensaje)}&parse_mode=Markdown`;
+            
+            fetch(urlPrivada, { mode: 'no-cors' }).catch(err => console.log(err));
         }
 
         // --- DASHBOARD DEL ADMINISTRADOR ---
@@ -499,12 +496,10 @@
                               `Nuevo Estado: ${nuevoEstado}\n` +
                               `\nDATA_TAG:${JSON.stringify(citaOriginal)}`;
 
+            const urlUpdate = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHANNEL_USERNAME}&text=${encodeURIComponent(postTexto)}&parse_mode=Markdown`;
+
             try {
-                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: `chat_id=${encodeURIComponent(TELEGRAM_CHANNEL_USERNAME)}&text=${encodeURIComponent(postTexto)}&parse_mode=Markdown`
-                });
+                await fetch(urlUpdate, { mode: 'no-cors' });
                 alert("✨ Estado actualizado en la nube de Telegram.");
                 setTimeout(checkSession, 1500);
             } catch(err) {
