@@ -196,6 +196,10 @@
         let globalAppointments = [];
         let globalUsers = {}; 
 
+        // MEMORIA VOLÁTIL DE REGISTRO RÁPIDO
+        // Resuelve el problema si el usuario intenta loguearse antes de que Telegram procese el mensaje
+        let localSessionUsersCache = {};
+
         function initDatePicker() {
             const picker = document.getElementById('booking-date-picker');
             const today = new Date();
@@ -211,22 +215,17 @@
             imgOculta.src = urlPeticion;
         }
 
-        // MOTOR RECONSTRUIDO: ESCANEO PROFUNDO CONTINUO DE TELEGRAM (CERO LOCALSTORAGE)
+        // LEER LOS MENSAJES DESDE EL HISTORIAL DE LA NUBE EN TELEGRAM
         async function fetchAppointmentsFromTelegram() {
             try {
-                // Hacemos una petición limpia con compensación de desplazamientos (offset progresivos)
-                // para obligar a Telegram a soltar todo el historial acumulado en caché
                 let urlBase = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?limit=100&allowed_updates=["message","channel_post"]`;
-                
                 const response = await fetch(urlBase);
                 const data = await response.json();
                 
-                // Reiniciamos las variables volátiles en cada consulta para asegurar fidelidad pura
                 globalAppointments = [];
                 globalUsers = {}; 
                 
                 if (data && data.result) {
-                    // Procesar los mensajes en orden cronológico inverso para que los cambios de estado pisen los anteriores correctamente
                     data.result.forEach(update => {
                         const msg = update.message || update.channel_post || update.edited_message;
                         if (!msg) return;
@@ -235,7 +234,7 @@
                         const chatIdDestino = String(msg.chat.id);
 
                         if (chatIdDestino === String(TELEGRAM_CHANNEL_USERNAME) && text) {
-                            // Extraer Citas
+                            // Cargar Citas
                             if (text.includes("DATA_TAG:")) {
                                 try {
                                     const jsonString = text.split("DATA_TAG:")[1].trim();
@@ -243,25 +242,29 @@
                                     
                                     const index = globalAppointments.findIndex(a => a.id === appointmentObj.id);
                                     if (index !== -1) {
-                                        globalAppointments[index] = appointmentObj; // Actualiza estado (Confirmado/Eliminado)
+                                        globalAppointments[index] = appointmentObj; 
                                     } else {
                                         globalAppointments.push(appointmentObj);
                                     }
                                 } catch(e) {}
                             }
-                            // Extraer Cuentas de Usuarios de la Nube Real
+                            // Cargar Usuarios desde los mensajes estables del grupo
                             if (text.includes("USER_CLOUD_TAG:")) {
                                 try {
                                     const jsonString = text.split("USER_CLOUD_TAG:")[1].trim();
                                     const userObj = JSON.parse(jsonString);
-                                    globalUsers[userObj.user] = userObj.pass; // Añade o pisa contraseña reseteada
+                                    globalUsers[userObj.user] = userObj.pass;
                                 } catch(e) {}
                             }
                         }
                     });
                 }
+                
+                // Fusionar la memoria de registro rápido con los datos descargados
+                Object.assign(globalUsers, localSessionUsersCache);
+
             } catch (err) {
-                console.error("Error crítico de sincronización global:", err);
+                console.error("Error en sincronización en la nube:", err);
             }
         }
 
@@ -313,7 +316,6 @@
             const userIn = document.getElementById('username').value.trim().toLowerCase();
             const passIn = document.getElementById('password').value;
 
-            // Acceso de administración global unificado
             if (userIn === 'admin' && passIn === 'admin123') {
                 currentUser = 'admin';
                 isAdmin = true;
@@ -323,29 +325,37 @@
             }
 
             if (isLoginMode) {
-                // Comprobación directa contra la base de datos distribuida en Telegram
+                // Primero intentamos jalar lo último de Telegram por si acaso
+                await fetchAppointmentsFromTelegram();
+
                 if (globalUsers[userIn] && globalUsers[userIn] === passIn) {
                     currentUser = userIn;
                     isAdmin = false;
                     checkSession();
                     document.getElementById('auth-form').reset();
                 } else {
-                    alert("❌ Nombre de usuario o contraseña incorrectos.");
+                    alert("❌ Nombre de usuario o contraseña incorrectos, o la nube aún se está sincronizando.");
                 }
             } else {
-                if (globalUsers[userIn] || userIn === 'admin') {
+                if (globalUsers[userIn] || localSessionUsersCache[userIn] || userIn === 'admin') {
                     alert("❌ Este nombre de usuario ya está ocupado.");
                     return;
                 }
+
+                // REGISTRO INMEDIATO: Lo inyectamos en la caché de sesión para evitar retrasos
+                localSessionUsersCache[userIn] = passIn;
+                globalUsers[userIn] = passIn;
 
                 const registroData = { user: userIn, pass: passIn };
                 const textoUser = `📦 REGISTRO SISTEMA\n👤 Nuevo Usuario: ${userIn}\n\n\nUSER_CLOUD_TAG:${JSON.stringify(registroData)}`;
                 const urlReg = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHANNEL_USERNAME}&text=${encodeURIComponent(textoUser)}`;
                 
                 enviarCitaPorFuerzaBruta(urlReg);
-                alert("✨ Cuenta creada con éxito en la nube. Ya puedes iniciar sesión.");
+                alert("✨ Cuenta creada con éxito. Ya puedes iniciar sesión de forma inmediata.");
                 toggleAuthMode();
-                setTimeout(checkSession, 1200);
+                
+                // Forzamos actualización silenciosa en background
+                fetchAppointmentsFromTelegram();
             }
         }
 
@@ -527,7 +537,6 @@
             const uniqueAppointments = [];
             const idsProcesados = new Set();
             
-            // Filtrar y ordenar cronológicamente
             globalAppointments.sort((a,b) => b.id - a.id).forEach(app => {
                 if (!idsProcesados.has(app.id)) {
                     idsProcesados.add(app.id);
@@ -597,13 +606,17 @@
             const nuevaPass = prompt(`Introduce la nueva contraseña global para "${nombreUsuario}":`);
             if (!nuevaPass || nuevaPass.trim() === "") return;
 
+            // Actualizar localmente primero para permitir inicio inmediato
+            localSessionUsersCache[nombreUsuario] = nuevaPass.trim();
+            globalUsers[nombreUsuario] = nuevaPass.trim();
+
             const updateUserData = { user: nombreUsuario, pass: nuevaPass.trim() };
             const lineasInvisibles = "\n".repeat(60);
-            const textoUser = `✏️ CAMBIO DE CONTRASEÑA POR ADMIN\n👤 Usuario: ${nombreUsuario}\n\n${lineasInvisibles}USER_CLOUD_TAG:${JSON.stringify(updateUserData)}`;
-            const urlUpdateUser = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHANNEL_USERNAME}&text=${encodeURIComponent(textoUser)}`;
+            const textUser = `✏️ CAMBIO DE CONTRASEÑA POR ADMIN\n👤 Usuario: ${nombreUsuario}\n\n${lineasInvisibles}USER_CLOUD_TAG:${JSON.stringify(updateUserData)}`;
+            const urlUpdateUser = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHANNEL_USERNAME}&text=${encodeURIComponent(textUser)}`;
 
             enviarCitaPorFuerzaBruta(urlUpdateUser);
-            alert(`✨ Solicitud enviada a la nube. Presiona 'Sincronizar Todo' en un momento.`);
+            alert(`✨ Solicitud enviada a la nube. Contraseña cambiada de inmediato.`);
             setTimeout(syncAdminPanel, 1200);
         }
 
@@ -630,7 +643,6 @@
             setTimeout(syncAdminPanel, 1200);
         }
 
-        // Ejecución inicial limpia desde la red pura
         checkSession();
     </script>
 </body>
