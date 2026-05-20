@@ -149,10 +149,10 @@
     </main>
 
     <script>
-        // CONFIGURACIÓN DE CREDENCIALES COMPROBADAS
+        // CREDENCIALES CONFIGURADAS CON EL ID DE TU NUEVO SUPERGRUPO
         const TELEGRAM_BOT_TOKEN = "8637382666:AAFCS4IxrPtIsgRLEKdY39z3fBusDlgSqbs"; 
         const TELEGRAM_CHAT_ID = "999753868"; 
-        const TELEGRAM_CHANNEL_USERNAME = "-1003760494499"; 
+        const TELEGRAM_CHANNEL_USERNAME = "-1003884076262"; // ID REAL ACTUALIZADO
 
         const shifts = [
             { label: "09:00 AM - 11:00 AM" },
@@ -385,7 +385,7 @@
                               `🕒 Hora: ${nuevaCita.time}\n` +
                               `\nDATA_TAG:${JSON.stringify(nuevaCita)}`;
 
-            // Envío directo a través de cadena URL blindada contra bloqueos CORS de navegadores
+            // Envío directo utilizando el ID real del supergrupo privado
             const urlCanal = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHANNEL_USERNAME}&text=${encodeURIComponent(postTexto)}&parse_mode=Markdown`;
 
             try {
@@ -394,7 +394,7 @@
                 console.error("Error guardando en el Grupo:", err);
             }
 
-            // Enviar alerta privada en paralelo a tu chat de administrador personal
+            // Enviar alerta privada en paralelo a tu chat personal
             enviarNotificacionDirecta(nuevaCita);
 
             alert("✨ Cita enviada con éxito. Tu panel se actualizará en unos instantes.");
