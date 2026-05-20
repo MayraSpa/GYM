@@ -297,7 +297,6 @@
             container.innerHTML = "";
 
             shifts.forEach(shift => {
-                // Verificamos si hay un estado vigente que no esté marcado como Eliminado
                 const isTaken = globalAppointments.some(app => app.date === dateStr && app.time === shift.label && app.status !== 'Eliminado');
                 
                 const div = document.createElement('div');
@@ -403,8 +402,8 @@
             try {
                 await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ chat_id: TELEGRAM_CHANNEL_USERNAME, text: postTexto, parse_mode: "Markdown" })
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: `chat_id=${encodeURIComponent(TELEGRAM_CHANNEL_USERNAME)}&text=${encodeURIComponent(postTexto)}&parse_mode=Markdown`
                 });
             } catch(err) {
                 console.error("Error guardando en el Canal:", err);
@@ -413,9 +412,9 @@
             // 2. ENVIAR TU ALERTA PERSONAL PRIVADA AL CELULAR
             enviarNotificacionDirecta(nuevaCita);
 
-            alert("✨ Cita enviada. Tu panel se actualizará en unos segundos.");
+            alert("✨ Cita enviada con éxito. Tu panel se actualizará en unos instantes.");
             closePayment();
-            setTimeout(checkSession, 1500);
+            setTimeout(checkSession, 2000);
         }
 
         function enviarNotificacionDirecta(cita) {
@@ -429,8 +428,8 @@
 
             fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: textoMensaje, parse_mode: "Markdown" })
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(textoMensaje)}&parse_mode=Markdown`
             }).catch(err => console.log(err));
         }
 
@@ -507,8 +506,8 @@
             try {
                 await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ chat_id: TELEGRAM_CHANNEL_USERNAME, text: postTexto, parse_mode: "Markdown" })
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: `chat_id=${encodeURIComponent(TELEGRAM_CHANNEL_USERNAME)}&text=${encodeURIComponent(postTexto)}&parse_mode=Markdown`
                 });
                 alert("✨ Estado actualizado en la nube de Telegram.");
                 setTimeout(checkSession, 1500);
