@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
@@ -169,7 +169,8 @@
     </main>
 
     <script>
-        const FIREBASE_DB_URL = "https://mayra-spa-default-rtdb.firebaseio.com/"; 
+        // URL Oficial de tu servidor en Europa
+        const FIREBASE_DB_URL = "https://mayracitas-default-rtdb.europe-west1.firebasedatabase.app/"; 
 
         const TELEGRAM_BOT_TOKEN = "8637382666:AAFCS4IxrPtIsgRLEKdY39z3fBusDlgSqbs"; 
         const TELEGRAM_CHAT_ID = "999753868"; 
@@ -180,8 +181,9 @@
             { label: "02:00 PM - 04:00 PM" }
         ];
 
-        let currentUser = null;
-        let isAdmin = false;
+        // Se rescata la sesión guardada del almacenamiento local del navegador
+        let currentUser = localStorage.getItem('ms_user') || null;
+        let isAdmin = localStorage.getItem('ms_role') === 'admin';
         let isLoginMode = true;
         let selectedDate = "";
         let selectedTimeLabel = "";
@@ -200,12 +202,10 @@
 
         async function syncCloudData() {
             try {
-                // Descargar Citas
                 const resCitas = await fetch(`${FIREBASE_DB_URL}citas.json`);
                 const dataCitas = await resCitas.json();
                 globalAppointments = dataCitas ? Object.values(dataCitas) : [];
 
-                // Descargar Usuarios
                 const resUsers = await fetch(`${FIREBASE_DB_URL}usuarios.json`);
                 const dataUsers = await resUsers.json();
                 globalUsers = dataUsers || {};
@@ -265,6 +265,9 @@
             if (userIn === 'admin' && passIn === 'admin123') {
                 currentUser = 'admin';
                 isAdmin = true;
+                // Guardado persistente de sesión para el Admin
+                localStorage.setItem('ms_user', 'admin');
+                localStorage.setItem('ms_role', 'admin');
                 await checkSession();
                 return;
             }
@@ -275,6 +278,9 @@
                 if (globalUsers[userIn] && globalUsers[userIn] === passIn) {
                     currentUser = userIn;
                     isAdmin = false;
+                    // Guardado persistente de sesión para el Cliente
+                    localStorage.setItem('ms_user', userIn);
+                    localStorage.setItem('ms_role', 'client');
                     checkSession();
                 } else {
                     alert("❌ Credenciales incorrectas.");
@@ -299,6 +305,9 @@
         function logout() {
             currentUser = null;
             isAdmin = false;
+            // Limpieza del almacenamiento al cerrar sesión manualmente
+            localStorage.removeItem('ms_user');
+            localStorage.removeItem('ms_role');
             checkSession();
         }
 
