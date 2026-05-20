@@ -149,10 +149,10 @@
     </main>
 
     <script>
-        // CREDENCIALES CONFIGURADAS CON EL ID DE TU NUEVO SUPERGRUPO
+        // CREDENCIALES FIJAS Y CONFIRMADAS
         const TELEGRAM_BOT_TOKEN = "8637382666:AAFCS4IxrPtIsgRLEKdY39z3fBusDlgSqbs"; 
         const TELEGRAM_CHAT_ID = "999753868"; 
-        const TELEGRAM_CHANNEL_USERNAME = "-1003884076262"; // ID REAL ACTUALIZADO
+        const TELEGRAM_CHANNEL_USERNAME = "-1003884076262"; // ID Real de tu Supergrupo
 
         const shifts = [
             { label: "09:00 AM - 11:00 AM" },
@@ -177,7 +177,7 @@
             picker.max = maxDate.toISOString().split('T')[0];
         }
 
-        // LEER LOS MENSAJES DIRECTAMENTE DESDE LA API DEL BOT (SIN CACHÉ DE CANALES)
+        // LEER LOS MENSAJES DIRECTAMENTE DESDE LA API DEL BOT
         async function fetchAppointmentsFromTelegram() {
             try {
                 const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?allowed_updates=["message"]`);
@@ -193,20 +193,19 @@
                         const text = msg.text;
                         const chatIdDestino = String(msg.chat.id);
 
-                        // Comprobar que el mensaje pertenezca al ID de nuestro grupo
                         if (chatIdDestino === String(TELEGRAM_CHANNEL_USERNAME) && text && text.includes("DATA_TAG:")) {
                             try {
                                 const jsonString = text.split("DATA_TAG:")[1].trim();
                                 const appointmentObj = JSON.parse(jsonString);
                                 globalAppointments.push(appointmentObj);
                             } catch(e) {
-                                console.log("Mensaje de control ignorado.");
+                                console.log("Formato secundario ignorado.");
                             }
                         }
                     });
                 }
             } catch (err) {
-                console.error("Error leyendo base de datos del Grupo de Telegram:", err);
+                console.error("Error leyendo base de datos del Grupo:", err);
             }
         }
 
@@ -227,7 +226,7 @@
                 
                 if (isAdmin) {
                     clientSec.classList.add('hidden');
-                    adminSec.remove('hidden');
+                    adminSec.classList.remove('hidden');
                     renderAdminDashboard();
                 } else {
                     adminSec.classList.add('hidden');
@@ -379,14 +378,14 @@
                 status: "En Espera"
             };
 
-            const postTexto = `📌 *Nueva Cita Registrada*\n` +
-                              `👤 Cliente: ${nuevaCita.username}\n` +
-                              `📅 Fecha: ${nuevaCita.date}\n` +
-                              `🕒 Hora: ${nuevaCita.time}\n` +
-                              `\nDATA_TAG:${JSON.stringify(nuevaCita)}`;
+            // TEXTO PLANO SEGURO SIN MARKDOWN PARA EVITAR RECHAZOS DE SÍMBOLOS POR LA API
+            const postTexto = "📌 Nueva Cita Registrada\n" +
+                              "👤 Cliente: " + nuevaCita.username + "\n" +
+                              "📅 Fecha: " + nuevaCita.date + "\n" +
+                              "🕒 Hora: " + nuevaCita.time + "\n\n" +
+                              "DATA_TAG:" + JSON.stringify(nuevaCita);
 
-            // Envío directo utilizando el ID real del supergrupo privado
-            const urlCanal = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHANNEL_USERNAME}&text=${encodeURIComponent(postTexto)}&parse_mode=Markdown`;
+            const urlCanal = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHANNEL_USERNAME}&text=${encodeURIComponent(postTexto)}`;
 
             try {
                 await fetch(urlCanal, { mode: 'no-cors' });
@@ -394,7 +393,6 @@
                 console.error("Error guardando en el Grupo:", err);
             }
 
-            // Enviar alerta privada en paralelo a tu chat personal
             enviarNotificacionDirecta(nuevaCita);
 
             alert("✨ Cita enviada con éxito. Tu panel se actualizará en unos instantes.");
@@ -479,12 +477,12 @@
 
             citaOriginal.status = nuevoEstado;
 
-            const postTexto = `✏️ *Actualización de Estado*\n` +
-                              `ID Modificado: ${idCita}\n` +
-                              `Nuevo Estado: ${nuevoEstado}\n` +
-                              `\nDATA_TAG:${JSON.stringify(citaOriginal)}`;
+            const postTexto = "✏️ Actualización de Estado\n" +
+                              "ID Modificado: " + idCita + "\n" +
+                              "Nuevo Estado: " + nuevoEstado + "\n\n" +
+                              "DATA_TAG:" + JSON.stringify(citaOriginal);
 
-            const urlUpdate = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHANNEL_USERNAME}&text=${encodeURIComponent(postTexto)}&parse_mode=Markdown`;
+            const urlUpdate = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHANNEL_USERNAME}&text=${encodeURIComponent(postTexto)}`;
 
             try {
                 await fetch(urlUpdate, { mode: 'no-cors' });
