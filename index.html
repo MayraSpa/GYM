@@ -91,12 +91,9 @@
             <div id="admin-tab-citas" class="bg-white p-6 rounded-2xl shadow-xl shadow-purple-900/5 border border-purple-100/40 space-y-4">
                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 border-b border-purple-50 pb-4">
                     <div>
-                        <h2 class="text-xl font-bold text-zinc-800">📊 Panel de Control de Citas (Nube Global)</h2>
-                        <p class="text-xs text-purple-400">Datos cargados desde el servidor centralizado de Telegram</p>
+                        <h2 class="text-xl font-bold text-zinc-800">📊 Panel de Control (Nube Firebase de Google)</h2>
+                        <p class="text-xs text-purple-400">Datos centralizados en tiempo real y multidispositivo</p>
                     </div>
-                    <button onclick="syncAdminPanel()" class="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-md cursor-pointer">
-                        <span>🔄</span> Sincronizar Todo
-                    </button>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -119,10 +116,6 @@
             <div id="admin-tab-usuarios" class="hidden bg-white p-6 rounded-2xl shadow-xl shadow-purple-900/5 border border-purple-100/40 space-y-4">
                 <div class="border-b border-purple-50 pb-4">
                     <h2 class="text-xl font-bold text-zinc-800">👥 Gestión Global de Usuarios</h2>
-                    <p class="text-xs text-purple-400">Lista centralizada de accesos de clientes</p>
-                </div>
-                <div class="p-3 bg-purple-50/40 rounded-xl text-xs font-semibold text-purple-900 w-fit">
-                    Registrados en total: <span id="total-users-count" class="text-base font-bold text-purple-700 ml-1">0</span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse text-sm">
@@ -140,7 +133,7 @@
         </div>
 
         <div id="payment-modal" class="hidden fixed inset-0 bg-zinc-950/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-            <div class="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl border border-purple-100/40 animate-in fade-in zoom-in-95 duration-200">
+            <div class="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl border border-purple-100/40">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-bold text-zinc-800 flex items-center gap-2">✨ Confirmar Solicitud</h3>
                     <button onclick="closePayment()" class="text-zinc-400 hover:text-zinc-600 text-2xl cursor-pointer">×</button>
@@ -148,7 +141,6 @@
                 
                 <div class="bg-[#fbf9fe] p-4 rounded-xl mb-5 text-sm border border-purple-100/50">
                     <p class="text-zinc-500">Bloque: <span id="modal-slot-date" class="font-semibold text-[#8c67b3]"></span></p>
-                    <p class="text-right text-lg font-bold text-[#8c67b3] mt-2 border-t border-purple-100 pt-2">Monto: $25.00 USD / Equivalente</p>
                 </div>
 
                 <form onsubmit="processPayment(event)" class="space-y-4">
@@ -163,8 +155,8 @@
                     </div>
 
                     <div id="transaction-code-container">
-                        <label class="block text-xs font-semibold text-purple-400 uppercase tracking-wider mb-1">Código de Confirmación / ID Transacción</label>
-                        <input type="text" id="transaction-code" placeholder="Ej: 485923011" class="w-full px-4 py-2.5 bg-purple-50/10 border border-purple-100 rounded-xl focus:outline-none focus:border-[#8c67b3] text-sm text-zinc-800 font-mono">
+                        <label class="block text-xs font-semibold text-purple-400 uppercase tracking-wider mb-1">Código de Confirmación</label>
+                        <input type="text" id="transaction-code" class="w-full px-4 py-2.5 bg-purple-50/10 border border-purple-100 rounded-xl focus:outline-none focus:border-[#8c67b3] text-sm">
                     </div>
 
                     <button type="submit" class="w-full bg-[#8c67b3] hover:bg-[#7c5ba7] text-white font-medium py-3 rounded-xl transition-all shadow-md mt-4 cursor-pointer">
@@ -177,8 +169,10 @@
     </main>
 
     <script>
+        const FIREBASE_DB_URL = "https://mayra-spa-default-rtdb.firebaseio.com/"; 
+
         const TELEGRAM_BOT_TOKEN = "8637382666:AAFCS4IxrPtIsgRLEKdY39z3fBusDlgSqbs"; 
-        const TELEGRAM_CHAT_ID = "999753868"; // Tu ID de Admin como base de datos de persistencia estable
+        const TELEGRAM_CHAT_ID = "999753868"; 
 
         const shifts = [
             { label: "09:00 AM - 11:00 AM" },
@@ -195,74 +189,28 @@
         let globalAppointments = [];
         let globalUsers = {}; 
 
-        // Copia de seguridad en SessionStorage del navegador actual para mitigar retardos de red inmediatos
-        let localSessionUsersCache = JSON.parse(sessionStorage.getItem('ms_session_users')) || {};
-
         function initDatePicker() {
             const picker = document.getElementById('booking-date-picker');
             const today = new Date();
             const maxDate = new Date();
             maxDate.setMonth(today.getMonth() + 2);
-
             picker.min = today.toISOString().split('T')[0];
             picker.max = maxDate.toISOString().split('T')[0];
         }
 
-        function enviarCitaPorFuerzaBruta(urlPeticion) {
-            const imgOculta = new Image();
-            imgOculta.src = urlPeticion;
-        }
-
-        // PETICIÓN REESTRUCTURADA PARA EXTRAER EL BUZÓN DE ACTUALIZACIONES DIRECTAS DEL BOT
-        async function fetchAppointmentsFromTelegram() {
+        async function syncCloudData() {
             try {
-                // Quitamos filtros de canal y jalamos del webhook/getUpdates unificado sin borrar offsets
-                let urlBase = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?limit=100`;
-                const response = await fetch(urlBase);
-                const data = await response.json();
-                
-                globalAppointments = [];
-                globalUsers = {}; 
-                
-                if (data && data.result) {
-                    data.result.forEach(update => {
-                        const msg = update.message || update.channel_post || update.edited_message;
-                        if (!msg) return;
+                // Descargar Citas
+                const resCitas = await fetch(`${FIREBASE_DB_URL}citas.json`);
+                const dataCitas = await resCitas.json();
+                globalAppointments = dataCitas ? Object.values(dataCitas) : [];
 
-                        const text = msg.text;
-
-                        if (text) {
-                            // Extraer Citas del cuerpo del JSON
-                            if (text.includes("DATA_TAG:")) {
-                                try {
-                                    const jsonString = text.split("DATA_TAG:")[1].trim();
-                                    const appointmentObj = JSON.parse(jsonString);
-                                    
-                                    const index = globalAppointments.findIndex(a => a.id === appointmentObj.id);
-                                    if (index !== -1) {
-                                        globalAppointments[index] = appointmentObj; 
-                                    } else {
-                                        globalAppointments.push(appointmentObj);
-                                    }
-                                } catch(e) {}
-                            }
-                            // Extraer Cuentas de Usuarios
-                            if (text.includes("USER_CLOUD_TAG:")) {
-                                try {
-                                    const jsonString = text.split("USER_CLOUD_TAG:")[1].trim();
-                                    const userObj = JSON.parse(jsonString);
-                                    globalUsers[userObj.user] = userObj.pass;
-                                } catch(e) {}
-                            }
-                        }
-                    });
-                }
-                
-                // Mezclar lo recuperado en la red con la memoria volátil actual
-                Object.assign(globalUsers, localSessionUsersCache);
-
-            } catch (err) {
-                console.error("Error en sincronización en la nube:", err);
+                // Descargar Usuarios
+                const resUsers = await fetch(`${FIREBASE_DB_URL}usuarios.json`);
+                const dataUsers = await resUsers.json();
+                globalUsers = dataUsers || {};
+            } catch (e) {
+                console.error("Error cargando base de datos:", e);
             }
         }
 
@@ -272,7 +220,7 @@
             const clientSec = document.getElementById('client-section');
             const adminSec = document.getElementById('admin-section');
 
-            await fetchAppointmentsFromTelegram();
+            await syncCloudData();
 
             if (currentUser) {
                 nav.innerHTML = `
@@ -317,44 +265,34 @@
             if (userIn === 'admin' && passIn === 'admin123') {
                 currentUser = 'admin';
                 isAdmin = true;
-                checkSession();
-                document.getElementById('auth-form').reset();
+                await checkSession();
                 return;
             }
 
-            if (isLoginMode) {
-                await fetchAppointmentsFromTelegram();
+            await syncCloudData();
 
+            if (isLoginMode) {
                 if (globalUsers[userIn] && globalUsers[userIn] === passIn) {
                     currentUser = userIn;
                     isAdmin = false;
                     checkSession();
-                    document.getElementById('auth-form').reset();
                 } else {
-                    alert("❌ Nombre de usuario o contraseña incorrectos.");
+                    alert("❌ Credenciales incorrectas.");
                 }
             } else {
-                if (globalUsers[userIn] || localSessionUsersCache[userIn] || userIn === 'admin') {
-                    alert("❌ Este nombre de usuario ya está ocupado.");
+                if (globalUsers[userIn] || userIn === 'admin') {
+                    alert("❌ Usuario ya ocupado.");
                     return;
                 }
 
-                // Guardar de inmediato en la sesión activa del navegador para mitigar el retardo
-                localSessionUsersCache[userIn] = passIn;
-                sessionStorage.setItem('ms_session_users', JSON.stringify(localSessionUsersCache));
-                globalUsers[userIn] = passIn;
+                await fetch(`${FIREBASE_DB_URL}usuarios/${userIn}.json`, {
+                    method: 'PUT',
+                    body: JSON.stringify(passIn)
+                });
 
-                const registroData = { user: userIn, pass: passIn };
-                const textoUser = `📦 REGISTRO SISTEMA\n👤 Nuevo Usuario: ${userIn}\n\nUSER_CLOUD_TAG:${JSON.stringify(registroData)}`;
-                
-                // CAMBIO CLAVE: Se envía directamente al canal privado estable del Administrador
-                const urlReg = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(textoUser)}`;
-                
-                enviarCitaPorFuerzaBruta(urlReg);
-                alert("✨ Cuenta creada con éxito. Ya puedes iniciar sesión de forma inmediata.");
+                alert("✨ Cuenta creada con éxito global.");
                 toggleAuthMode();
-                
-                setTimeout(fetchAppointmentsFromTelegram, 500);
+                checkSession();
             }
         }
 
@@ -372,18 +310,17 @@
 
             shifts.forEach(shift => {
                 const isTaken = globalAppointments.some(app => app.date === dateStr && app.time === shift.label && app.status !== 'Eliminado');
-                
                 const div = document.createElement('div');
-                div.className = "p-3 border rounded-xl flex justify-between items-center transition-all ";
+                div.className = "p-3 border rounded-xl flex justify-between items-center";
 
                 if (isTaken) {
-                    div.className += "bg-zinc-50 border-zinc-100 text-zinc-300";
-                    div.innerHTML = `<span class="text-xs line-through font-medium">${shift.label}</span> <span class="text-[10px] font-bold bg-zinc-200 text-zinc-500 px-2 py-0.5 rounded-sm uppercase">Ocupado</span>`;
+                    div.className += " bg-zinc-50 border-zinc-100 text-zinc-300";
+                    div.innerHTML = `<span class="text-xs line-through">${shift.label}</span> <span class="text-[10px] bg-zinc-200 text-zinc-500 px-2 py-0.5 rounded-sm">Ocupado</span>`;
                 } else {
-                    div.className += "bg-white border-purple-100 hover:border-purple-300";
+                    div.className += " bg-white border-purple-100";
                     div.innerHTML = `
                         <span class="text-xs font-semibold text-zinc-700">${shift.label}</span>
-                        <button onclick="openPayment('${shift.label}')" class="bg-purple-100 hover:bg-[#8c67b3] text-[#7c5ba7] hover:text-white text-xs font-bold px-3 py-1 rounded-lg transition-colors cursor-pointer">Agendar</button>
+                        <button onclick="openPayment('${shift.label}')" class="bg-purple-100 text-[#7c5ba7] text-xs font-bold px-3 py-1 rounded-lg">Agendar</button>
                     `;
                 }
                 container.appendChild(div);
@@ -392,30 +329,18 @@
 
         function renderUserAppointments() {
             const container = document.getElementById('my-appointments');
-            const myApps = globalAppointments.filter(app => app.username === currentUser);
+            const myApps = globalAppointments.filter(app => app.username === currentUser && app.status !== 'Eliminado');
 
             if (myApps.length === 0) {
-                container.innerHTML = `<p class="text-zinc-400 italic text-center py-6 text-xs bg-[#fbf9fe] rounded-xl border border-purple-100">No tienes citas registradas.</p>`;
+                container.innerHTML = `<p class="text-zinc-400 italic text-center py-6 text-xs bg-[#fbf9fe] rounded-xl border border-purple-100">No tienes citas.</p>`;
                 return;
             }
 
             container.innerHTML = "";
             myApps.forEach(app => {
-                if(app.status === 'Eliminado') return;
                 const div = document.createElement('div');
-                div.className = "bg-white border border-purple-100 p-3 rounded-xl shadow-xs space-y-1";
-                
-                let badgeClass = app.status === 'Confirmado' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200';
-
-                div.innerHTML = `
-                    <p class="font-bold text-xs text-zinc-700">📅 ${app.date}</p>
-                    <p class="text-xs text-[#8c67b3] font-medium">🕒 ${app.time}</p>
-                    <p class="text-[11px] text-zinc-500">Vía: <b>${app.method}</b></p>
-                    <div class="flex justify-between items-center pt-1 border-t border-purple-50 mt-1">
-                        <span class="text-[9px] font-bold ${badgeClass} px-2 py-0.5 rounded-full border uppercase">${app.status}</span>
-                        <span class="text-[10px] text-zinc-400 font-mono">Cod: ${app.code}</span>
-                    </div>
-                `;
+                div.className = "bg-white border border-purple-100 p-3 rounded-xl";
+                div.innerHTML = `<p class="font-bold text-xs">📅 ${app.date}</p><p class="text-xs text-[#8c67b3]">🕒 ${app.time}</p><span class="text-[9px] border px-2 py-0.5 rounded-full uppercase">${app.status}</span>`;
                 container.appendChild(div);
             });
         }
@@ -423,9 +348,6 @@
         function openPayment(timeLabel) {
             selectedTimeLabel = timeLabel;
             document.getElementById('modal-slot-date').innerText = `${selectedDate} (${timeLabel})`;
-            document.getElementById('payment-method').value = "Transfermovil";
-            document.getElementById('transaction-code').value = "";
-            toggleCodeField("Transfermovil");
             document.getElementById('payment-modal').classList.remove('hidden');
         }
 
@@ -434,126 +356,51 @@
         }
 
         function toggleCodeField(method) {
-            const container = document.getElementById('transaction-code-container');
-            const input = document.getElementById('transaction-code');
-            if (method === "Efectivo") {
-                container.classList.add('hidden');
-                input.required = false;
-            } else {
-                container.classList.remove('hidden');
-                input.required = true;
-            }
+            document.getElementById('transaction-code-container').classList.toggle('hidden', method === "Efectivo");
         }
 
         async function processPayment(e) {
             e.preventDefault();
             const method = document.getElementById('payment-method').value;
-            let code = document.getElementById('transaction-code').value.trim();
-
-            if (method === "Efectivo") code = "Pago Presencial";
-            if (method !== "Efectivo" && !code) {
-                alert("❌ Por favor, inserta el código.");
-                return;
-            }
+            let code = document.getElementById('transaction-code').value.trim() || "Pago Presencial";
             
-            const nuevaCita = {
-                id: Date.now(),
-                username: currentUser,
-                date: selectedDate,
-                time: selectedTimeLabel,
-                method: method,
-                code: code,
-                status: "En Espera"
-            };
+            const idCita = Date.now();
+            const nuevaCita = { id: idCita, username: currentUser, date: selectedDate, time: selectedTimeLabel, method: method, code: code, status: "En Espera" };
 
-            const lineasInvisibles = "\n".repeat(40);
-            const postTexto = `📝 *SOLICITUD DE CITA*\n` +
-                              `━━━━━━━━━━━━━━━━━━\n` +
-                              `👤 *Cliente:* ${nuevaCita.username}\n` +
-                              `📅 *Fecha:* ${nuevaCita.date}\n` +
-                              `🕒 *Horario:* ${nuevaCita.time}\n` +
-                              `💳 *Pago:* ${nuevaCita.method}\n` +
-                              `🔢 *Operación:* ${nuevaCita.code}\n` +
-                              `━━━━━━━━━━━━━━━━━━${lineasInvisibles}DATA_TAG:${JSON.stringify(nuevaCita)}`;
+            await fetch(`${FIREBASE_DB_URL}citas/${idCita}.json`, {
+                method: 'PUT',
+                body: JSON.stringify(nuevaCita)
+            });
 
-            // Modificado para que se almacene centralizado en el ID de destino seguro
-            const urlGrupoFuerza = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(postTexto)}&parse_mode=Markdown`;
+            const msgText = `🔔 *Nueva Cita de ${nuevaCita.username}*\n📅 ${nuevaCita.date} - ${nuevaCita.time}\n💳 ${nuevaCita.method}`;
+            new Image().src = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(msgText)}&parse_mode=Markdown`;
 
-            enviarCitaPorFuerzaBruta(urlGrupoFuerza);
-
-            alert("✨ Cita reservada con éxito.");
+            alert("✨ Cita enviada de manera segura.");
             closePayment();
-            setTimeout(checkSession, 1200);
-        }
-
-        // --- MANEJO DEL PANEL ADMIN GLOBAL ---
-        function switchAdminTab(tabName) {
-            const btnCitas = document.getElementById('tab-btn-citas');
-            const btnUsers = document.getElementById('tab-btn-usuarios');
-            const tabCitas = document.getElementById('admin-tab-citas');
-            const tabUsers = document.getElementById('admin-tab-usuarios');
-
-            if (tabName === 'citas') {
-                btnCitas.className = "px-4 py-2 text-sm font-bold border-b-2 border-purple-600 text-purple-700 cursor-pointer";
-                btnUsers.className = "px-4 py-2 text-sm font-medium text-zinc-500 hover:text-purple-600 cursor-pointer";
-                tabCitas.classList.remove('hidden');
-                tabUsers.classList.add('hidden');
-            } else {
-                btnUsers.className = "px-4 py-2 text-sm font-bold border-b-2 border-purple-600 text-purple-700 cursor-pointer";
-                btnCitas.className = "px-4 py-2 text-sm font-medium text-zinc-500 hover:text-purple-600 cursor-pointer";
-                tabUsers.classList.remove('hidden');
-                tabCitas.classList.add('hidden');
-            }
-        }
-
-        async function syncAdminPanel() {
-            await fetchAppointmentsFromTelegram();
-            renderAdminDashboard();
-            renderAdminUsers();
-            alert("🔄 Datos sincronizados en tiempo real.");
+            checkSession();
         }
 
         function renderAdminDashboard() {
             const tbody = document.getElementById('admin-table-body');
-            if (globalAppointments.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-zinc-400 italic">No hay citas en la nube. Pulsa 'Sincronizar Todo'.</td></tr>`;
-                return;
-            }
             tbody.innerHTML = "";
-            
-            const uniqueAppointments = [];
-            const idsProcesados = new Set();
-            
-            globalAppointments.sort((a,b) => b.id - a.id).forEach(app => {
-                if (!idsProcesados.has(app.id)) {
-                    idsProcesados.add(app.id);
-                    if (app.status !== 'Eliminado') {
-                        uniqueAppointments.push(app);
-                    }
-                }
-            });
+            const activas = globalAppointments.filter(a => a.status !== 'Eliminado');
 
-            if (uniqueAppointments.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-zinc-400 italic">No hay citas activas registradas.</td></tr>`;
+            if(activas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-zinc-400">No hay citas registradas.</td></tr>`;
                 return;
             }
 
-            uniqueAppointments.forEach(app => {
+            activas.forEach(app => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-purple-50/20 transition-colors";
-                let badgeClass = app.status === 'Confirmado' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800';
-
                 tr.innerHTML = `
-                    <td class="p-3 font-semibold text-zinc-800">${app.username}</td>
-                    <td class="p-3 font-medium text-zinc-600">📅 ${app.date}<br><span class="text-xs text-zinc-400">${app.time}</span></td>
-                    <td class="p-3 font-medium text-purple-700 text-xs">${app.method}</td>
-                    <td class="p-3"><code class="bg-purple-50 px-2 py-1 rounded text-xs font-bold font-mono text-zinc-700 border border-purple-100">${app.code}</code></td>
-                    <td class="p-3"><span class="text-[10px] font-bold ${badgeClass} px-2 py-1 rounded-full uppercase">${app.status}</span></td>
-                    <td class="p-3 text-center space-x-2 whitespace-nowrap">
-                        ${app.status === 'En Espera' ? 
-                            `<button onclick="cambiarEstadoCita(${app.id}, 'Confirmado')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-2.5 py-1 rounded-lg font-medium cursor-pointer transition-colors">Confirmar Pago</button>` : ''
-                        }
-                        <button onclick="cambiarEstadoCita(${app.id}, 'Eliminado')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs px-2.5 py-1 rounded-lg font-medium cursor-pointer transition-colors">Eliminar</button>
+                    <td class="p-3 font-bold">${app.username}</td>
+                    <td class="p-3">📅 ${app.date}<br>${app.time}</td>
+                    <td class="p-3 text-xs">${app.method}</td>
+                    <td class="p-3"><code class="bg-purple-50 px-2 py-0.5 rounded text-xs">${app.code}</code></td>
+                    <td class="p-3"><span class="text-xs font-bold uppercase">${app.status}</span></td>
+                    <td class="p-3 space-x-2">
+                        ${app.status === 'En Espera' ? `<button onclick="cambiarEstadoCita(${app.id}, 'Confirmado')" class="bg-emerald-600 text-white text-xs px-2 py-1 rounded">Confirmar</button>`:''}
+                        <button onclick="cambiarEstadoCita(${app.id}, 'Eliminado')" class="bg-rose-600 text-white text-xs px-2 py-1 rounded">Eliminar</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -562,72 +409,31 @@
 
         function renderAdminUsers() {
             const tbody = document.getElementById('admin-users-table-body');
-            const totalSpan = document.getElementById('total-users-count');
-            const userKeys = Object.keys(globalUsers);
-
-            totalSpan.innerText = userKeys.length;
-
-            if (userKeys.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-8 text-zinc-400 italic">No hay clientes registrados en la red global.</td></tr>`;
-                return;
-            }
-
             tbody.innerHTML = "";
-            userKeys.forEach(userKey => {
+            Object.keys(globalUsers).forEach(user => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-purple-50/20 transition-colors";
-                tr.innerHTML = `
-                    <td class="p-3 font-semibold text-zinc-800">👤 ${userKey}</td>
-                    <td class="p-3 font-mono text-xs text-zinc-600">${globalUsers[userKey]}</td>
-                    <td class="p-3 text-center">
-                        <button onclick="resetearContrasena('${userKey}')" class="bg-purple-50 hover:bg-purple-100 text-[#7c5ba7] text-xs px-3 py-1.5 rounded-xl font-bold cursor-pointer transition-all border border-purple-100">
-                            🔑 Resetear Contraseña
-                        </button>
-                    </td>
-                `;
+                tr.innerHTML = `<td class="p-3 font-semibold">👤 ${user}</td><td class="p-3 font-mono text-xs">${globalUsers[user]}</td><td class="p-3 text-center"><button onclick="eliminarUsuario('${user}')" class="bg-rose-100 text-rose-700 text-xs px-2 py-1 rounded">Eliminar Cliente</button></td>`;
                 tbody.appendChild(tr);
             });
         }
 
-        function resetearContrasena(nombreUsuario) {
-            const nuevaPass = prompt(`Introduce la nueva contraseña global para "${nombreUsuario}":`);
-            if (!nuevaPass || nuevaPass.trim() === "") return;
-
-            localSessionUsersCache[nombreUsuario] = nuevaPass.trim();
-            sessionStorage.setItem('ms_session_users', JSON.stringify(localSessionUsersCache));
-            globalUsers[nombreUsuario] = nuevaPass.trim();
-
-            const updateUserData = { user: nombreUsuario, pass: nuevaPass.trim() };
-            const lineasInvisibles = "\n".repeat(40);
-            const textUser = `✏️ CAMBIO DE CONTRASEÑA POR ADMIN\n👤 Usuario: ${nombreUsuario}\n\n${lineasInvisibles}USER_CLOUD_TAG:${JSON.stringify(updateUserData)}`;
-            const urlUpdateUser = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(textUser)}`;
-
-            enviarCitaPorFuerzaBruta(urlUpdateUser);
-            alert(`✨ Solicitud enviada a la nube. Contraseña cambiada de inmediato.`);
-            setTimeout(syncAdminPanel, 1200);
+        async function cambiarEstadoCita(id, nuevoEstado) {
+            await fetch(`${FIREBASE_DB_URL}citas/${id}/status.json`, {
+                method: 'PUT',
+                body: JSON.stringify(nuevoEstado)
+            });
+            checkSession();
         }
 
-        async function cambiarEstadoCita(idCita, nuevoEstado) {
-            if(nuevoEstado === 'Eliminado' && !confirm("⚠️ ¿Deseas eliminar permanentemente esta cita?")) return;
-            
-            const citaOriginal = globalAppointments.find(a => a.id === idCita);
-            if(!citaOriginal) return;
+        async function eliminarUsuario(user) {
+            if(!confirm("¿Eliminar usuario?")) return;
+            await fetch(`${FIREBASE_DB_URL}usuarios/${user}.json`, { method: 'DELETE' });
+            checkSession();
+        }
 
-            citaOriginal.status = nuevoEstado;
-
-            const lineasInvisibles = "\n".repeat(40);
-            const postTexto = `✏️ *ACTUALIZACIÓN DE CITA*\n` +
-                              `━━━━━━━━━━━━━━━━━━\n` +
-                              `🆔 ID Cita: ${idCita}\n` +
-                              `👤 Cliente: ${citaOriginal.username}\n` +
-                              `🚨 Nuevo Estado: *${nuevoEstado}*\n` +
-                              `━━━━━━━━━━━━━━━━━━${lineasInvisibles}DATA_TAG:${JSON.stringify(citaOriginal)}`;
-
-            const urlUpdate = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(postTexto)}&parse_mode=Markdown`;
-
-            enviarCitaPorFuerzaBruta(urlUpdate);
-            alert("✨ Cambios enviados a la nube.");
-            setTimeout(syncAdminPanel, 1200);
+        function switchAdminTab(t) {
+            document.getElementById('admin-tab-citas').classList.toggle('hidden', t !== 'citas');
+            document.getElementById('admin-tab-usuarios').classList.toggle('hidden', t !== 'usuarios');
         }
 
         checkSession();
