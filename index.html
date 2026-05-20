@@ -164,10 +164,10 @@
     </main>
 
     <script>
-        // CREDENCIALES CONFIGURADAS DIRECTAMENTE
+        // CREDENCIALES CONFIGURADAS DIRECTAMENTE CON EL ID NUMÉRICO
         const TELEGRAM_BOT_TOKEN = "8637382666:AAFCS4IxrPtIsgRLEKdY39z3fBusDlgSqbs"; 
         const TELEGRAM_CHAT_ID = "999753868"; 
-        const TELEGRAM_CHANNEL_USERNAME = "@MayraSpaCitas"; 
+        const TELEGRAM_CHANNEL_USERNAME = "-1003760494499"; 
 
         const shifts = [
             { label: "09:00 AM - 11:00 AM" },
@@ -192,11 +192,11 @@
             picker.max = maxDate.toISOString().split('T')[0];
         }
 
-        // LEER MENSAJES DEL CANAL PARA USARLO COMO BASE DE DATOS MEDIANTE EL FEED RSS PÚBLICO ABIERTO
+        // LEER LOS DATOS DEL HISTORIAL MEDIANTE EL FEED PÚBLICO DEL ENLACE ALIAS
         async function fetchAppointmentsFromTelegram() {
-            const cleanChannel = TELEGRAM_CHANNEL_USERNAME.replace("@", "");
+            // Usamos la variante de feed público nativa de Telegram "MayraSpaCitas" para la lectura RSS abierta
+            const cleanChannel = "MayraSpaCitas";
             try {
-                // Sincronizamos usando el agregador de feeds rss2json libre de bloqueos
                 const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://t.me/s/${cleanChannel}`);
                 const data = await response.json();
                 
@@ -206,7 +206,6 @@
                     data.items.forEach(item => {
                         const text = item.content || item.description;
                         
-                        // Localizamos la marca de datos crudos estructurados
                         if (text && text.includes("DATA_TAG:")) {
                             try {
                                 const jsonString = text.split("DATA_TAG:")[1].trim().replace(/<[^>]*>/g, '');
@@ -392,7 +391,6 @@
                 status: "En Espera"
             };
 
-            // 1. PUBLICAR EN EL CANAL DE TELEGRAM (NUESTRA BASE DE DATOS EN LA NUBE)
             const postTexto = `📌 *Nueva Cita Registrada*\n` +
                               `👤 Cliente: ${nuevaCita.username}\n` +
                               `📅 Fecha: ${nuevaCita.date}\n` +
@@ -400,6 +398,7 @@
                               `\nDATA_TAG:${JSON.stringify(nuevaCita)}`;
 
             try {
+                // Al enviar directo al ID numérico forzamos que el bot lo guarde sin fallos
                 await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
                     method: "POST",
                     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -409,7 +408,6 @@
                 console.error("Error guardando en el Canal:", err);
             }
 
-            // 2. ENVIAR TU ALERTA PERSONAL PRIVADA AL CELULAR
             enviarNotificacionDirecta(nuevaCita);
 
             alert("✨ Cita enviada con éxito. Tu panel se actualizará en unos instantes.");
@@ -444,7 +442,6 @@
 
             tbody.innerHTML = "";
             
-            // Filtramos las repetidas quedándonos solo con el estado más reciente de cada ID de cita
             const uniqueAppointments = [];
             const idsProcesados = new Set();
             
@@ -489,7 +486,6 @@
             });
         }
 
-        // Modificar el estado publica un nuevo mensaje en el canal sobrescribiendo el historial previo de ese ID
         async function cambiarEstadoCita(idCita, nuevoEstado) {
             if(nuevoEstado === 'Eliminado' && !confirm("⚠️ ¿Deseas eliminar permanentemente esta cita y liberar el turno?")) return;
             
