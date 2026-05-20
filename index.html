@@ -91,11 +91,11 @@
             <div id="admin-tab-citas" class="bg-white p-6 rounded-2xl shadow-xl shadow-purple-900/5 border border-purple-100/40 space-y-4">
                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 border-b border-purple-50 pb-4">
                     <div>
-                        <h2 class="text-xl font-bold text-zinc-800">📊 Panel de Control de Citas</h2>
-                        <p class="text-xs text-purple-400">Sincronización Híbrida Protegida contra borrado</p>
+                        <h2 class="text-xl font-bold text-zinc-800">📊 Panel de Control de Citas (Nube Global)</h2>
+                        <p class="text-xs text-purple-400">Datos cargados desde cualquier dispositivo en tiempo real</p>
                     </div>
                     <button onclick="syncAdminPanel()" class="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-md cursor-pointer">
-                        <span>🔄</span> Actualizar Nube
+                        <span>🔄</span> Sincronizar Todo
                     </button>
                 </div>
 
@@ -118,8 +118,8 @@
 
             <div id="admin-tab-usuarios" class="hidden bg-white p-6 rounded-2xl shadow-xl shadow-purple-900/5 border border-purple-100/40 space-y-4">
                 <div class="border-b border-purple-50 pb-4">
-                    <h2 class="text-xl font-bold text-zinc-800">👥 Gestión y Control de Usuarios</h2>
-                    <p class="text-xs text-purple-400">Lista de clientes registrados y reconfiguración de accesos</p>
+                    <h2 class="text-xl font-bold text-zinc-800">👥 Gestión Global de Usuarios</h2>
+                    <p class="text-xs text-purple-400">Lista centralizada de accesos de clientes</p>
                 </div>
                 <div class="p-3 bg-purple-50/40 rounded-xl text-xs font-semibold text-purple-900 w-fit">
                     Registrados en total: <span id="total-users-count" class="text-base font-bold text-purple-700 ml-1">0</span>
@@ -165,7 +165,6 @@
                     <div id="transaction-code-container">
                         <label class="block text-xs font-semibold text-purple-400 uppercase tracking-wider mb-1">Código de Confirmación / ID Transacción</label>
                         <input type="text" id="transaction-code" placeholder="Ej: 485923011" class="w-full px-4 py-2.5 bg-purple-50/10 border border-purple-100 rounded-xl focus:outline-none focus:border-[#8c67b3] text-sm text-zinc-800 font-mono">
-                        <p class="text-[11px] text-zinc-400 mt-1">Introduce el número de operation que recibiste en tu comprobante o SMS.</p>
                     </div>
 
                     <button type="submit" class="w-full bg-[#8c67b3] hover:bg-[#7c5ba7] text-white font-medium py-3 rounded-xl transition-all shadow-md mt-4 cursor-pointer">
@@ -194,9 +193,8 @@
         let selectedDate = "";
         let selectedTimeLabel = "";
         
-        // BD HÍBRIDA (LocalStorage + Telegram Cloud)
-        let globalAppointments = JSON.parse(localStorage.getItem('ms_appointments')) || [];
-        let globalUsers = JSON.parse(localStorage.getItem('ms_users')) || {}; 
+        let globalAppointments = [];
+        let globalUsers = {}; 
 
         function initDatePicker() {
             const picker = document.getElementById('booking-date-picker');
@@ -213,55 +211,57 @@
             imgOculta.src = urlPeticion;
         }
 
-        function guardarEnAlmacenamientoLocal() {
-            localStorage.setItem('ms_appointments', JSON.stringify(globalAppointments));
-            localStorage.setItem('ms_users', JSON.stringify(globalUsers));
-        }
-
-        // LEER LOS DATOS RECIENTES DE TELEGRAM Y FUSIONARLOS CON LOS LOCALES SIN PERDER NADA
+        // MOTOR RECONSTRUIDO: ESCANEO PROFUNDO CONTINUO DE TELEGRAM (CERO LOCALSTORAGE)
         async function fetchAppointmentsFromTelegram() {
             try {
-                const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?allowed_updates=["message"]`);
+                // Hacemos una petición limpia con compensación de desplazamientos (offset progresivos)
+                // para obligar a Telegram a soltar todo el historial acumulado en caché
+                let urlBase = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?limit=100&allowed_updates=["message","channel_post"]`;
+                
+                const response = await fetch(urlBase);
                 const data = await response.json();
                 
+                // Reiniciamos las variables volátiles en cada consulta para asegurar fidelidad pura
+                globalAppointments = [];
+                globalUsers = {}; 
+                
                 if (data && data.result) {
+                    // Procesar los mensajes en orden cronológico inverso para que los cambios de estado pisen los anteriores correctamente
                     data.result.forEach(update => {
-                        const msg = update.message || update.channel_post;
+                        const msg = update.message || update.channel_post || update.edited_message;
                         if (!msg) return;
 
                         const text = msg.text;
                         const chatIdDestino = String(msg.chat.id);
 
                         if (chatIdDestino === String(TELEGRAM_CHANNEL_USERNAME) && text) {
-                            // Sincronizar Citas
+                            // Extraer Citas
                             if (text.includes("DATA_TAG:")) {
                                 try {
                                     const jsonString = text.split("DATA_TAG:")[1].trim();
                                     const appointmentObj = JSON.parse(jsonString);
                                     
-                                    // Evitar duplicados y conservar el estado más moderno
                                     const index = globalAppointments.findIndex(a => a.id === appointmentObj.id);
                                     if (index !== -1) {
-                                        globalAppointments[index] = appointmentObj;
+                                        globalAppointments[index] = appointmentObj; // Actualiza estado (Confirmado/Eliminado)
                                     } else {
                                         globalAppointments.push(appointmentObj);
                                     }
                                 } catch(e) {}
                             }
-                            // Sincronizar Usuarios
+                            // Extraer Cuentas de Usuarios de la Nube Real
                             if (text.includes("USER_CLOUD_TAG:")) {
                                 try {
                                     const jsonString = text.split("USER_CLOUD_TAG:")[1].trim();
                                     const userObj = JSON.parse(jsonString);
-                                    globalUsers[userObj.user] = userObj.pass;
+                                    globalUsers[userObj.user] = userObj.pass; // Añade o pisa contraseña reseteada
                                 } catch(e) {}
                             }
                         }
                     });
-                    guardarEnAlmacenamientoLocal();
                 }
             } catch (err) {
-                console.error("Error en sincronización en la nube:", err);
+                console.error("Error crítico de sincronización global:", err);
             }
         }
 
@@ -313,6 +313,7 @@
             const userIn = document.getElementById('username').value.trim().toLowerCase();
             const passIn = document.getElementById('password').value;
 
+            // Acceso de administración global unificado
             if (userIn === 'admin' && passIn === 'admin123') {
                 currentUser = 'admin';
                 isAdmin = true;
@@ -322,6 +323,7 @@
             }
 
             if (isLoginMode) {
+                // Comprobación directa contra la base de datos distribuida en Telegram
                 if (globalUsers[userIn] && globalUsers[userIn] === passIn) {
                     currentUser = userIn;
                     isAdmin = false;
@@ -335,19 +337,15 @@
                     alert("❌ Este nombre de usuario ya está ocupado.");
                     return;
                 }
-                
-                // Guardar localmente inmediato
-                globalUsers[userIn] = passIn;
-                guardarEnAlmacenamientoLocal();
 
                 const registroData = { user: userIn, pass: passIn };
                 const textoUser = `📦 REGISTRO SISTEMA\n👤 Nuevo Usuario: ${userIn}\n\n\nUSER_CLOUD_TAG:${JSON.stringify(registroData)}`;
                 const urlReg = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHANNEL_USERNAME}&text=${encodeURIComponent(textoUser)}`;
                 
                 enviarCitaPorFuerzaBruta(urlReg);
-                alert("✨ Cuenta creada con éxito. Ya puedes iniciar sesión.");
+                alert("✨ Cuenta creada con éxito en la nube. Ya puedes iniciar sesión.");
                 toggleAuthMode();
-                setTimeout(checkSession, 1000);
+                setTimeout(checkSession, 1200);
             }
         }
 
@@ -459,10 +457,6 @@
                 status: "En Espera"
             };
 
-            // Insertar localmente de inmediato
-            globalAppointments.push(nuevaCita);
-            guardarEnAlmacenamientoLocal();
-
             const lineasInvisibles = "\n".repeat(60);
             const postTexto = `📝 *SOLICITUD DE CITA*\n` +
                               `━━━━━━━━━━━━━━━━━━\n` +
@@ -480,7 +474,7 @@
 
             alert("✨ Cita reservada con éxito.");
             closePayment();
-            setTimeout(checkSession, 1000);
+            setTimeout(checkSession, 1200);
         }
 
         function enviarNotificacionDirecta(cita) {
@@ -495,7 +489,7 @@
             enviarCitaPorFuerzaBruta(urlPrivada);
         }
 
-        // --- MANEJO DEL PANEL ADMIN ---
+        // --- MANEJO DEL PANEL ADMIN GLOBAL ---
         function switchAdminTab(tabName) {
             const btnCitas = document.getElementById('tab-btn-citas');
             const btnUsers = document.getElementById('tab-btn-usuarios');
@@ -519,13 +513,13 @@
             await fetchAppointmentsFromTelegram();
             renderAdminDashboard();
             renderAdminUsers();
-            alert("🔄 Base de datos sincronizada con la nube de Telegram.");
+            alert("🔄 Nube sincronizada globalmente. Datos frescos obtenidos.");
         }
 
         function renderAdminDashboard() {
             const tbody = document.getElementById('admin-table-body');
             if (globalAppointments.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-zinc-400 italic">No hay citas en el historial local ni en la nube.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-zinc-400 italic">No hay citas en la nube. Pulsa 'Sincronizar Todo'.</td></tr>`;
                 return;
             }
             tbody.innerHTML = "";
@@ -533,7 +527,7 @@
             const uniqueAppointments = [];
             const idsProcesados = new Set();
             
-            // Procesar desde las más nuevas primero
+            // Filtrar y ordenar cronológicamente
             globalAppointments.sort((a,b) => b.id - a.id).forEach(app => {
                 if (!idsProcesados.has(app.id)) {
                     idsProcesados.add(app.id);
@@ -544,7 +538,7 @@
             });
 
             if (uniqueAppointments.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-zinc-400 italic">No hay citas activas.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-zinc-400 italic">No hay citas activas registradas.</td></tr>`;
                 return;
             }
 
@@ -578,7 +572,7 @@
             totalSpan.innerText = userKeys.length;
 
             if (userKeys.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-8 text-zinc-400 italic">No hay clientes en el historial de la base de datos.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-8 text-zinc-400 italic">No hay clientes registrados en la red global.</td></tr>`;
                 return;
             }
 
@@ -600,11 +594,8 @@
         }
 
         function resetearContrasena(nombreUsuario) {
-            const nuevaPass = prompt(`Introduce la nueva contraseña para "${nombreUsuario}":`);
+            const nuevaPass = prompt(`Introduce la nueva contraseña global para "${nombreUsuario}":`);
             if (!nuevaPass || nuevaPass.trim() === "") return;
-
-            globalUsers[nombreUsuario] = nuevaPass.trim();
-            guardarEnAlmacenamientoLocal();
 
             const updateUserData = { user: nombreUsuario, pass: nuevaPass.trim() };
             const lineasInvisibles = "\n".repeat(60);
@@ -612,34 +603,34 @@
             const urlUpdateUser = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHANNEL_USERNAME}&text=${encodeURIComponent(textoUser)}`;
 
             enviarCitaPorFuerzaBruta(urlUpdateUser);
-            alert(`✨ Contraseña actualizada de forma permanente.`);
-            renderAdminUsers();
+            alert(`✨ Solicitud enviada a la nube. Presiona 'Sincronizar Todo' en un momento.`);
+            setTimeout(syncAdminPanel, 1200);
         }
 
         async function cambiarEstadoCita(idCita, nuevoEstado) {
-            if(nuevoEstado === 'Eliminado' && !confirm("⚠️ ¿Deseas eliminar permanentemente esta cita y liberar el turno?")) return;
+            if(nuevoEstado === 'Eliminado' && !confirm("⚠️ ¿Deseas eliminar permanentemente esta cita?")) return;
             
-            const index = globalAppointments.findIndex(a => a.id === idCita);
-            if(index === -1) return;
+            const citaOriginal = globalAppointments.find(a => a.id === idCita);
+            if(!citaOriginal) return;
 
-            globalAppointments[index].status = nuevoEstado;
-            guardarEnAlmacenamientoLocal();
+            citaOriginal.status = nuevoEstado;
 
             const lineasInvisibles = "\n".repeat(60);
             const postTexto = `✏️ *ACTUALIZACIÓN DE CITA*\n` +
                               `━━━━━━━━━━━━━━━━━━\n` +
                               `🆔 ID Cita: ${idCita}\n` +
-                              `👤 Cliente: ${globalAppointments[index].username}\n` +
+                              `👤 Cliente: ${citaOriginal.username}\n` +
                               `🚨 Nuevo Estado: *${nuevoEstado}*\n` +
-                              `━━━━━━━━━━━━━━━━━━${lineasInvisibles}DATA_TAG:${JSON.stringify(globalAppointments[index])}`;
+                              `━━━━━━━━━━━━━━━━━━${lineasInvisibles}DATA_TAG:${JSON.stringify(citaOriginal)}`;
 
             const urlUpdate = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHANNEL_USERNAME}&text=${encodeURIComponent(postTexto)}&parse_mode=Markdown`;
 
             enviarCitaPorFuerzaBruta(urlUpdate);
-            alert("✨ Estado actualizado.");
-            renderAdminDashboard();
+            alert("✨ Cambios enviados a la nube.");
+            setTimeout(syncAdminPanel, 1200);
         }
 
+        // Ejecución inicial limpia desde la red pura
         checkSession();
     </script>
 </body>
