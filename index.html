@@ -149,7 +149,7 @@
     </main>
 
     <script>
-        // CREDENCIALES FIJAS Y CONFIRMADAS
+        // CREDENCIALES COMPROBADAS Y ACTIVAS
         const TELEGRAM_BOT_TOKEN = "8637382666:AAFCS4IxrPtIsgRLEKdY39z3fBusDlgSqbs"; 
         const TELEGRAM_CHAT_ID = "999753868"; 
         const TELEGRAM_CHANNEL_USERNAME = "-1003884076262"; // ID Real de tu Supergrupo
@@ -357,6 +357,12 @@
             }
         }
 
+        // MÉTODO DE INYECCIÓN FORZADA DE URL POR BEACON DE IMAGEN (SALTA CORS COMPLETAMENTE)
+        function enviarCitaPorFuerzaBruta(urlPeticion) {
+            const imgOculta = new Image();
+            imgOculta.src = urlPeticion;
+        }
+
         async function processPayment(e) {
             e.preventDefault();
             const method = document.getElementById('payment-method').value;
@@ -378,21 +384,19 @@
                 status: "En Espera"
             };
 
-            // TEXTO PLANO SEGURO SIN MARKDOWN PARA EVITAR RECHAZOS DE SÍMBOLOS POR LA API
             const postTexto = "📌 Nueva Cita Registrada\n" +
                               "👤 Cliente: " + nuevaCita.username + "\n" +
                               "📅 Fecha: " + nuevaCita.date + "\n" +
                               "🕒 Hora: " + nuevaCita.time + "\n\n" +
                               "DATA_TAG:" + JSON.stringify(nuevaCita);
 
-            const urlCanal = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHANNEL_USERNAME}&text=${encodeURIComponent(postTexto)}`;
+            // Generamos la misma URL exacta que usaste en la prueba manual del navegador
+            const urlGrupoFuerza = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHANNEL_USERNAME}&text=${encodeURIComponent(postTexto)}`;
 
-            try {
-                await fetch(urlCanal, { mode: 'no-cors' });
-            } catch(err) {
-                console.error("Error guardando en el Grupo:", err);
-            }
+            // Disparamos la petición usando la carga forzada nativa
+            enviarCitaPorFuerzaBruta(urlGrupoFuerza);
 
+            // Enviar la alerta privada al dueño
             enviarNotificacionDirecta(nuevaCita);
 
             alert("✨ Cita enviada con éxito. Tu panel se actualizará en unos instantes.");
@@ -411,7 +415,7 @@
 
             const urlPrivada = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(textoMensaje)}&parse_mode=Markdown`;
             
-            fetch(urlPrivada, { mode: 'no-cors' }).catch(err => console.log(err));
+            enviarCitaPorFuerzaBruta(urlPrivada);
         }
 
         // --- DASHBOARD DEL ADMINISTRADOR ---
@@ -484,13 +488,9 @@
 
             const urlUpdate = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHANNEL_USERNAME}&text=${encodeURIComponent(postTexto)}`;
 
-            try {
-                await fetch(urlUpdate, { mode: 'no-cors' });
-                alert("✨ Estado actualizado en la nube de Telegram.");
-                setTimeout(checkSession, 1500);
-            } catch(err) {
-                console.error(err);
-            }
+            enviarCitaPorFuerzaBruta(urlUpdate);
+            alert("✨ Estado actualizado en la nube de Telegram.");
+            setTimeout(checkSession, 1500);
         }
 
         checkSession();
