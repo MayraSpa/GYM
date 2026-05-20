@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mayra Spa - Panel de Gestión & Reservas</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -16,7 +14,6 @@
 </head>
 <body class="bg-[#fcfaff] text-zinc-700 antialiased">
 
-    <!-- NAVBAR -->
     <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-purple-100/60 shadow-xs">
         <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex flex-col">
@@ -29,7 +26,6 @@
 
     <main class="max-w-6xl mx-auto px-6 py-12">
         
-        <!-- SECCIÓN 1: LOGIN / REGISTRO -->
         <section id="auth-section" class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-xl shadow-purple-900/5 border border-purple-100/40">
             <div class="text-center mb-6">
                 <span class="text-3xl">🪞</span>
@@ -51,21 +47,14 @@
                 </button>
             </form>
             
-            <div class="text-xs bg-purple-50/50 text-purple-700 p-3 rounded-xl mt-4 border border-purple-100/60">
-                💡 <b>Acceso de Dueño (Admin):</b><br>
-                Usuario: <code class="font-bold">admin</code> | Contraseña: <code class="font-bold">admin123</code>
-            </div>
-            
             <p class="text-sm text-center mt-6 text-zinc-400">
                 <span id="auth-switch-text">¿Primera vez en Mayra Spa?</span>
                 <button onclick="toggleAuthMode()" id="auth-switch-btn" class="text-[#8c67b3] font-semibold underline ml-1 cursor-pointer">Regístrate</button>
             </p>
         </section>
 
-        <!-- SECCIÓN 2: VISTA CLIENTE -->
         <div id="client-section" class="hidden space-y-8">
             <div class="grid md:grid-cols-3 gap-8">
-                <!-- Selector de Agenda -->
                 <div class="md:col-span-2 bg-white p-6 rounded-2xl shadow-xl shadow-purple-900/5 border border-purple-100/40 space-y-6">
                     <div>
                         <h2 class="text-xl font-bold text-zinc-800">1. Selecciona Fecha y Turno</h2>
@@ -84,7 +73,6 @@
                     </div>
                 </div>
 
-                <!-- Resumen Citas del Cliente -->
                 <div class="bg-white p-6 rounded-2xl shadow-xl shadow-purple-900/5 border border-purple-100/40">
                     <h3 class="text-md font-bold text-zinc-800 border-b border-purple-50 pb-3 mb-4 flex items-center gap-2">
                         <span>🗓️</span> Tus Citas Solicitadas
@@ -93,7 +81,6 @@
                 </div>
             </div>
             
-            <!-- Ubicación Integrada -->
             <section class="bg-white p-6 rounded-2xl shadow-xl shadow-purple-900/5 border border-purple-100/40">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                     <div>
@@ -105,13 +92,11 @@
                     </a>
                 </div>
                 <div class="w-full h-72 rounded-xl overflow-hidden border border-purple-100/70 shadow-inner">
-                    <!-- Mapa embebido configurado con coordenadas estables para asegurar compatibilidad -->
                     <iframe class="w-full h-full border-0" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3666.0825316474624!2d-82.3592!3d23.1352!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3AMayra%20Spa!2sMayra%20Spa!5e0!3m2!1ses!2s!4v1680000000000!5m2!1ses!2s" loading="lazy" allowfullscreen></iframe>
                 </div>
             </section>
         </div>
 
-        <!-- SECCIÓN 3: VISTA ADMINISTRADOR -->
         <div id="admin-section" class="hidden space-y-6">
             <div class="bg-white p-6 rounded-2xl shadow-xl shadow-purple-900/5 border border-purple-100/40">
                 <div class="flex justify-between items-center border-b border-purple-50 pb-4 mb-6">
@@ -140,12 +125,11 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 4: MODAL DE REGISTRO DE PAGO -->
         <div id="payment-modal" class="hidden fixed inset-0 bg-zinc-950/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
             <div class="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl border border-purple-100/40 animate-in fade-in zoom-in-95 duration-200">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-bold text-zinc-800 flex items-center gap-2">✨ Confirmar Solicitud</h3>
-                    <button onclick="closePayment()" class="text-zinc-400 hover:text-zinc-600 text-2xl cursor-pointer">&times;</button>
+                    <button onclick="closePayment()" class="text-zinc-400 hover:text-zinc-600 text-2xl cursor-pointer">×</button>
                 </div>
                 
                 <div class="bg-[#fbf9fe] p-4 rounded-xl mb-5 text-sm border border-purple-100/50">
@@ -179,7 +163,6 @@
 
     </main>
 
-    <!-- LOGIC -->
     <script>
         if (!localStorage.getItem('users')) localStorage.setItem('users', JSON.stringify([]));
         if (!localStorage.getItem('appointments')) localStorage.setItem('appointments', JSON.stringify([]));
@@ -252,6 +235,7 @@
             const passIn = document.getElementById('password').value;
             let users = JSON.parse(localStorage.getItem('users'));
 
+            // El acceso de administrador maestro queda oculto pero activo para ti
             if (userIn === 'admin' && passIn === 'admin123') {
                 currentUser = 'Dueño / Administrador';
                 isAdmin = true;
@@ -383,11 +367,11 @@
             }
 
             if (method !== "Efectivo" && !code) {
-                alert("❌ Por favor, inserta el código de confirmación de la transferencia.");
+                alert("❌ Por favor, inserta el código de confirmación.");
                 return;
             }
             
-            appointments.push({
+            const nuevaCita = {
                 id: Date.now(),
                 username: currentUser,
                 date: selectedDate,
@@ -395,13 +379,43 @@
                 method: method,
                 code: code,
                 status: "En Espera"
-            });
+            };
 
+            appointments.push(nuevaCita);
             localStorage.setItem('appointments', JSON.stringify(appointments));
-            alert("✨ Cita enviada. Se encuentra en espera de confirmación de cobro por parte de Mayra Spa.");
-            
+
+            // ENVÍO DE NOTIFICACIÓN AUTOMÁTICA CON TUS DATOS INTEGRADOS
+            enviarNotificacionAAdmin(nuevaCita);
+
+            alert("✨ Solicitud enviada con éxito. Se encuentra en espera de confirmación.");
             closePayment();
             checkSession();
+        }
+
+        // FUNCIÓN DE TELEGRAM INTEGRADA DIRECTAMENTE CON TUS CREDENCIALES REALES
+        function enviarNotificacionAAdmin(cita) {
+            const TELEGRAM_BOT_TOKEN = "8637382666:AAFCS4IxrPtIsgRLEKdY39z3fBusDlgSqbs"; 
+            const TELEGRAM_CHAT_ID = "999753868"; 
+
+            const textoMensaje = `🔔 *Nueva Solicitud de Cita - Mayra Spa*\n\n` +
+                                 `👤 *Cliente:* ${cita.username}\n` +
+                                 `📅 *Fecha:* ${cita.date}\n` +
+                                 `🕒 *Horario:* ${cita.time}\n` +
+                                 `💳 *Método de Pago:* ${cita.method}\n` +
+                                 `🔢 *Código/Ref:* \`${cita.code}\`\n\n` +
+                                 `⚠️ _Por favor, verifique el cobro antes de confirmar._`;
+
+            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+            
+            fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    chat_id: TELEGRAM_CHAT_ID,
+                    text: textoMensaje,
+                    parse_mode: "Markdown"
+                })
+            }).catch(err => console.log("Error enviando a Telegram:", err));
         }
 
         // --- DASHBOARD DEL ADMINISTRADOR ---
@@ -410,7 +424,7 @@
             const appointments = JSON.parse(localStorage.getItem('appointments'));
 
             if (appointments.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-zinc-400 italic">No hay registros de citas en el sistema.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-zinc-400 italic">No hay registros locales.</td></tr>`;
                 return;
             }
 
