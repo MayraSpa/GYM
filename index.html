@@ -63,7 +63,7 @@
                 <div class="md:col-span-2 bg-white p-6 rounded-2xl shadow-xl shadow-purple-900/5 border border-purple-100/40 space-y-6">
                     <div>
                         <h2 class="text-xl font-bold text-zinc-800">1. Selecciona Fecha y Turno</h2>
-                        <p class="text-xs text-zinc-400 mt-1">Los turnos duran 2 horas. Elige un día del calendario.</p>
+                        <p class="text-xs text-zinc-400 mt-1">Los turnos duran 2 hours. Elige un día del calendario.</p>
                     </div>
                     
                     <div class="flex flex-col sm:flex-row gap-6">
@@ -159,7 +159,7 @@
     </main>
 
     <script>
-        // Inicialización de Supabase con los datos de tus capturas
+        // Inicialización única de Supabase (Solucionado el error de duplicación)
         const SUPABASE_URL = "https://qwlxsvzhxvvdbhiwxlbb.supabase.co";
         const SUPABASE_KEY = "sb_publishable_ieNxKvgX7nTROGOmHNpBbw_GSTTJ9Os";
         const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -188,7 +188,7 @@
             picker.min = today.toISOString().split('T')[0];
         }
 
-        // Sincronización limpia usando los nombres exactos de tus columnas
+        // Sincronización limpia estructurada con las columnas que guardó Supabase
         async function syncCloudData() {
             try {
                 const { data: citas, error: errCitas } = await supabase.from('citas').select('*');
@@ -266,7 +266,6 @@
             await syncCloudData();
 
             if (isLoginMode) {
-                // Adaptado al nombre de columna de tu tabla: "nombre de usuario"
                 const encontrado = globalUsers.find(u => u['nombre de usuario'] === userIn && u.contraseña === passIn);
                 if (encontrado) {
                     currentUser = userIn;
@@ -284,7 +283,6 @@
                     return;
                 }
 
-                // Inserción mapeada a tus columnas reales en Supabase
                 const { error } = await supabase.from('usuarios').insert([{ 'nombre de usuario': userIn, contraseña: passIn }]);
                 if(error) {
                     alert("Error al registrar: " + error.message);
@@ -312,7 +310,6 @@
             container.innerHTML = "";
 
             shifts.forEach(shift => {
-                // Mapeado a tus columnas: "fecha", "hora" y "estado"
                 const isTaken = globalAppointments.some(app => app.fecha === dateStr && app.hora === shift.label && app.estado !== 'Eliminado');
                 const div = document.createElement('div');
                 div.className = "p-3 border rounded-xl flex justify-between items-center bg-white border-purple-100";
@@ -363,7 +360,6 @@
             const method = document.getElementById('payment-method').value;
             let code = document.getElementById('transaction-code').value.trim();
             
-            // Objeto armado exactamente con los nombres de tus columnas en la base de datos
             const nuevaCita = { 
                 'nombre de usuario': currentUser, 
                 fecha: selectedDate, 
@@ -379,7 +375,6 @@
                 return;
             }
 
-            // Notificación directa al bot de Telegram
             const msgText = `🔔 *Nueva Cita Recibida en Supabase*\n👤 Cliente: ${nuevaCita['nombre de usuario']}\n📅 Fecha: ${nuevaCita.fecha}\n🕒 Hora: ${nuevaCita.hora}\n💳 Pago: ${nuevaCita.metodo}\n🔢 Comprobante: ${nuevaCita.codigo}`;
             new Image().src = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(msgText)}&parse_mode=Markdown`;
 
