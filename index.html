@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mayra Spa - Sistema Libre de VPN</title>
+    <title>Mayra Spa - Sistema Autónomo</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,7 +19,7 @@
         <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex flex-col">
                 <span class="text-xl font-bold tracking-widest text-[#7c5ba7]">MAYRA SPA</span>
-                <span class="text-[10px] tracking-wider text-purple-400 font-semibold uppercase -mt-1">Servidor Supabase Autónomo</span>
+                <span class="text-[10px] tracking-wider text-purple-400 font-semibold uppercase -mt-1">Conexión Directa Supabase</span>
             </div>
             <div id="nav-user-info" class="flex items-center gap-4 text-sm"></div>
         </div>
@@ -28,14 +28,14 @@
     <main class="max-w-6xl mx-auto px-6 py-12">
         
         <div id="sync-status" class="max-w-md mx-auto mb-4 p-2 text-center text-xs rounded-xl bg-purple-50 text-purple-700 font-medium animate-pulse">
-            🔄 Conectando de manera directa con Supabase...
+            🔄 Sincronizando con base de datos...
         </div>
         
         <section id="auth-section" class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-xl shadow-purple-900/5 border border-purple-100/40">
             <div class="text-center mb-6">
                 <span class="text-3xl">🪞</span>
                 <h2 id="auth-title" class="text-2xl font-bold text-zinc-800 mt-2">Iniciar Sesión</h2>
-                <p class="text-sm text-zinc-400 mt-1">Ingresa sin restricciones de red ni VPN</p>
+                <p class="text-sm text-zinc-400 mt-1">Acceso libre de VPN</p>
             </div>
             
             <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-4">
@@ -63,7 +63,7 @@
                 <div class="md:col-span-2 bg-white p-6 rounded-2xl shadow-xl shadow-purple-900/5 border border-purple-100/40 space-y-6">
                     <div>
                         <h2 class="text-xl font-bold text-zinc-800">1. Selecciona Fecha y Turno</h2>
-                        <p class="text-xs text-zinc-400 mt-1">Los turnos duran 2 hours. Elige un día del calendario.</p>
+                        <p class="text-xs text-zinc-400 mt-1">Elige un día del calendario para ver turnos disponibles.</p>
                     </div>
                     
                     <div class="flex flex-col sm:flex-row gap-6">
@@ -80,7 +80,7 @@
 
                 <div class="bg-white p-6 rounded-2xl shadow-xl shadow-purple-900/5 border border-purple-100/40">
                     <h3 class="text-md font-bold text-zinc-800 border-b border-purple-50 pb-3 mb-4 flex items-center gap-2">
-                        <span>🗓️</span> Tus Citas Solicitadas
+                        <span>🗓️</span> Tus Citas
                     </h3>
                     <div id="my-appointments" class="space-y-3 text-sm"></div>
                 </div>
@@ -89,12 +89,12 @@
 
         <div id="admin-section" class="hidden space-y-6">
             <div class="flex gap-4 border-b border-purple-100 pb-2">
-                <button onclick="switchAdminTab('citas')" id="tab-btn-citas" class="px-4 py-2 text-sm font-bold border-b-2 border-purple-600 text-purple-700 cursor-pointer">🗓️ Gestión de Citas</button>
+                <button onclick="switchAdminTab('citas')" id="tab-btn-citas" class="px-4 py-2 text-sm font-bold border-b-2 border-purple-600 text-purple-700 cursor-pointer">🗓️ Control de Citas</button>
                 <button onclick="switchAdminTab('usuarios')" id="tab-btn-usuarios" class="px-4 py-2 text-sm font-medium text-zinc-500 hover:text-purple-600 cursor-pointer">👥 Control de Usuarios</button>
             </div>
 
             <div id="admin-tab-citas" class="bg-white p-6 rounded-2xl shadow-xl shadow-purple-900/5 border border-purple-100/40 space-y-4">
-                <h2 class="text-xl font-bold text-zinc-800">📊 Panel de Control Realtime (Supabase)</h2>
+                <h2 class="text-xl font-bold text-zinc-800">📊 Panel General de Ventas y Citas</h2>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse text-sm">
                         <thead>
@@ -113,13 +113,13 @@
             </div>
 
             <div id="admin-tab-usuarios" class="hidden bg-white p-6 rounded-2xl shadow-xl shadow-purple-900/5 border border-purple-100/40 space-y-4">
-                <h2 class="text-xl font-bold text-zinc-800">👥 Gestión Global de Usuarios</h2>
+                <h2 class="text-xl font-bold text-zinc-800">👥 Base de Datos de Clientes</h2>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse text-sm">
                         <thead>
                             <tr class="bg-purple-50/50 text-purple-900 font-semibold">
                                 <th class="p-3 rounded-l-xl">Nombre de Usuario</th>
-                                <th class="p-3">Contraseña Actual</th>
+                                <th class="p-3">Contraseña</th>
                                 <th class="p-3 rounded-r-xl text-center">Acción</th>
                             </tr>
                         </thead>
@@ -132,7 +132,7 @@
         <div id="payment-modal" class="hidden fixed inset-0 bg-zinc-950/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
             <div class="bg-white w-full max-w-md p-8 rounded-2xl border border-purple-100/40">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-zinc-800">✨ Confirmar Solicitud</h3>
+                    <h3 class="text-lg font-bold text-zinc-800">✨ Registrar Comprobante</h3>
                     <button onclick="closePayment()" class="text-zinc-400 hover:text-zinc-600 text-2xl cursor-pointer">×</button>
                 </div>
                 <div class="bg-[#fbf9fe] p-4 rounded-xl mb-5 text-sm border border-purple-100/50">
@@ -144,14 +144,14 @@
                         <select id="payment-method" class="w-full px-3 py-2 bg-purple-50/30 border border-purple-100 rounded-xl text-sm">
                             <option value="Transfermovil">📱 Transfermóvil</option>
                             <option value="Enzona">🌐 Enzona</option>
-                            <option value="Efectivo">💵 Efectivo (En el local)</option>
+                            <option value="Efectivo">💵 Efectivo</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-purple-400 uppercase tracking-wider mb-1">Código de Confirmación / Transacción</label>
+                        <label class="block text-xs font-semibold text-purple-400 uppercase tracking-wider mb-1">Código de Transacción</label>
                         <input type="text" id="transaction-code" required class="w-full px-4 py-2 bg-purple-50/10 border border-purple-100 rounded-xl text-sm">
                     </div>
-                    <button type="submit" class="w-full bg-[#8c67b3] hover:bg-[#7c5ba7] text-white font-medium py-3 rounded-xl mt-4 cursor-pointer">Enviar para Verificación</button>
+                    <button type="submit" class="w-full bg-[#8c67b3] hover:bg-[#7c5ba7] text-white font-medium py-3 rounded-xl mt-4 cursor-pointer">Confirmar Cita</button>
                 </form>
             </div>
         </div>
@@ -159,7 +159,7 @@
     </main>
 
     <script>
-        // Inicialización única de Supabase (Solucionado el error de duplicación)
+        // Configuración limpia sin duplicaciones
         const SUPABASE_URL = "https://qwlxsvzhxvvdbhiwxlbb.supabase.co";
         const SUPABASE_KEY = "sb_publishable_ieNxKvgX7nTROGOmHNpBbw_GSTTJ9Os";
         const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -188,21 +188,22 @@
             picker.min = today.toISOString().split('T')[0];
         }
 
-        // Sincronización limpia estructurada con las columnas que guardó Supabase
         async function syncCloudData() {
             try {
                 const { data: citas, error: errCitas } = await supabase.from('citas').select('*');
+                if (errCitas) throw errCitas;
                 globalAppointments = citas || [];
 
                 const { data: usuarios, error: errUsers } = await supabase.from('usuarios').select('*');
+                if (errUsers) throw errUsers;
                 globalUsers = usuarios || [];
 
                 document.getElementById('sync-status').className = "max-w-md mx-auto mb-4 p-2 text-center text-xs rounded-xl bg-emerald-50 text-emerald-700 font-semibold";
-                document.getElementById('sync-status').innerHTML = "🟢 Servidor Supabase Conectado (Sin VPN)";
+                document.getElementById('sync-status').innerHTML = "🟢 Conectado con Supabase";
             } catch (e) {
-                console.error(e);
+                console.error("Error de sincronización:", e);
                 document.getElementById('sync-status').className = "max-w-md mx-auto mb-4 p-2 text-center text-xs rounded-xl bg-rose-50 text-rose-700 font-semibold";
-                document.getElementById('sync-status').innerHTML = "⚠️ Error de enlace con el servidor de datos.";
+                document.getElementById('sync-status').innerHTML = "⚠️ Error de conexión con el servidor de datos.";
             }
         }
 
@@ -216,8 +217,8 @@
 
             if (currentUser) {
                 nav.innerHTML = `
-                    <span class="text-zinc-600">Sesión: <b class="text-[#7c5ba7]">${currentUser}</b></span>
-                    <button onclick="logout()" class="text-zinc-400 hover:text-red-500 font-medium cursor-pointer">Salir</button>
+                    <span class="text-zinc-600">Usuario: <b class="text-[#7c5ba7]">${currentUser}</b></span>
+                    <button onclick="logout()" class="text-zinc-400 hover:text-red-500 font-medium cursor-pointer ml-2">Salir</button>
                 `;
                 authSec.classList.add('hidden');
                 
@@ -231,10 +232,10 @@
                     clientSec.classList.remove('hidden');
                     initDatePicker();
                     renderUserAppointments();
-                    document.getElementById('hours-slots-container').innerHTML = `<p class="text-zinc-400 italic text-xs">Elige una fecha del calendario para desplegar los turnos.</p>`;
+                    document.getElementById('hours-slots-container').innerHTML = `<p class="text-zinc-400 italic text-xs">Elige una fecha del calendario.</p>`;
                 }
             } else {
-                nav.innerHTML = `<span class="text-zinc-400 text-xs">Acceso Remoto</span>`;
+                nav.innerHTML = `<span class="text-zinc-400 text-xs">Modo Offline</span>`;
                 authSec.classList.remove('hidden');
                 clientSec.classList.add('hidden');
                 adminSec.classList.add('hidden');
@@ -266,7 +267,7 @@
             await syncCloudData();
 
             if (isLoginMode) {
-                const encontrado = globalUsers.find(u => u['nombre de usuario'] === userIn && u.contraseña === passIn);
+                const encontrado = globalUsers.find(u => u.username === userIn && u.password === passIn);
                 if (encontrado) {
                     currentUser = userIn;
                     isAdmin = false;
@@ -277,19 +278,19 @@
                     alert("❌ Credenciales incorrectas.");
                 }
             } else {
-                const existe = globalUsers.some(u => u['nombre de usuario'] === userIn);
+                const existe = globalUsers.some(u => u.username === userIn);
                 if (existe || userIn === 'admin') {
-                    alert("❌ Nombre de usuario ocupado.");
+                    alert("❌ Nombre de usuario no disponible.");
                     return;
                 }
 
-                const { error } = await supabase.from('usuarios').insert([{ 'nombre de usuario': userIn, contraseña: passIn }]);
+                const { error } = await supabase.from('usuarios').insert([{ username: userIn, password: passIn }]);
                 if(error) {
                     alert("Error al registrar: " + error.message);
                     return;
                 }
 
-                alert("✨ Cuenta creada con éxito.");
+                alert("✨ Cuenta creada.");
                 toggleAuthMode();
                 checkSession();
             }
@@ -310,7 +311,7 @@
             container.innerHTML = "";
 
             shifts.forEach(shift => {
-                const isTaken = globalAppointments.some(app => app.fecha === dateStr && app.hora === shift.label && app.estado !== 'Eliminado');
+                const isTaken = globalAppointments.some(app => app.date === dateStr && app.time === shift.label && app.status !== 'Eliminado');
                 const div = document.createElement('div');
                 div.className = "p-3 border rounded-xl flex justify-between items-center bg-white border-purple-100";
 
@@ -329,10 +330,10 @@
 
         function renderUserAppointments() {
             const container = document.getElementById('my-appointments');
-            const myApps = globalAppointments.filter(app => app['nombre de usuario'] === currentUser && app.estado !== 'Eliminado');
+            const myApps = globalAppointments.filter(app => app.username === currentUser && app.status !== 'Eliminado');
 
             if (myApps.length === 0) {
-                container.innerHTML = `<p class="text-zinc-400 italic text-center py-6 text-xs bg-[#fbf9fe] rounded-xl border border-purple-100">No tienes citas.</p>`;
+                container.innerHTML = `<p class="text-zinc-400 italic text-center py-6 text-xs bg-[#fbf9fe] rounded-xl border border-purple-100">No tienes citas agendadas.</p>`;
                 return;
             }
 
@@ -340,7 +341,7 @@
             myApps.forEach(app => {
                 const div = document.createElement('div');
                 div.className = "bg-white border border-purple-100 p-3 rounded-xl";
-                div.innerHTML = `<p class="font-bold text-xs">📅 ${app.fecha}</p><p class="text-xs text-[#8c67b3]">🕒 ${app.hora}</p><span class="text-[9px] border px-2 py-0.5 rounded-full uppercase">${app.estado}</span>`;
+                div.innerHTML = `<p class="font-bold text-xs">📅 ${app.date}</p><p class="text-xs text-[#8c67b3]">🕒 ${app.time}</p><span class="text-[9px] border px-2 py-0.5 rounded-full uppercase">${app.status}</span>`;
                 container.appendChild(div);
             });
         }
@@ -360,25 +361,18 @@
             const method = document.getElementById('payment-method').value;
             let code = document.getElementById('transaction-code').value.trim();
             
-            const nuevaCita = { 
-                'nombre de usuario': currentUser, 
-                fecha: selectedDate, 
-                hora: selectedTimeLabel, 
-                metodo: method, 
-                codigo: code, 
-                estado: "En Espera" 
-            };
+            const nuevaCita = { username: currentUser, date: selectedDate, time: selectedTimeLabel, method: method, code: code, status: "En Espera" };
 
             const { error } = await supabase.from('citas').insert([nuevaCita]);
             if(error) {
-                alert("Error al guardar cita: " + error.message);
+                alert("Error al guardar: " + error.message);
                 return;
             }
 
-            const msgText = `🔔 *Nueva Cita Recibida en Supabase*\n👤 Cliente: ${nuevaCita['nombre de usuario']}\n📅 Fecha: ${nuevaCita.fecha}\n🕒 Hora: ${nuevaCita.hora}\n💳 Pago: ${nuevaCita.metodo}\n🔢 Comprobante: ${nuevaCita.codigo}`;
+            const msgText = `🔔 *Nueva Cita*\n👤 Cliente: ${nuevaCita.username}\n📅 Fecha: ${nuevaCita.date}\n🕒 Hora: ${nuevaCita.time}\n💳 Pago: ${nuevaCita.method}\n🔢 Código: ${nuevaCita.code}`;
             new Image().src = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(msgText)}&parse_mode=Markdown`;
 
-            alert("✨ Cita enviada para verificación.");
+            alert("✨ Solicitud enviada.");
             closePayment();
             checkSession();
         }
@@ -386,7 +380,7 @@
         function renderAdminDashboard() {
             const tbody = document.getElementById('admin-table-body');
             tbody.innerHTML = "";
-            const activas = globalAppointments.filter(a => a.estado !== 'Eliminado');
+            const activas = globalAppointments.filter(a => a.status !== 'Eliminado');
 
             if(activas.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-zinc-400">No hay citas registradas.</td></tr>`;
@@ -396,14 +390,14 @@
             activas.forEach(app => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="p-3 font-bold text-zinc-800">${app['nombre de usuario']}</td>
-                    <td class="p-3">📅 ${app.fecha}<br>${app.hora}</td>
-                    <td class="p-3 text-xs">${app.metodo}</td>
-                    <td class="p-3"><code class="bg-purple-50 px-2 py-0.5 rounded text-xs">${app.codigo}</code></td>
-                    <td class="p-3"><span class="text-xs font-bold uppercase">${app.estado}</span></td>
+                    <td class="p-3 font-bold text-zinc-800">${app.username}</td>
+                    <td class="p-3">📅 ${app.date}<br>${app.time}</td>
+                    <td class="p-3 text-xs">${app.method}</td>
+                    <td class="p-3"><code class="bg-purple-50 px-2 py-0.5 rounded text-xs">${app.code}</code></td>
+                    <td class="p-3"><span class="text-xs font-bold uppercase">${app.status}</span></td>
                     <td class="p-3 space-x-2 text-center">
-                        ${app.estado === 'En Espera' ? `<button onclick="cambiarEstadoCita(${app.identificacion}, 'Confirmado')" class="bg-emerald-600 text-white text-xs px-2 py-1 rounded cursor-pointer">Confirmar</button>`:''}
-                        <button onclick="cambiarEstadoCita(${app.identificacion}, 'Eliminado')" class="bg-rose-600 text-white text-xs px-2 py-1 rounded cursor-pointer">Eliminar</button>
+                        ${app.status === 'En Espera' ? `<button onclick="cambiarEstadoCita(${app.id}, 'Confirmado')" class="bg-emerald-600 text-white text-xs px-2 py-1 rounded cursor-pointer">Confirmar</button>`:''}
+                        <button onclick="cambiarEstadoCita(${app.id}, 'Eliminado')" class="bg-rose-600 text-white text-xs px-2 py-1 rounded cursor-pointer">Eliminar</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -415,17 +409,17 @@
             tbody.innerHTML = "";
             
             if(globalUsers.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-zinc-400">No hay usuarios clientes.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-zinc-400">No hay clientes en la base de datos.</td></tr>`;
                 return;
             }
 
             globalUsers.forEach(u => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="p-3 font-semibold text-zinc-800">👤 ${u['nombre de usuario']}</td>
-                    <td class="p-3 font-mono text-xs">${u.contraseña}</td>
+                    <td class="p-3 font-semibold text-zinc-800">👤 ${u.username}</td>
+                    <td class="p-3 font-mono text-xs">${u.password}</td>
                     <td class="p-3 text-center">
-                        <button onclick="eliminarUsuario(${u.identificacion})" class="bg-rose-100 text-rose-700 text-xs px-2 py-1 rounded cursor-pointer">Eliminar</button>
+                        <button onclick="eliminarUsuario(${u.id})" class="bg-rose-100 text-rose-700 text-xs px-2 py-1 rounded cursor-pointer">Eliminar</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -433,13 +427,13 @@
         }
 
         async function cambiarEstadoCita(id, nuevoEstado) {
-            await supabase.from('citas').update({ estado: nuevoEstado }).eq('identificacion', id);
+            await supabase.from('citas').update({ status: nuevoEstado }).eq('id', id);
             checkSession();
         }
 
         async function eliminarUsuario(id) {
-            if(!confirm("¿Eliminar usuario del sistema?")) return;
-            await supabase.from('usuarios').delete().eq('identificacion', id);
+            if(!confirm("¿Eliminar este usuario por completo?")) return;
+            await supabase.from('usuarios').delete().eq('id', id);
             checkSession();
         }
 
@@ -448,6 +442,7 @@
             document.getElementById('admin-tab-usuarios').classList.toggle('hidden', t !== 'usuarios');
         }
 
+        // Arranque inicial
         checkSession();
     </script>
 </body>
