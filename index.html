@@ -159,7 +159,7 @@
     </main>
 
     <script>
-        // Inicialización automática de Supabase usando tus credenciales reales y URL exacta
+        // Inicialización de Supabase con los datos de tus capturas
         const SUPABASE_URL = "https://qwlxsvzhxvvdbhiwxlbb.supabase.co";
         const SUPABASE_KEY = "sb_publishable_ieNxKvgX7nTROGOmHNpBbw_GSTTJ9Os";
         const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -188,7 +188,7 @@
             picker.min = today.toISOString().split('T')[0];
         }
 
-        // Sincronización limpia desde las tablas relacionales de Supabase
+        // Sincronización limpia usando los nombres exactos de tus columnas
         async function syncCloudData() {
             try {
                 const { data: citas, error: errCitas } = await supabase.from('citas').select('*');
@@ -235,7 +235,7 @@
                 }
             } else {
                 nav.innerHTML = `<span class="text-zinc-400 text-xs">Acceso Remoto</span>`;
-                authSec.remove('hidden');
+                authSec.classList.remove('hidden');
                 clientSec.classList.add('hidden');
                 adminSec.classList.add('hidden');
             }
@@ -266,7 +266,8 @@
             await syncCloudData();
 
             if (isLoginMode) {
-                const encontrado = globalUsers.find(u => u.username === userIn && u.password === passIn);
+                // Adaptado al nombre de columna de tu tabla: "nombre de usuario"
+                const encontrado = globalUsers.find(u => u['nombre de usuario'] === userIn && u.contraseña === passIn);
                 if (encontrado) {
                     currentUser = userIn;
                     isAdmin = false;
@@ -277,13 +278,14 @@
                     alert("❌ Credenciales incorrectas.");
                 }
             } else {
-                const existe = globalUsers.some(u => u.username === userIn);
+                const existe = globalUsers.some(u => u['nombre de usuario'] === userIn);
                 if (existe || userIn === 'admin') {
                     alert("❌ Nombre de usuario ocupado.");
                     return;
                 }
 
-                const { error } = await supabase.from('usuarios').insert([{ username: userIn, password: passIn }]);
+                // Inserción mapeada a tus columnas reales en Supabase
+                const { error } = await supabase.from('usuarios').insert([{ 'nombre de usuario': userIn, contraseña: passIn }]);
                 if(error) {
                     alert("Error al registrar: " + error.message);
                     return;
@@ -310,7 +312,8 @@
             container.innerHTML = "";
 
             shifts.forEach(shift => {
-                const isTaken = globalAppointments.some(app => app.date === dateStr && app.time === shift.label && app.status !== 'Eliminado');
+                // Mapeado a tus columnas: "fecha", "hora" y "estado"
+                const isTaken = globalAppointments.some(app => app.fecha === dateStr && app.hora === shift.label && app.estado !== 'Eliminado');
                 const div = document.createElement('div');
                 div.className = "p-3 border rounded-xl flex justify-between items-center bg-white border-purple-100";
 
@@ -329,7 +332,7 @@
 
         function renderUserAppointments() {
             const container = document.getElementById('my-appointments');
-            const myApps = globalAppointments.filter(app => app.username === currentUser && app.status !== 'Eliminado');
+            const myApps = globalAppointments.filter(app => app['nombre de usuario'] === currentUser && app.estado !== 'Eliminado');
 
             if (myApps.length === 0) {
                 container.innerHTML = `<p class="text-zinc-400 italic text-center py-6 text-xs bg-[#fbf9fe] rounded-xl border border-purple-100">No tienes citas.</p>`;
@@ -340,7 +343,7 @@
             myApps.forEach(app => {
                 const div = document.createElement('div');
                 div.className = "bg-white border border-purple-100 p-3 rounded-xl";
-                div.innerHTML = `<p class="font-bold text-xs">📅 ${app.date}</p><p class="text-xs text-[#8c67b3]">🕒 ${app.time}</p><span class="text-[9px] border px-2 py-0.5 rounded-full uppercase">${app.status}</span>`;
+                div.innerHTML = `<p class="font-bold text-xs">📅 ${app.fecha}</p><p class="text-xs text-[#8c67b3]">🕒 ${app.hora}</p><span class="text-[9px] border px-2 py-0.5 rounded-full uppercase">${app.estado}</span>`;
                 container.appendChild(div);
             });
         }
@@ -360,7 +363,15 @@
             const method = document.getElementById('payment-method').value;
             let code = document.getElementById('transaction-code').value.trim();
             
-            const nuevaCita = { username: currentUser, date: selectedDate, time: selectedTimeLabel, method: method, code: code, status: "En Espera" };
+            // Objeto armado exactamente con los nombres de tus columnas en la base de datos
+            const nuevaCita = { 
+                'nombre de usuario': currentUser, 
+                fecha: selectedDate, 
+                hora: selectedTimeLabel, 
+                metodo: method, 
+                codigo: code, 
+                estado: "En Espera" 
+            };
 
             const { error } = await supabase.from('citas').insert([nuevaCita]);
             if(error) {
@@ -368,8 +379,8 @@
                 return;
             }
 
-            // Notificación al bot de Telegram (Para enterarte al momento por la app de consola)
-            const msgText = `🔔 *Nueva Cita Recibida en Supabase*\n👤 Cliente: ${nuevaCita.username}\n📅 Fecha: ${nuevaCita.date}\n🕒 Hora: ${nuevaCita.time}\n💳 Pago: ${nuevaCita.method}\n🔢 Comprobante: ${nuevaCita.code}`;
+            // Notificación directa al bot de Telegram
+            const msgText = `🔔 *Nueva Cita Recibida en Supabase*\n👤 Cliente: ${nuevaCita['nombre de usuario']}\n📅 Fecha: ${nuevaCita.fecha}\n🕒 Hora: ${nuevaCita.hora}\n💳 Pago: ${nuevaCita.metodo}\n🔢 Comprobante: ${nuevaCita.codigo}`;
             new Image().src = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(msgText)}&parse_mode=Markdown`;
 
             alert("✨ Cita enviada para verificación.");
@@ -380,7 +391,7 @@
         function renderAdminDashboard() {
             const tbody = document.getElementById('admin-table-body');
             tbody.innerHTML = "";
-            const activas = globalAppointments.filter(a => a.status !== 'Eliminado');
+            const activas = globalAppointments.filter(a => a.estado !== 'Eliminado');
 
             if(activas.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-zinc-400">No hay citas registradas.</td></tr>`;
@@ -390,14 +401,14 @@
             activas.forEach(app => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="p-3 font-bold text-zinc-800">${app.username}</td>
-                    <td class="p-3">📅 ${app.date}<br>${app.time}</td>
-                    <td class="p-3 text-xs">${app.method}</td>
-                    <td class="p-3"><code class="bg-purple-50 px-2 py-0.5 rounded text-xs">${app.code}</code></td>
-                    <td class="p-3"><span class="text-xs font-bold uppercase">${app.status}</span></td>
+                    <td class="p-3 font-bold text-zinc-800">${app['nombre de usuario']}</td>
+                    <td class="p-3">📅 ${app.fecha}<br>${app.hora}</td>
+                    <td class="p-3 text-xs">${app.metodo}</td>
+                    <td class="p-3"><code class="bg-purple-50 px-2 py-0.5 rounded text-xs">${app.codigo}</code></td>
+                    <td class="p-3"><span class="text-xs font-bold uppercase">${app.estado}</span></td>
                     <td class="p-3 space-x-2 text-center">
-                        ${app.status === 'En Espera' ? `<button onclick="cambiarEstadoCita(${app.id}, 'Confirmado')" class="bg-emerald-600 text-white text-xs px-2 py-1 rounded cursor-pointer">Confirmar</button>`:''}
-                        <button onclick="cambiarEstadoCita(${app.id}, 'Eliminado')" class="bg-rose-600 text-white text-xs px-2 py-1 rounded cursor-pointer">Eliminar</button>
+                        ${app.estado === 'En Espera' ? `<button onclick="cambiarEstadoCita(${app.identificacion}, 'Confirmado')" class="bg-emerald-600 text-white text-xs px-2 py-1 rounded cursor-pointer">Confirmar</button>`:''}
+                        <button onclick="cambiarEstadoCita(${app.identificacion}, 'Eliminado')" class="bg-rose-600 text-white text-xs px-2 py-1 rounded cursor-pointer">Eliminar</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -416,10 +427,10 @@
             globalUsers.forEach(u => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="p-3 font-semibold text-zinc-800">👤 ${u.username}</td>
-                    <td class="p-3 font-mono text-xs">${u.password}</td>
+                    <td class="p-3 font-semibold text-zinc-800">👤 ${u['nombre de usuario']}</td>
+                    <td class="p-3 font-mono text-xs">${u.contraseña}</td>
                     <td class="p-3 text-center">
-                        <button onclick="eliminarUsuario(${u.id})" class="bg-rose-100 text-rose-700 text-xs px-2 py-1 rounded cursor-pointer">Eliminar</button>
+                        <button onclick="eliminarUsuario(${u.identificacion})" class="bg-rose-100 text-rose-700 text-xs px-2 py-1 rounded cursor-pointer">Eliminar</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -427,13 +438,13 @@
         }
 
         async function cambiarEstadoCita(id, nuevoEstado) {
-            await supabase.from('citas').update({ status: nuevoEstado }).eq('id', id);
+            await supabase.from('citas').update({ estado: nuevoEstado }).eq('identificacion', id);
             checkSession();
         }
 
         async function eliminarUsuario(id) {
             if(!confirm("¿Eliminar usuario del sistema?")) return;
-            await supabase.from('usuarios').delete().eq('id', id);
+            await supabase.from('usuarios').delete().eq('identificacion', id);
             checkSession();
         }
 
