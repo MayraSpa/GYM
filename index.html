@@ -1,449 +1,830 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mayra Spa - Sistema Autónomo</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Mayra Spa Estética Facial</title>
+
+  <meta
+    name="description"
+    content="Mayra Spa Estética Facial - Limpieza facial profesional, hidratación y tratamientos premium."
+  />
+
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  />
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    *{
+      font-family:'Poppins',sans-serif;
+    }
+
+    html{
+      scroll-behavior:smooth;
+    }
+
+    body{
+      background:
+      radial-gradient(circle at top left,#7c3aed 0%,#4c1d95 30%,#0f172a 100%);
+      overflow-x:hidden;
+    }
+
+    .glass{
+      backdrop-filter: blur(18px);
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.15);
+    }
+
+    .glow{
+      box-shadow:
+      0 0 25px rgba(168,85,247,.35);
+    }
+
+    .fade-in{
+      animation:fade .8s ease;
+    }
+
+    @keyframes fade{
+      from{
+        opacity:0;
+        transform:translateY(20px);
+      }
+      to{
+        opacity:1;
+        transform:translateY(0);
+      }
+    }
+
+    .service-card:hover{
+      transform:translateY(-5px);
+      transition:.3s;
+    }
+
+    .hidden-admin{
+      display:none;
+    }
+  </style>
 </head>
-<body class="bg-[#fcfaff] text-zinc-700 antialiased">
 
-    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-purple-100/60 shadow-xs">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex flex-col">
-                <span class="text-xl font-bold tracking-widest text-[#7c5ba7]">MAYRA SPA</span>
-                <span class="text-[10px] tracking-wider text-purple-400 font-semibold uppercase -mt-1">Conexión Directa Supabase</span>
-            </div>
-            <div id="nav-user-info" class="flex items-center gap-4 text-sm"></div>
-        </div>
-    </header>
+<body class="text-white">
 
-    <main class="max-w-6xl mx-auto px-6 py-12">
-        
-        <div id="sync-status" class="max-w-md mx-auto mb-4 p-2 text-center text-xs rounded-xl bg-purple-50 text-purple-700 font-medium animate-pulse">
-            🔄 Sincronizando con base de datos...
+  <!-- NAVBAR -->
+  <nav class="fixed top-0 w-full z-50 glass">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+
+      <div>
+        <h1 class="text-2xl font-bold">
+          Mayra Spa
+        </h1>
+      </div>
+
+      <div class="hidden md:flex gap-6 text-sm">
+        <a href="#inicio" class="hover:text-violet-300">
+          Inicio
+        </a>
+
+        <a href="#servicios" class="hover:text-violet-300">
+          Servicios
+        </a>
+
+        <a href="#reservas" class="hover:text-violet-300">
+          Reservar
+        </a>
+
+        <a href="#contacto" class="hover:text-violet-300">
+          Contacto
+        </a>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section
+    id="inicio"
+    class="min-h-screen flex items-center justify-center px-6 pt-24"
+  >
+
+    <div class="max-w-6xl w-full grid lg:grid-cols-2 gap-12 items-center">
+
+      <div class="fade-in">
+
+        <div class="mb-4 inline-block px-4 py-2 rounded-full bg-violet-500/20 border border-violet-300/20">
+          ✨ Estética Facial Premium
         </div>
-        
-        <section id="auth-section" class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-xl shadow-purple-900/5 border border-purple-100/40">
-            <div class="text-center mb-6">
-                <span class="text-3xl">🪞</span>
-                <h2 id="auth-title" class="text-2xl font-bold text-zinc-800 mt-2">Iniciar Sesión</h2>
-                <p class="text-sm text-zinc-400 mt-1">Acceso libre de VPN</p>
+
+        <h1 class="text-5xl lg:text-7xl font-bold leading-tight mb-6">
+          Mayra Spa
+          <span class="text-violet-300">
+            Estética Facial
+          </span>
+        </h1>
+
+        <p class="text-lg text-violet-100 mb-8 leading-relaxed">
+          Tratamientos faciales profesionales, hidratación,
+          limpieza profunda y cuidado premium para tu piel.
+        </p>
+
+        <div class="flex flex-wrap gap-4">
+
+          <a
+            href="#reservas"
+            class="px-8 py-4 rounded-2xl bg-violet-500 hover:bg-violet-600 transition glow font-semibold"
+          >
+            Reservar cita
+          </a>
+
+          <a
+            href="https://wa.me/5359740626"
+            target="_blank"
+            class="px-8 py-4 rounded-2xl glass hover:bg-white/10 transition"
+          >
+            WhatsApp
+          </a>
+
+        </div>
+
+      </div>
+
+      <!-- CARD -->
+      <div class="glass rounded-3xl p-8 glow fade-in">
+
+        <div class="aspect-square rounded-3xl bg-gradient-to-br from-violet-400/30 to-fuchsia-300/10 flex items-center justify-center">
+
+          <div class="text-center">
+
+            <div class="text-7xl mb-4">
+              ✨
             </div>
-            
-            <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-purple-400 mb-1">Usuario</label>
-                    <input type="text" id="username" required class="w-full px-4 py-2 bg-purple-50/30 border border-purple-100 rounded-xl focus:outline-none focus:border-[#9d7bb0] text-zinc-800">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-purple-400 mb-1">Contraseña</label>
-                    <input type="password" id="password" required class="w-full px-4 py-2 bg-purple-50/30 border border-purple-100 rounded-xl focus:outline-none focus:border-[#9d7bb0] text-zinc-800">
-                </div>
-                <button type="submit" id="auth-btn" class="w-full bg-[#8c67b3] hover:bg-[#7c5ba7] text-white font-medium py-2.5 rounded-xl transition-all shadow-sm cursor-pointer">
-                    Ingresar
-                </button>
-            </form>
-            
-            <p class="text-sm text-center mt-6 text-zinc-400">
-                <span id="auth-switch-text">¿Primera vez en Mayra Spa?</span>
-                <button onclick="toggleAuthMode()" id="auth-switch-btn" class="text-[#8c67b3] font-semibold underline ml-1 cursor-pointer">Regístrate</button>
+
+            <h2 class="text-3xl font-bold mb-3">
+              Belleza & Relax
+            </h2>
+
+            <p class="text-violet-100">
+              Experiencia premium de cuidado facial.
             </p>
-        </section>
 
-        <div id="client-section" class="hidden space-y-8">
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="md:col-span-2 bg-white p-6 rounded-2xl shadow-xl shadow-purple-900/5 border border-purple-100/40 space-y-6">
-                    <div>
-                        <h2 class="text-xl font-bold text-zinc-800">1. Selecciona Fecha y Turno</h2>
-                        <p class="text-xs text-zinc-400 mt-1">Elige un día del calendario para ver turnos disponibles.</p>
-                    </div>
-                    
-                    <div class="flex flex-col sm:flex-row gap-6">
-                        <div class="w-full sm:w-1/3">
-                            <label class="block text-xs font-semibold text-purple-400 uppercase tracking-wider mb-2">Elegir Día</label>
-                            <input type="date" id="booking-date-picker" onchange="loadHoursForDate(this.value)" class="w-full px-3 py-2 border border-purple-100 rounded-xl text-sm">
-                        </div>
-                        <div class="w-full sm:w-2/3">
-                            <label class="block text-xs font-semibold text-purple-400 uppercase tracking-wider mb-2">Horarios Disponibles</label>
-                            <div id="hours-slots-container" class="grid grid-cols-1 gap-2"></div>
-                        </div>
-                    </div>
-                </div>
+          </div>
 
-                <div class="bg-white p-6 rounded-2xl shadow-xl shadow-purple-900/5 border border-purple-100/40">
-                    <h3 class="text-md font-bold text-zinc-800 border-b border-purple-50 pb-3 mb-4 flex items-center gap-2">
-                        <span>🗓️</span> Tus Citas
-                    </h3>
-                    <div id="my-appointments" class="space-y-3 text-sm"></div>
-                </div>
-            </div>
         </div>
 
-        <div id="admin-section" class="hidden space-y-6">
-            <div class="flex gap-4 border-b border-purple-100 pb-2">
-                <button onclick="switchAdminTab('citas')" id="tab-btn-citas" class="px-4 py-2 text-sm font-bold border-b-2 border-purple-600 text-purple-700 cursor-pointer">🗓️ Control de Citas</button>
-                <button onclick="switchAdminTab('usuarios')" id="tab-btn-usuarios" class="px-4 py-2 text-sm font-medium text-zinc-500 hover:text-purple-600 cursor-pointer">👥 Control de Usuarios</button>
-            </div>
+      </div>
 
-            <div id="admin-tab-citas" class="bg-white p-6 rounded-2xl shadow-xl shadow-purple-900/5 border border-purple-100/40 space-y-4">
-                <h2 class="text-xl font-bold text-zinc-800">📊 Panel General de Ventas y Citas</h2>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead>
-                            <tr class="bg-purple-50/50 text-purple-900 font-semibold">
-                                <th class="p-3 rounded-l-xl">Cliente</th>
-                                <th class="p-3">Fecha y Hora</th>
-                                <th class="p-3">Método Pago</th>
-                                <th class="p-3">Código</th>
-                                <th class="p-3">Estado</th>
-                                <th class="p-3 rounded-r-xl text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-table-body" class="divide-y divide-purple-50"></tbody>
-                    </table>
-                </div>
-            </div>
+    </div>
 
-            <div id="admin-tab-usuarios" class="hidden bg-white p-6 rounded-2xl shadow-xl shadow-purple-900/5 border border-purple-100/40 space-y-4">
-                <h2 class="text-xl font-bold text-zinc-800">👥 Base de Datos de Clientes</h2>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead>
-                            <tr class="bg-purple-50/50 text-purple-900 font-semibold">
-                                <th class="p-3 rounded-l-xl">Nombre de Usuario</th>
-                                <th class="p-3">Contraseña</th>
-                                <th class="p-3 rounded-r-xl text-center">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-users-table-body" class="divide-y divide-purple-50"></tbody>
-                    </table>
-                </div>
-            </div>
+  </section>
+
+  <!-- SERVICIOS -->
+  <section
+    id="servicios"
+    class="py-24 px-6"
+  >
+
+    <div class="max-w-7xl mx-auto">
+
+      <div class="text-center mb-16">
+
+        <h2 class="text-5xl font-bold mb-4">
+          Servicios
+        </h2>
+
+        <p class="text-violet-100">
+          Tratamientos personalizados para tu piel
+        </p>
+
+      </div>
+
+      <div
+        id="services-container"
+        class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+      >
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- RESERVAS -->
+  <section
+    id="reservas"
+    class="py-24 px-6"
+  >
+
+    <div class="max-w-4xl mx-auto glass rounded-3xl p-10 glow">
+
+      <div class="text-center mb-10">
+
+        <h2 class="text-4xl font-bold mb-4">
+          Reserva tu cita
+        </h2>
+
+        <p class="text-violet-100">
+          Agenda fácilmente tu tratamiento facial
+        </p>
+
+      </div>
+
+      <form
+        id="booking-form"
+        class="grid md:grid-cols-2 gap-6"
+      >
+
+        <input
+          id="cliente"
+          type="text"
+          placeholder="Nombre"
+          required
+          class="p-4 rounded-2xl bg-white/10 border border-white/10 outline-none"
+        />
+
+        <input
+          id="telefono"
+          type="text"
+          placeholder="Teléfono"
+          required
+          class="p-4 rounded-2xl bg-white/10 border border-white/10 outline-none"
+        />
+
+        <select
+          id="servicio"
+          class="p-4 rounded-2xl bg-slate-900 border border-white/10 outline-none"
+        >
+        </select>
+
+        <input
+          id="fecha"
+          type="date"
+          required
+          class="p-4 rounded-2xl bg-white/10 border border-white/10 outline-none"
+        />
+
+        <textarea
+          id="mensaje"
+          placeholder="Mensaje adicional"
+          class="md:col-span-2 p-4 rounded-2xl bg-white/10 border border-white/10 outline-none h-32"
+        ></textarea>
+
+        <button
+          class="md:col-span-2 bg-violet-500 hover:bg-violet-600 transition rounded-2xl py-4 font-semibold text-lg"
+        >
+          Reservar ahora
+        </button>
+
+      </form>
+
+      <div
+        id="booking-status"
+        class="mt-6 text-center font-semibold"
+      ></div>
+
+    </div>
+
+  </section>
+
+  <!-- TESTIMONIOS -->
+  <section class="py-24 px-6">
+
+    <div class="max-w-7xl mx-auto">
+
+      <div class="text-center mb-16">
+
+        <h2 class="text-5xl font-bold mb-4">
+          Clientes felices
+        </h2>
+
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+
+        <div class="glass p-8 rounded-3xl">
+          <div class="text-3xl mb-4">⭐️⭐️⭐️⭐️⭐️</div>
+          <p class="text-violet-100">
+            Excelente atención y resultados increíbles.
+          </p>
         </div>
 
-        <div id="payment-modal" class="hidden fixed inset-0 bg-zinc-950/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-            <div class="bg-white w-full max-w-md p-8 rounded-2xl border border-purple-100/40">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-zinc-800">✨ Registrar Comprobante</h3>
-                    <button onclick="closePayment()" class="text-zinc-400 hover:text-zinc-600 text-2xl cursor-pointer">×</button>
-                </div>
-                <div class="bg-[#fbf9fe] p-4 rounded-xl mb-5 text-sm border border-purple-100/50">
-                    <p class="text-zinc-500">Bloque: <span id="modal-slot-date" class="font-semibold text-[#8c67b3]"></span></p>
-                </div>
-                <form onsubmit="processPayment(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-purple-400 uppercase tracking-wider mb-2">Método de pago</label>
-                        <select id="payment-method" class="w-full px-3 py-2 bg-purple-50/30 border border-purple-100 rounded-xl text-sm">
-                            <option value="Transfermovil">📱 Transfermóvil</option>
-                            <option value="Enzona">🌐 Enzona</option>
-                            <option value="Efectivo">💵 Efectivo</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-purple-400 uppercase tracking-wider mb-1">Código de Transacción</label>
-                        <input type="text" id="transaction-code" required class="w-full px-4 py-2 bg-purple-50/10 border border-purple-100 rounded-xl text-sm">
-                    </div>
-                    <button type="submit" class="w-full bg-[#8c67b3] hover:bg-[#7c5ba7] text-white font-medium py-3 rounded-xl mt-4 cursor-pointer">Confirmar Cita</button>
-                </form>
-            </div>
+        <div class="glass p-8 rounded-3xl">
+          <div class="text-3xl mb-4">⭐️⭐️⭐️⭐️⭐️</div>
+          <p class="text-violet-100">
+            El mejor spa facial que he visitado.
+          </p>
         </div>
 
-    </main>
+        <div class="glass p-8 rounded-3xl">
+          <div class="text-3xl mb-4">⭐️⭐️⭐️⭐️⭐️</div>
+          <p class="text-violet-100">
+            Ambiente premium y muy relajante.
+          </p>
+        </div>
 
-    <script>
-        // Configuración limpia sin duplicaciones
-        const SUPABASE_URL = "https://qwlxsvzhxvvdbhiwxlbb.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_ieNxKvgX7nTROGOmHNpBbw_GSTTJ9Os";
-        const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      </div>
 
-        const TELEGRAM_BOT_TOKEN = "8637382666:AAFCS4IxrPtIsgRLEKdY39z3fBusDlgSqbs"; 
-        const TELEGRAM_CHAT_ID = "999753868"; 
+    </div>
 
-        const shifts = [
-            { label: "09:00 AM - 11:00 AM" },
-            { label: "11:30 AM - 01:30 PM" },
-            { label: "02:00 PM - 04:00 PM" }
-        ];
+  </section>
 
-        let currentUser = localStorage.getItem('ms_user') || null;
-        let isAdmin = localStorage.getItem('ms_role') === 'admin';
-        let isLoginMode = true;
-        let selectedDate = "";
-        let selectedTimeLabel = "";
-        
-        let globalAppointments = [];
-        let globalUsers = []; 
+  <!-- ADMIN -->
+  <section
+    id="admin-panel"
+    class="hidden-admin py-24 px-6"
+  >
 
-        function initDatePicker() {
-            const picker = document.getElementById('booking-date-picker');
-            const today = new Date();
-            picker.min = today.toISOString().split('T')[0];
+    <div class="max-w-7xl mx-auto">
+
+      <div class="flex justify-between items-center mb-8">
+
+        <h2 class="text-4xl font-bold">
+          Panel Admin
+        </h2>
+
+        <button
+          id="logout-btn"
+          class="bg-red-500 px-5 py-3 rounded-xl"
+        >
+          Cerrar sesión
+        </button>
+
+      </div>
+
+      <!-- LOGIN -->
+      <div
+        id="login-box"
+        class="glass p-8 rounded-3xl mb-10"
+      >
+
+        <h3 class="text-2xl font-bold mb-6">
+          Login administrador
+        </h3>
+
+        <form id="login-form" class="grid md:grid-cols-3 gap-4">
+
+          <input
+            id="admin-email"
+            type="email"
+            placeholder="Email"
+            class="p-4 rounded-2xl bg-white/10 border border-white/10"
+          />
+
+          <input
+            id="admin-password"
+            type="password"
+            placeholder="Password"
+            class="p-4 rounded-2xl bg-white/10 border border-white/10"
+          />
+
+          <button
+            class="bg-violet-500 rounded-2xl"
+          >
+            Entrar
+          </button>
+
+        </form>
+
+        <div
+          id="login-status"
+          class="mt-4"
+        ></div>
+
+      </div>
+
+      <!-- ADMIN CONTENT -->
+      <div
+        id="admin-content"
+        class="hidden"
+      >
+
+        <!-- AGREGAR SERVICIO -->
+        <div class="glass p-8 rounded-3xl mb-10">
+
+          <h3 class="text-2xl font-bold mb-6">
+            Agregar servicio
+          </h3>
+
+          <form
+            id="service-form"
+            class="grid md:grid-cols-3 gap-4"
+          >
+
+            <input
+              id="service-name"
+              placeholder="Nombre"
+              class="p-4 rounded-2xl bg-white/10 border border-white/10"
+            />
+
+            <input
+              id="service-price"
+              placeholder="Precio"
+              class="p-4 rounded-2xl bg-white/10 border border-white/10"
+            />
+
+            <button
+              class="bg-violet-500 rounded-2xl"
+            >
+              Guardar
+            </button>
+
+          </form>
+
+        </div>
+
+        <!-- CITAS -->
+        <div class="glass p-8 rounded-3xl">
+
+          <h3 class="text-2xl font-bold mb-6">
+            Reservas
+          </h3>
+
+          <div
+            id="appointments-container"
+            class="space-y-4"
+          ></div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- FOOTER -->
+  <footer
+    id="contacto"
+    class="py-12 px-6 text-center border-t border-white/10"
+  >
+
+    <h3 class="text-3xl font-bold mb-4">
+      Mayra Spa Estética Facial
+    </h3>
+
+    <p class="text-violet-100 mb-6">
+      Belleza, relajación y cuidado profesional.
+    </p>
+
+    <a
+      href="https://wa.me/5359740626"
+      target="_blank"
+      class="inline-block px-8 py-4 rounded-2xl bg-violet-500 hover:bg-violet-600 transition"
+    >
+      Contactar por WhatsApp
+    </a>
+
+  </footer>
+
+  <!-- FLOAT BUTTON -->
+  <a
+    href="https://wa.me/5359740626"
+    target="_blank"
+    class="fixed bottom-6 right-6 w-16 h-16 rounded-full bg-green-500 flex items-center justify-center text-3xl shadow-2xl hover:scale-110 transition"
+  >
+    💬
+  </a>
+
+  <script>
+
+    // ======================
+    // SUPABASE
+    // ======================
+
+    const SUPABASE_URL =
+      "https://qwlxsvzhxvvdbhiwxlbb.supabase.co";
+
+    const SUPABASE_KEY =
+      "sb_publishable_ieNxKvgX7nTROGOmHNpBbw_GSTTJ9Os";
+
+    const client =
+      supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+    // ======================
+    // ELEMENTOS
+    // ======================
+
+    const servicesContainer =
+      document.getElementById("services-container");
+
+    const serviceSelect =
+      document.getElementById("servicio");
+
+    const bookingForm =
+      document.getElementById("booking-form");
+
+    const bookingStatus =
+      document.getElementById("booking-status");
+
+    const loginForm =
+      document.getElementById("login-form");
+
+    const loginStatus =
+      document.getElementById("login-status");
+
+    const adminContent =
+      document.getElementById("admin-content");
+
+    const serviceForm =
+      document.getElementById("service-form");
+
+    const appointmentsContainer =
+      document.getElementById("appointments-container");
+
+    // ======================
+    // MOSTRAR ADMIN
+    // ======================
+
+    if(window.location.hash === "#admin"){
+      document
+        .getElementById("admin-panel")
+        .classList.remove("hidden-admin");
+    }
+
+    // ======================
+    // CARGAR SERVICIOS
+    // ======================
+
+    async function loadServices(){
+
+      const { data, error } =
+        await client
+        .from("servicios")
+        .select("*")
+        .order("id",{ascending:false});
+
+      if(error){
+        console.error(error);
+        return;
+      }
+
+      servicesContainer.innerHTML = "";
+      serviceSelect.innerHTML = "";
+
+      data.forEach(service => {
+
+        servicesContainer.innerHTML += `
+          <div class="glass rounded-3xl p-8 service-card">
+            <div class="text-5xl mb-6">✨</div>
+
+            <h3 class="text-2xl font-bold mb-3">
+              ${service.nombre}
+            </h3>
+
+            <p class="text-violet-100 mb-5">
+              ${service.descripcion || "Tratamiento facial premium"}
+            </p>
+
+            <div class="text-3xl font-bold text-violet-300">
+              ${service.precio || ""}
+            </div>
+          </div>
+        `;
+
+        serviceSelect.innerHTML += `
+          <option value="${service.nombre}">
+            ${service.nombre}
+          </option>
+        `;
+      });
+
+    }
+
+    loadServices();
+
+    // ======================
+    // RESERVA
+    // ======================
+
+    bookingForm.addEventListener(
+      "submit",
+      async(e)=>{
+
+        e.preventDefault();
+
+        bookingStatus.innerHTML =
+          "Enviando reserva...";
+
+        const payload = {
+
+          cliente:
+            document.getElementById("cliente").value,
+
+          telefono:
+            document.getElementById("telefono").value,
+
+          servicio:
+            document.getElementById("servicio").value,
+
+          fecha:
+            document.getElementById("fecha").value,
+
+          mensaje:
+            document.getElementById("mensaje").value
+
+        };
+
+        const { error } =
+          await client
+          .from("citas")
+          .insert([payload]);
+
+        if(error){
+
+          console.error(error);
+
+          bookingStatus.innerHTML =
+            "❌ Error enviando reserva";
+
+        }else{
+
+          bookingStatus.innerHTML =
+            "✅ Reserva enviada correctamente";
+
+          bookingForm.reset();
+
         }
 
-        async function syncCloudData() {
-            try {
-                const { data: citas, error: errCitas } = await supabase.from('citas').select('*');
-                if (errCitas) throw errCitas;
-                globalAppointments = citas || [];
+      }
+    );
 
-                const { data: usuarios, error: errUsers } = await supabase.from('usuarios').select('*');
-                if (errUsers) throw errUsers;
-                globalUsers = usuarios || [];
+    // ======================
+    // LOGIN ADMIN
+    // ======================
 
-                document.getElementById('sync-status').className = "max-w-md mx-auto mb-4 p-2 text-center text-xs rounded-xl bg-emerald-50 text-emerald-700 font-semibold";
-                document.getElementById('sync-status').innerHTML = "🟢 Conectado con Supabase";
-            } catch (e) {
-                console.error("Error de sincronización:", e);
-                document.getElementById('sync-status').className = "max-w-md mx-auto mb-4 p-2 text-center text-xs rounded-xl bg-rose-50 text-rose-700 font-semibold";
-                document.getElementById('sync-status').innerHTML = "⚠️ Error de conexión con el servidor de datos.";
+    loginForm.addEventListener(
+      "submit",
+      async(e)=>{
+
+        e.preventDefault();
+
+        const email =
+          document.getElementById("admin-email").value;
+
+        const password =
+          document.getElementById("admin-password").value;
+
+        const { error } =
+          await client.auth.signInWithPassword({
+            email,
+            password
+          });
+
+        if(error){
+
+          loginStatus.innerHTML =
+            "❌ Login incorrecto";
+
+        }else{
+
+          loginStatus.innerHTML =
+            "✅ Login correcto";
+
+          adminContent.classList.remove("hidden");
+
+          loadAppointments();
+
+        }
+
+      }
+    );
+
+    // ======================
+    // CARGAR CITAS
+    // ======================
+
+    async function loadAppointments(){
+
+      const { data, error } =
+        await client
+        .from("citas")
+        .select("*")
+        .order("id",{ascending:false});
+
+      if(error){
+        console.error(error);
+        return;
+      }
+
+      appointmentsContainer.innerHTML = "";
+
+      data.forEach(item => {
+
+        appointmentsContainer.innerHTML += `
+          <div class="glass p-6 rounded-2xl">
+
+            <div class="flex justify-between mb-4">
+              <h4 class="font-bold text-xl">
+                ${item.cliente}
+              </h4>
+
+              <span class="text-violet-300">
+                ${item.estado}
+              </span>
+            </div>
+
+            <p>
+              📞 ${item.telefono}
+            </p>
+
+            <p>
+              ✨ ${item.servicio}
+            </p>
+
+            <p>
+              📅 ${item.fecha}
+            </p>
+
+            <p class="mt-3 text-violet-100">
+              ${item.mensaje || ""}
+            </p>
+
+          </div>
+        `;
+      });
+
+    }
+
+    // ======================
+    // AGREGAR SERVICIO
+    // ======================
+
+    serviceForm.addEventListener(
+      "submit",
+      async(e)=>{
+
+        e.preventDefault();
+
+        const nombre =
+          document.getElementById("service-name").value;
+
+        const precio =
+          document.getElementById("service-price").value;
+
+        const { error } =
+          await client
+          .from("servicios")
+          .insert([
+            {
+              nombre,
+              precio
             }
+          ]);
+
+        if(error){
+
+          alert("Error");
+
+          console.error(error);
+
+        }else{
+
+          alert("Servicio agregado");
+
+          serviceForm.reset();
+
+          loadServices();
+
         }
 
-        async function checkSession() {
-            const nav = document.getElementById('nav-user-info');
-            const authSec = document.getElementById('auth-section');
-            const clientSec = document.getElementById('client-section');
-            const adminSec = document.getElementById('admin-section');
+      }
+    );
 
-            await syncCloudData();
+    // ======================
+    // LOGOUT
+    // ======================
 
-            if (currentUser) {
-                nav.innerHTML = `
-                    <span class="text-zinc-600">Usuario: <b class="text-[#7c5ba7]">${currentUser}</b></span>
-                    <button onclick="logout()" class="text-zinc-400 hover:text-red-500 font-medium cursor-pointer ml-2">Salir</button>
-                `;
-                authSec.classList.add('hidden');
-                
-                if (isAdmin) {
-                    clientSec.classList.add('hidden');
-                    adminSec.classList.remove('hidden');
-                    renderAdminDashboard();
-                    renderAdminUsers();
-                } else {
-                    adminSec.classList.add('hidden');
-                    clientSec.classList.remove('hidden');
-                    initDatePicker();
-                    renderUserAppointments();
-                    document.getElementById('hours-slots-container').innerHTML = `<p class="text-zinc-400 italic text-xs">Elige una fecha del calendario.</p>`;
-                }
-            } else {
-                nav.innerHTML = `<span class="text-zinc-400 text-xs">Modo Offline</span>`;
-                authSec.classList.remove('hidden');
-                clientSec.classList.add('hidden');
-                adminSec.classList.add('hidden');
-            }
+    document
+      .getElementById("logout-btn")
+      .addEventListener(
+        "click",
+        async()=>{
+
+          await client.auth.signOut();
+
+          location.reload();
+
         }
+      );
 
-        function toggleAuthMode() {
-            isLoginMode = !isLoginMode;
-            document.getElementById('auth-title').innerText = isLoginMode ? "Iniciar Sesión" : "Crear Cuenta";
-            document.getElementById('auth-btn').innerText = isLoginMode ? "Ingresar" : "Registrarse";
-            document.getElementById('auth-switch-text').innerText = isLoginMode ? "¿Primera vez en Mayra Spa?" : "¿Ya tienes cuenta?";
-            document.getElementById('auth-switch-btn').innerText = isLoginMode ? "Regístrate" : "Inicia Sesión";
-        }
+  </script>
 
-        async function handleAuth(e) {
-            e.preventDefault();
-            const userIn = document.getElementById('username').value.trim().toLowerCase();
-            const passIn = document.getElementById('password').value;
-
-            if (userIn === 'admin' && passIn === 'admin123') {
-                currentUser = 'admin';
-                isAdmin = true;
-                localStorage.setItem('ms_user', 'admin');
-                localStorage.setItem('ms_role', 'admin');
-                await checkSession();
-                return;
-            }
-
-            await syncCloudData();
-
-            if (isLoginMode) {
-                const encontrado = globalUsers.find(u => u.username === userIn && u.password === passIn);
-                if (encontrado) {
-                    currentUser = userIn;
-                    isAdmin = false;
-                    localStorage.setItem('ms_user', userIn);
-                    localStorage.setItem('ms_role', 'client');
-                    checkSession();
-                } else {
-                    alert("❌ Credenciales incorrectas.");
-                }
-            } else {
-                const existe = globalUsers.some(u => u.username === userIn);
-                if (existe || userIn === 'admin') {
-                    alert("❌ Nombre de usuario no disponible.");
-                    return;
-                }
-
-                const { error } = await supabase.from('usuarios').insert([{ username: userIn, password: passIn }]);
-                if(error) {
-                    alert("Error al registrar: " + error.message);
-                    return;
-                }
-
-                alert("✨ Cuenta creada.");
-                toggleAuthMode();
-                checkSession();
-            }
-        }
-
-        function logout() {
-            currentUser = null;
-            isAdmin = false;
-            localStorage.removeItem('ms_user');
-            localStorage.removeItem('ms_role');
-            checkSession();
-        }
-
-        function loadHoursForDate(dateStr) {
-            if (!dateStr) return;
-            selectedDate = dateStr;
-            const container = document.getElementById('hours-slots-container');
-            container.innerHTML = "";
-
-            shifts.forEach(shift => {
-                const isTaken = globalAppointments.some(app => app.date === dateStr && app.time === shift.label && app.status !== 'Eliminado');
-                const div = document.createElement('div');
-                div.className = "p-3 border rounded-xl flex justify-between items-center bg-white border-purple-100";
-
-                if (isTaken) {
-                    div.className = "p-3 border rounded-xl flex justify-between items-center bg-zinc-50 border-zinc-100 text-zinc-300";
-                    div.innerHTML = `<span class="text-xs line-through">${shift.label}</span> <span class="text-[10px] bg-zinc-200 text-zinc-500 px-2 py-0.5 rounded-sm">Ocupado</span>`;
-                } else {
-                    div.innerHTML = `
-                        <span class="text-xs font-semibold text-zinc-700">${shift.label}</span>
-                        <button onclick="openPayment('${shift.label}')" class="bg-purple-100 text-[#7c5ba7] text-xs font-bold px-3 py-1 rounded-lg cursor-pointer">Agendar</button>
-                    `;
-                }
-                container.appendChild(div);
-            });
-        }
-
-        function renderUserAppointments() {
-            const container = document.getElementById('my-appointments');
-            const myApps = globalAppointments.filter(app => app.username === currentUser && app.status !== 'Eliminado');
-
-            if (myApps.length === 0) {
-                container.innerHTML = `<p class="text-zinc-400 italic text-center py-6 text-xs bg-[#fbf9fe] rounded-xl border border-purple-100">No tienes citas agendadas.</p>`;
-                return;
-            }
-
-            container.innerHTML = "";
-            myApps.forEach(app => {
-                const div = document.createElement('div');
-                div.className = "bg-white border border-purple-100 p-3 rounded-xl";
-                div.innerHTML = `<p class="font-bold text-xs">📅 ${app.date}</p><p class="text-xs text-[#8c67b3]">🕒 ${app.time}</p><span class="text-[9px] border px-2 py-0.5 rounded-full uppercase">${app.status}</span>`;
-                container.appendChild(div);
-            });
-        }
-
-        function openPayment(timeLabel) {
-            selectedTimeLabel = timeLabel;
-            document.getElementById('modal-slot-date').innerText = `${selectedDate} (${timeLabel})`;
-            document.getElementById('payment-modal').classList.remove('hidden');
-        }
-
-        function closePayment() {
-            document.getElementById('payment-modal').classList.add('hidden');
-        }
-
-        async function processPayment(e) {
-            e.preventDefault();
-            const method = document.getElementById('payment-method').value;
-            let code = document.getElementById('transaction-code').value.trim();
-            
-            const nuevaCita = { username: currentUser, date: selectedDate, time: selectedTimeLabel, method: method, code: code, status: "En Espera" };
-
-            const { error } = await supabase.from('citas').insert([nuevaCita]);
-            if(error) {
-                alert("Error al guardar: " + error.message);
-                return;
-            }
-
-            const msgText = `🔔 *Nueva Cita*\n👤 Cliente: ${nuevaCita.username}\n📅 Fecha: ${nuevaCita.date}\n🕒 Hora: ${nuevaCita.time}\n💳 Pago: ${nuevaCita.method}\n🔢 Código: ${nuevaCita.code}`;
-            new Image().src = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(msgText)}&parse_mode=Markdown`;
-
-            alert("✨ Solicitud enviada.");
-            closePayment();
-            checkSession();
-        }
-
-        function renderAdminDashboard() {
-            const tbody = document.getElementById('admin-table-body');
-            tbody.innerHTML = "";
-            const activas = globalAppointments.filter(a => a.status !== 'Eliminado');
-
-            if(activas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-zinc-400">No hay citas registradas.</td></tr>`;
-                return;
-            }
-
-            activas.forEach(app => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="p-3 font-bold text-zinc-800">${app.username}</td>
-                    <td class="p-3">📅 ${app.date}<br>${app.time}</td>
-                    <td class="p-3 text-xs">${app.method}</td>
-                    <td class="p-3"><code class="bg-purple-50 px-2 py-0.5 rounded text-xs">${app.code}</code></td>
-                    <td class="p-3"><span class="text-xs font-bold uppercase">${app.status}</span></td>
-                    <td class="p-3 space-x-2 text-center">
-                        ${app.status === 'En Espera' ? `<button onclick="cambiarEstadoCita(${app.id}, 'Confirmado')" class="bg-emerald-600 text-white text-xs px-2 py-1 rounded cursor-pointer">Confirmar</button>`:''}
-                        <button onclick="cambiarEstadoCita(${app.id}, 'Eliminado')" class="bg-rose-600 text-white text-xs px-2 py-1 rounded cursor-pointer">Eliminar</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function renderAdminUsers() {
-            const tbody = document.getElementById('admin-users-table-body');
-            tbody.innerHTML = "";
-            
-            if(globalUsers.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-zinc-400">No hay clientes en la base de datos.</td></tr>`;
-                return;
-            }
-
-            globalUsers.forEach(u => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="p-3 font-semibold text-zinc-800">👤 ${u.username}</td>
-                    <td class="p-3 font-mono text-xs">${u.password}</td>
-                    <td class="p-3 text-center">
-                        <button onclick="eliminarUsuario(${u.id})" class="bg-rose-100 text-rose-700 text-xs px-2 py-1 rounded cursor-pointer">Eliminar</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        async function cambiarEstadoCita(id, nuevoEstado) {
-            await supabase.from('citas').update({ status: nuevoEstado }).eq('id', id);
-            checkSession();
-        }
-
-        async function eliminarUsuario(id) {
-            if(!confirm("¿Eliminar este usuario por completo?")) return;
-            await supabase.from('usuarios').delete().eq('id', id);
-            checkSession();
-        }
-
-        function switchAdminTab(t) {
-            document.getElementById('admin-tab-citas').classList.toggle('hidden', t !== 'citas');
-            document.getElementById('admin-tab-usuarios').classList.toggle('hidden', t !== 'usuarios');
-        }
-
-        // Arranque inicial
-        checkSession();
-    </script>
 </body>
 </html>
