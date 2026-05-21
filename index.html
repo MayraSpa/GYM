@@ -63,7 +63,7 @@
                 <div class="md:col-span-2 bg-white p-6 rounded-2xl shadow-xl shadow-purple-900/5 border border-purple-100/40 space-y-6">
                     <div>
                         <h2 class="text-xl font-bold text-zinc-800">1. Selecciona Fecha y Turno</h2>
-                        <p class="text-xs text-zinc-400 mt-1">Los turnos duran 2 hours. Elige un día del calendario.</p>
+                        <p class="text-xs text-zinc-400 mt-1">Los turnos duran 2 horas. Elige un día del calendario.</p>
                     </div>
                     
                     <div class="flex flex-col sm:flex-row gap-6">
@@ -159,8 +159,8 @@
     </main>
 
     <script>
-        // Inicialización automática de Supabase usando tus credenciales
-        const SUPABASE_URL = "https://ienxvkgx7ntrogomhnpbw.supabase.co";
+        // Inicialización automática de Supabase usando tus credenciales reales y URL exacta
+        const SUPABASE_URL = "https://qwlxsvzhxvvdbhiwxlbb.supabase.co";
         const SUPABASE_KEY = "sb_publishable_ieNxKvgX7nTROGOmHNpBbw_GSTTJ9Os";
         const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -235,7 +235,7 @@
                 }
             } else {
                 nav.innerHTML = `<span class="text-zinc-400 text-xs">Acceso Remoto</span>`;
-                authSec.classList.remove('hidden');
+                authSec.remove('hidden');
                 clientSec.classList.add('hidden');
                 adminSec.classList.add('hidden');
             }
@@ -368,7 +368,7 @@
                 return;
             }
 
-            // Notificación al bot de Telegram (Para que te enteres al momento)
+            // Notificación al bot de Telegram (Para enterarte al momento por la app de consola)
             const msgText = `🔔 *Nueva Cita Recibida en Supabase*\n👤 Cliente: ${nuevaCita.username}\n📅 Fecha: ${nuevaCita.date}\n🕒 Hora: ${nuevaCita.time}\n💳 Pago: ${nuevaCita.method}\n🔢 Comprobante: ${nuevaCita.code}`;
             new Image().src = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(msgText)}&parse_mode=Markdown`;
 
