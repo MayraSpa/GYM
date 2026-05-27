@@ -94,11 +94,44 @@ pre{
   white-space:pre-wrap;
 }
 
+#appScreen{
+  width:100%;
+  min-height:100vh;
+}
+
+#authScreen.hidden{
+  display:none;
+}
+
 @media(min-width:900px){
 
   .sidebar{
     left:0;
   }
+
+  .main-content{
+    margin-left:260px;
+  }
+
+  .menu-btn{
+    display:none;
+  }
+}
+
+@media(max-width:899px){
+
+  .sidebar{
+    left:-260px;
+  }
+
+  .sidebar.active{
+    left:0;
+  }
+
+  .main-content{
+    margin-left:0;
+  }
+}
 
   .main-content{
     margin-left:260px;
