@@ -10,15 +10,7 @@ supabase.createClient(
   SUPABASE_KEY
 );
 
-/* ================================= */
-/* INIT */
-/* ================================= */
-
 checkSession();
-
-/* ================================= */
-/* SIDEBAR */
-/* ================================= */
 
 function toggleSidebar(){
 
@@ -28,82 +20,40 @@ function toggleSidebar(){
   sidebar.classList.toggle("active");
 }
 
-/* ================================= */
-/* SECTIONS */
-/* ================================= */
-
 function showSection(section){
 
   const sections = [
-
     "dashboardSection",
     "clientsSection",
     "routinesSection",
     "codesSection",
     "profileSection"
-
   ];
 
   sections.forEach(id=>{
 
-    const el =
-    document.getElementById(id);
+    const el = document.getElementById(id);
 
     if(el){
-
       el.classList.add("hidden");
     }
   });
 
-  if(section === "dashboard"){
-
-    document
-    .getElementById("dashboardSection")
-    .classList.remove("hidden");
-  }
-
-  if(section === "clients"){
-
-    document
-    .getElementById("clientsSection")
-    .classList.remove("hidden");
-  }
-
-  if(section === "routines"){
-
-    document
-    .getElementById("routinesSection")
-    .classList.remove("hidden");
-  }
+  document
+  .getElementById(section + "Section")
+  ?.classList.remove("hidden");
 
   if(section === "codes"){
-
-    document
-    .getElementById("codesSection")
-    .classList.remove("hidden");
-
     loadCodes();
-  }
-
-  if(section === "profile"){
-
-    document
-    .getElementById("profileSection")
-    .classList.remove("hidden");
   }
 
   if(window.innerWidth < 900){
 
-    const sidebar =
-    document.getElementById("sidebar");
-
-    sidebar.classList.remove("active");
+    document
+    .getElementById("sidebar")
+    .classList.remove("active");
   }
 }
-
-/* ================================= */
-/* SIGNUP */
-/* ================================= */
 
 async function signUp(){
 
@@ -118,17 +68,24 @@ async function signUp(){
 
   if(!email || !password){
 
-    alert("Completa todos los campos");
+    alert("Completa todo");
 
     return;
   }
 
-  const isAdmin =
+  const isSuperAdmin =
   email === "yeraariel0@gmail.com";
+
+  let role = "client";
 
   let trainerId = null;
 
-  if(!isAdmin){
+  if(isSuperAdmin){
+
+    role = "super_admin";
+  }
+
+  else{
 
     const { data:codeData } =
     await supabaseClient
@@ -149,7 +106,6 @@ async function signUp(){
 
   const { data,error } =
   await supabaseClient.auth.signUp({
-
     email,
     password
   });
@@ -167,21 +123,15 @@ async function signUp(){
 
     id:data.user.id,
 
-    email:email,
+    email,
 
-    role:isAdmin
-      ? "admin"
-      : "client",
+    role,
 
     trainer_id:trainerId
   });
 
   alert("Cuenta creada");
 }
-
-/* ================================= */
-/* LOGIN */
-/* ================================= */
 
 async function login(){
 
@@ -195,7 +145,6 @@ async function login(){
   await supabaseClient
   .auth
   .signInWithPassword({
-
     email,
     password
   });
@@ -210,19 +159,12 @@ async function login(){
   checkSession();
 }
 
-/* ================================= */
-/* LOGOUT */
-/* ================================= */
-
 async function logout(){
 
   await supabaseClient.auth.signOut();
 
   location.reload();
 }
-/* ================================= */
-/* SESSION */
-/* ================================= */
 
 async function checkSession(){
 
@@ -232,7 +174,6 @@ async function checkSession(){
   await supabaseClient.auth.getUser();
 
   if(!user){
-
     return;
   }
 
@@ -244,27 +185,13 @@ async function checkSession(){
   .getElementById("appScreen")
   .classList.remove("hidden");
 
-  loadProfile(user.id);
-
   loadClients(user.id);
-
   loadRoutines(user.id);
-
   loadCodes();
+  loadProfile(user.id);
 }
 
-/* ================================= */
-/* PROFILE */
-/* ================================= */
-
 async function loadProfile(userId){
-
-  const { data:userData } =
-  await supabaseClient
-  .from("users")
-  .select("*")
-  .eq("id", userId)
-  .maybeSingle();
 
   const { data:profile } =
   await supabaseClient
@@ -273,57 +200,28 @@ async function loadProfile(userId){
   .eq("user_id", userId)
   .maybeSingle();
 
-  const profileBox =
+  const profileData =
   document.getElementById("profileData");
 
-  profileBox.innerHTML = `
-    <p>
-
-      <strong>Email:</strong>
-
-      ${userData?.email || ""}
-
-    </p>
-
-    <br>
+  profileData.innerHTML = `
 
     <p>
-
-      <strong>Nombre:</strong>
-
-      ${profile?.full_name || "-"}
-
+      Nombre: ${profile?.full_name || "-"}
     </p>
 
     <p>
-
-      <strong>Peso:</strong>
-
-      ${profile?.weight || "-"}
-
+      Peso: ${profile?.weight || "-"}
     </p>
 
     <p>
-
-      <strong>Altura:</strong>
-
-      ${profile?.height || "-"}
-
+      Altura: ${profile?.height || "-"}
     </p>
 
     <p>
-
-      <strong>Objetivo:</strong>
-
-      ${profile?.goal || "-"}
-
+      Objetivo: ${profile?.goal || "-"}
     </p>
   `;
 }
-
-/* ================================= */
-/* CLIENTES */
-/* ================================= */
 
 async function loadClients(userId){
 
@@ -334,27 +232,32 @@ async function loadClients(userId){
   .eq("id", userId)
   .maybeSingle();
 
-  if(!userData){
+  let clients = [];
 
-    return;
+  if(userData.role === "super_admin"){
+
+    const { data } =
+    await supabaseClient
+    .from("users")
+    .select("*")
+    .eq("role","client");
+
+    clients = data || [];
   }
 
-  if(userData.role !== "admin"){
+  else if(
+    userData.role === "trainer"
+    ||
+    userData.role === "gym_owner"
+  ){
 
-    return;
-  }
+    const { data } =
+    await supabaseClient
+    .from("users")
+    .select("*")
+    .eq("trainer_id", userId);
 
-  const { data:clients,error } =
-  await supabaseClient
-  .from("users")
-  .select("*")
-  .eq("trainer_id", userId);
-
-  if(error){
-
-    console.log(error);
-
-    return;
+    clients = data || [];
   }
 
   const clientsList =
@@ -362,70 +265,26 @@ async function loadClients(userId){
 
   clientsList.innerHTML = "";
 
-  if(clients.length === 0){
-
-    clientsList.innerHTML = `
-      <p>
-        No hay clientes todavía
-      </p>
-    `;
-
-    return;
-  }
-
-  for(const client of clients){
-
-    const { data:profile } =
-    await supabaseClient
-    .from("profiles")
-    .select("*")
-    .eq("user_id", client.id)
-    .maybeSingle();
+  clients.forEach(client=>{
 
     clientsList.innerHTML += `
 
       <div class="client-card">
 
-        <h3>
+        <p>${client.email}</p>
 
-          ${profile?.full_name || "Sin nombre"}
+        <button onclick="deleteClient('${client.id}')">
+          Eliminar
+        </button>
 
-        </h3>
-
-        <p>
-
-          ${client.email}
-
-        </p>
-
-        <p>
-
-          Peso:
-          ${profile?.weight || "-"}
-
-        </p>
-
-        <p>
-
-          Altura:
-          ${profile?.height || "-"}
-
-        </p>
-
-        <p>
-
-          Objetivo:
-          ${profile?.goal || "-"}
-
-        </p>
+        <button onclick="makeTrainer('${client.id}')">
+          Hacer entrenador
+        </button>
 
       </div>
     `;
-  }
+  });
 }
-/* ================================= */
-/* CREAR RUTINA */
-/* ================================= */
 
 async function createRoutine(){
 
@@ -434,27 +293,12 @@ async function createRoutine(){
   } =
   await supabaseClient.auth.getUser();
 
-  if(!user){
-
-    alert("No hay sesión");
-
-    return;
-  }
-
   const routineName =
   document.getElementById("routineName").value;
 
   const routineExercises =
   document.getElementById("routineExercises").value;
 
-  if(!routineName || !routineExercises){
-
-    alert("Completa todo");
-
-    return;
-  }
-
-  const { error } =
   await supabaseClient
   .from("routine_templates")
   .insert({
@@ -466,64 +310,21 @@ async function createRoutine(){
     exercises:routineExercises
   });
 
-  if(error){
-
-    console.log(error);
-
-    alert(error.message);
-
-    return;
-  }
-
-  document.getElementById("routineName").value = "";
-
-  document.getElementById("routineExercises").value = "";
-
   loadRoutines(user.id);
-
-  alert("Rutina creada");
 }
-
-/* ================================= */
-/* LOAD RUTINAS */
-/* ================================= */
 
 async function loadRoutines(userId){
 
-  const { data:routines,error } =
+  const { data:routines } =
   await supabaseClient
   .from("routine_templates")
   .select("*")
-  .eq("trainer_id", userId)
-  .order("id",{ ascending:false });
-
-  if(error){
-
-    console.log(error);
-
-    return;
-  }
+  .eq("trainer_id", userId);
 
   const routinesList =
   document.getElementById("routinesList");
 
-  if(!routinesList){
-
-    return;
-  }
-
   routinesList.innerHTML = "";
-
-  if(routines.length === 0){
-
-    routinesList.innerHTML = `
-      <p>
-        No hay rutinas todavía
-      </p>
-    `;
-
-    return;
-  }
 
   routines.forEach(routine=>{
 
@@ -531,27 +332,14 @@ async function loadRoutines(userId){
 
       <div class="routine-card">
 
-        <h3>
+        <h3>${routine.name}</h3>
 
-          ${routine.name}
-
-        </h3>
-
-        <pre>
-
-${routine.exercises}
-
-        </pre>
+        <pre>${routine.exercises}</pre>
 
       </div>
-
     `;
   });
 }
-
-/* ================================= */
-/* GENERAR CODIGO */
-/* ================================= */
 
 async function generateCode(){
 
@@ -560,45 +348,23 @@ async function generateCode(){
   } =
   await supabaseClient.auth.getUser();
 
-  if(!user){
-
-    alert("No hay sesión");
-
-    return;
-  }
-
   const code =
   Math.random()
   .toString(36)
   .substring(2,8)
   .toUpperCase();
 
-  const { error } =
   await supabaseClient
   .from("invite_codes")
   .insert({
 
-    code:code,
+    code,
 
     created_by:user.id
   });
 
-  if(error){
-
-    console.log(error);
-
-    alert(error.message);
-
-    return;
-  }
-
   loadCodes();
-
-  alert("Código generado");
 }
-/* ================================= */
-/* LOAD CODES */
-/* ================================= */
 
 async function loadCodes(){
 
@@ -607,45 +373,16 @@ async function loadCodes(){
   } =
   await supabaseClient.auth.getUser();
 
-  if(!user){
-
-    return;
-  }
-
-  const { data:codes,error } =
+  const { data:codes } =
   await supabaseClient
   .from("invite_codes")
   .select("*")
-  .eq("created_by", user.id)
-  .order("id",{ ascending:false });
-
-  if(error){
-
-    console.log(error);
-
-    return;
-  }
+  .eq("created_by", user.id);
 
   const codesList =
   document.getElementById("codesList");
 
-  if(!codesList){
-
-    return;
-  }
-
   codesList.innerHTML = "";
-
-  if(codes.length === 0){
-
-    codesList.innerHTML = `
-      <p>
-        No hay códigos todavía
-      </p>
-    `;
-
-    return;
-  }
 
   codes.forEach(code=>{
 
@@ -653,53 +390,60 @@ async function loadCodes(){
 
       <div class="routine-card">
 
-        <h3>
-
-          ${code.code}
-
-        </h3>
+        <h3>${code.code}</h3>
 
       </div>
-
     `;
   });
 }
 
-/* ================================= */
-/* AUTO REFRESH */
-/* ================================= */
+async function deleteClient(clientId){
 
-window.addEventListener("resize",()=>{
+  await supabaseClient
+  .from("profiles")
+  .delete()
+  .eq("user_id", clientId);
 
-  const sidebar =
-  document.getElementById("sidebar");
+  await supabaseClient
+  .from("users")
+  .delete()
+  .eq("id", clientId);
 
-  if(window.innerWidth > 900){
+  location.reload();
+}
 
-    sidebar.classList.remove("active");
-  }
-});
+async function deleteMyAccount(){
 
-/* ================================= */
-/* ENTER LOGIN */
-/* ================================= */
+  const {
+    data:{ user }
+  } =
+  await supabaseClient.auth.getUser();
 
-document.addEventListener("keydown",(e)=>{
+  await supabaseClient
+  .from("profiles")
+  .delete()
+  .eq("user_id", user.id);
 
-  if(e.key === "Enter"){
+  await supabaseClient
+  .from("users")
+  .delete()
+  .eq("id", user.id);
 
-    const authScreen =
-    document.getElementById("authScreen");
+  await supabaseClient.auth.signOut();
 
-    if(!authScreen.classList.contains("hidden")){
+  location.reload();
+}
 
-      login();
-    }
-  }
-});
+async function makeTrainer(userId){
 
-/* ================================= */
-/* START */
-/* ================================= */
+  await supabaseClient
+  .from("users")
+  .update({
+    role:"trainer"
+  })
+  .eq("id", userId);
 
-console.log("Gym App cargada correctamente");
+  alert("Ahora es entrenador");
+
+  location.reload();
+}
