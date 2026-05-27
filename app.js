@@ -169,13 +169,24 @@ async function logout(){
 async function checkSession(){
 
   const {
-    data:{ user }
+    data:{ session }
   } =
-  await supabaseClient.auth.getUser();
+  await supabaseClient.auth.getSession();
 
-  if(!user){
+  if(!session){
+
+    document
+    .getElementById("authScreen")
+    .classList.remove("hidden");
+
+    document
+    .getElementById("appScreen")
+    .classList.add("hidden");
+
     return;
   }
+
+  const user = session.user;
 
   document
   .getElementById("authScreen")
