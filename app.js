@@ -310,11 +310,16 @@ function toggleSidebar(id){
     document.getElementById(id);
 
 
-  sidebar.classList.toggle(
-    "sidebarOpen"
-  );
-}
+  if(sidebar.style.left === "0px"){
 
+    sidebar.style.left = "-100%";
+
+  }else{
+
+    sidebar.style.left = "0px";
+
+  }
+}
 
 
 // =========================
