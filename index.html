@@ -1,247 +1,197 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gym App</title>
 
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css"/>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
 
+  <!-- LOGIN -->
 
-<!-- LOGIN -->
-<div id="authScreen" class="screen">
+  <div id="authScreen" class="center-screen">
 
-  <div class="authBox">
+    <div class="card auth-card">
 
-    <h1>Gym App</h1>
+      <h1>Gym App</h1>
 
-    <input type="email" id="email" placeholder="Correo">
+      <input
+        type="email"
+        id="email"
+        placeholder="Correo"
+      />
 
-    <input type="password" id="password" placeholder="Contraseña">
+      <input
+        type="password"
+        id="password"
+        placeholder="Contraseña"
+      />
 
-    <input type="text" id="inviteCode" placeholder="Código invitación">
+      <input
+        type="text"
+        id="inviteCode"
+        placeholder="Código invitación"
+      />
 
-    <button onclick="login()">
-      Iniciar sesión
-    </button>
+      <button onclick="login()">
+        Iniciar sesión
+      </button>
 
-    <button onclick="signUp()">
-      Crear cuenta
-    </button>
+      <button onclick="signUp()">
+        Crear cuenta
+      </button>
 
-  </div>
-
-</div>
-
-
-<!-- PERFIL -->
-<div id="profileSetupScreen" class="screen hidden">
-
-  <div class="card">
-
-    <h2>Completa tu perfil</h2>
-
-    <input type="text" id="fullName" placeholder="Nombre completo">
-
-    <input type="text" id="weight" placeholder="Peso">
-
-    <input type="text" id="height" placeholder="Altura">
-
-    <input type="text" id="age" placeholder="Edad">
-
-    <input type="text" id="goal" placeholder="Objetivo">
-
-    <button onclick="saveProfile()">
-      Guardar perfil
-    </button>
-
-  </div>
-
-</div>
-
-
-<!-- ADMIN -->
-<div id="adminDashboard" class="screen hidden">
-
-  <div class="topBar">
-
-    <button class="menuBtn"
-    onclick="toggleSidebar('adminSidebar')">
-      ☰
-    </button>
-
-    <h2>Panel Entrenador</h2>
+    </div>
 
   </div>
 
 
-  <div id="adminSidebar" class="sidebar">
+  <!-- APP -->
 
-    <button onclick="showAdminSection('clientsSection')">
-      Clientes
-    </button>
+  <div id="appScreen" class="hidden">
 
-    <button onclick="showAdminSection('codesSection')">
-      Códigos
-    </button>
+    <!-- SIDEBAR -->
 
-    <button onclick="showAdminSection('templatesSection')">
-      Rutinas
-    </button>
+    <aside id="sidebar" class="sidebar">
 
-    <button onclick="showAdminSection('assignSection')">
-      Asignar
-    </button>
+      <div class="sidebar-top">
 
-    <button onclick="logout()">
-      Cerrar sesión
-    </button>
+        <h2>Gym</h2>
 
-  </div>
+        <button class="close-btn" onclick="toggleSidebar()">
+          ✕
+        </button>
 
+      </div>
 
-  <div id="clientsSection" class="adminSection">
+      <button onclick="showSection('dashboard')">
+        Dashboard
+      </button>
 
-    <h2>Clientes</h2>
+      <button onclick="showSection('clients')">
+        Clientes
+      </button>
 
-    <div id="clientsList"></div>
+      <button onclick="showSection('routines')">
+        Rutinas
+      </button>
 
-  </div>
+      <button onclick="showSection('profile')">
+        Perfil
+      </button>
 
+      <button onclick="logout()">
+        Cerrar sesión
+      </button>
 
-  <div id="codesSection"
-  class="adminSection hidden">
-
-    <h2>Códigos</h2>
-
-    <button onclick="generateCode()">
-      Generar código
-    </button>
-
-    <div id="codesList"></div>
-
-  </div>
+    </aside>
 
 
-  <div id="templatesSection"
-  class="adminSection hidden">
+    <!-- CONTENT -->
 
-    <h2>Crear rutina</h2>
+    <main class="main-content">
 
-    <input type="text"
-    id="routineName"
-    placeholder="Nombre rutina">
+      <!-- TOPBAR -->
 
-    <input type="text"
-    id="exerciseName"
-    placeholder="Ejercicio">
+      <div class="topbar">
 
-    <input type="text"
-    id="exerciseSets"
-    placeholder="Series">
+        <button class="menu-btn" onclick="toggleSidebar()">
+          ☰
+        </button>
 
-    <input type="text"
-    id="exerciseReps"
-    placeholder="Repeticiones">
+        <h1>Panel Entrenador</h1>
 
-    <input type="text"
-    id="exerciseRest"
-    placeholder="Descanso">
-
-    <button onclick="addExercise()">
-      Agregar ejercicio
-    </button>
-
-    <div id="exercisePreview"></div>
-
-    <button onclick="saveTemplate()">
-      Guardar rutina
-    </button>
-
-    <div id="templatesList"></div>
-
-  </div>
+      </div>
 
 
-  <div id="assignSection"
-  class="adminSection hidden">
+      <!-- DASHBOARD -->
 
-    <h2>Asignar rutina</h2>
+      <section id="dashboardSection">
 
-    <select id="assignClient"></select>
+        <div class="card">
+          <h2>Dashboard</h2>
+          <p>Bienvenido</p>
+        </div>
 
-    <select id="assignTemplate"></select>
-
-    <input type="text"
-    id="weekLabel"
-    placeholder="Semana 1">
-
-    <button onclick="assignRoutine()">
-      Asignar
-    </button>
-
-  </div>
-
-</div>
+      </section>
 
 
-<!-- CLIENT -->
-<div id="clientDashboard" class="screen hidden">
+      <!-- CLIENTES -->
 
-  <div class="topBar">
+      <section id="clientsSection" class="hidden">
 
-    <button class="menuBtn"
-    onclick="toggleSidebar('clientSidebar')">
-      ☰
-    </button>
+        <div class="card">
 
-    <h2 id="welcomeName"></h2>
+          <h2>Clientes</h2>
 
-  </div>
+          <div id="clientsList"></div>
 
+        </div>
 
-  <div id="clientSidebar" class="sidebar">
-
-    <button onclick="showClientSection('routineSection')">
-      Rutina
-    </button>
-
-    <button onclick="showClientSection('profileSection')">
-      Perfil
-    </button>
-
-    <button onclick="logout()">
-      Cerrar sesión
-    </button>
-
-  </div>
+      </section>
 
 
-  <div id="routineSection" class="clientSection">
+      <!-- RUTINAS -->
 
-    <h2>Rutina semanal</h2>
+      <section id="routinesSection" class="hidden">
 
-    <div id="routineList"></div>
+        <div class="card">
+
+          <h2>Crear rutina</h2>
+
+          <input
+            type="text"
+            id="routineName"
+            placeholder="Nombre rutina"
+          />
+
+          <textarea
+            id="routineExercises"
+            placeholder="Ejercicios..."
+          ></textarea>
+
+          <button onclick="createRoutine()">
+            Guardar rutina
+          </button>
+
+        </div>
+
+
+        <div class="card">
+
+          <h2>Rutinas guardadas</h2>
+
+          <div id="routinesList"></div>
+
+        </div>
+
+      </section>
+
+
+      <!-- PERFIL -->
+
+      <section id="profileSection" class="hidden">
+
+        <div class="card">
+
+          <h2>Perfil</h2>
+
+          <div id="profileData"></div>
+
+        </div>
+
+      </section>
+
+    </main>
 
   </div>
 
-
-  <div id="profileSection"
-  class="clientSection hidden">
-
-    <h2>Perfil</h2>
-
-    <div id="profileData"></div>
-
-  </div>
-
-</div>
-
-<script src="app.js"></script>
+  <script src="app.js"></script>
 
 </body>
 </html>
