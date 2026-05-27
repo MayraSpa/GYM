@@ -34,21 +34,26 @@ function toggleSidebar(){
 
 function showSection(section){
 
-  document
-  .getElementById("dashboardSection")
-  .classList.add("hidden");
+  const sections = [
 
-  document
-  .getElementById("clientsSection")
-  .classList.add("hidden");
+    "dashboardSection",
+    "clientsSection",
+    "routinesSection",
+    "codesSection",
+    "profileSection"
 
-  document
-  .getElementById("routinesSection")
-  .classList.add("hidden");
+  ];
 
-  document
-  .getElementById("profileSection")
-  .classList.add("hidden");
+  sections.forEach(id=>{
+
+    const el =
+    document.getElementById(id);
+
+    if(el){
+
+      el.classList.add("hidden");
+    }
+  });
 
   if(section === "dashboard"){
 
@@ -71,6 +76,15 @@ function showSection(section){
     .classList.remove("hidden");
   }
 
+  if(section === "codes"){
+
+    document
+    .getElementById("codesSection")
+    .classList.remove("hidden");
+
+    loadCodes();
+  }
+
   if(section === "profile"){
 
     document
@@ -80,12 +94,15 @@ function showSection(section){
 
   if(window.innerWidth < 900){
 
-    toggleSidebar();
+    const sidebar =
+    document.getElementById("sidebar");
+
+    sidebar.classList.remove("active");
   }
 }
 
 /* ================================= */
-/* SIGN UP */
+/* SIGNUP */
 /* ================================= */
 
 async function signUp(){
@@ -203,7 +220,6 @@ async function logout(){
 
   location.reload();
 }
-
 /* ================================= */
 /* SESSION */
 /* ================================= */
@@ -262,30 +278,45 @@ async function loadProfile(userId){
 
   profileBox.innerHTML = `
     <p>
+
       <strong>Email:</strong>
+
       ${userData?.email || ""}
+
     </p>
 
     <br>
 
     <p>
+
       <strong>Nombre:</strong>
+
       ${profile?.full_name || "-"}
+
     </p>
 
     <p>
+
       <strong>Peso:</strong>
+
       ${profile?.weight || "-"}
+
     </p>
 
     <p>
+
       <strong>Altura:</strong>
+
       ${profile?.height || "-"}
+
     </p>
 
     <p>
+
       <strong>Objetivo:</strong>
+
       ${profile?.goal || "-"}
+
     </p>
   `;
 }
@@ -303,21 +334,44 @@ async function loadClients(userId){
   .eq("id", userId)
   .maybeSingle();
 
+  if(!userData){
+
+    return;
+  }
+
   if(userData.role !== "admin"){
 
     return;
   }
 
-  const { data:clients } =
+  const { data:clients,error } =
   await supabaseClient
   .from("users")
   .select("*")
   .eq("trainer_id", userId);
 
+  if(error){
+
+    console.log(error);
+
+    return;
+  }
+
   const clientsList =
   document.getElementById("clientsList");
 
   clientsList.innerHTML = "";
+
+  if(clients.length === 0){
+
+    clientsList.innerHTML = `
+      <p>
+        No hay clientes todavía
+      </p>
+    `;
+
+    return;
+  }
 
   for(const client of clients){
 
@@ -329,31 +383,46 @@ async function loadClients(userId){
     .maybeSingle();
 
     clientsList.innerHTML += `
+
       <div class="client-card">
 
         <h3>
+
           ${profile?.full_name || "Sin nombre"}
+
         </h3>
 
         <p>
+
           ${client.email}
+
         </p>
 
         <p>
+
           Peso:
           ${profile?.weight || "-"}
+
         </p>
 
         <p>
+
+          Altura:
+          ${profile?.height || "-"}
+
+        </p>
+
+        <p>
+
           Objetivo:
           ${profile?.goal || "-"}
+
         </p>
 
       </div>
     `;
   }
 }
-
 /* ================================= */
 /* CREAR RUTINA */
 /* ================================= */
@@ -364,6 +433,13 @@ async function createRoutine(){
     data:{ user }
   } =
   await supabaseClient.auth.getUser();
+
+  if(!user){
+
+    alert("No hay sesión");
+
+    return;
+  }
 
   const routineName =
   document.getElementById("routineName").value;
@@ -392,6 +468,8 @@ async function createRoutine(){
 
   if(error){
 
+    console.log(error);
+
     alert(error.message);
 
     return;
@@ -402,6 +480,8 @@ async function createRoutine(){
   document.getElementById("routineExercises").value = "";
 
   loadRoutines(user.id);
+
+  alert("Rutina creada");
 }
 
 /* ================================= */
@@ -410,32 +490,61 @@ async function createRoutine(){
 
 async function loadRoutines(userId){
 
-  const { data:routines } =
+  const { data:routines,error } =
   await supabaseClient
   .from("routine_templates")
   .select("*")
   .eq("trainer_id", userId)
   .order("id",{ ascending:false });
 
+  if(error){
+
+    console.log(error);
+
+    return;
+  }
+
   const routinesList =
   document.getElementById("routinesList");
 
+  if(!routinesList){
+
+    return;
+  }
+
   routinesList.innerHTML = "";
+
+  if(routines.length === 0){
+
+    routinesList.innerHTML = `
+      <p>
+        No hay rutinas todavía
+      </p>
+    `;
+
+    return;
+  }
 
   routines.forEach(routine=>{
 
     routinesList.innerHTML += `
+
       <div class="routine-card">
 
         <h3>
+
           ${routine.name}
+
         </h3>
 
         <pre>
+
 ${routine.exercises}
+
         </pre>
 
       </div>
+
     `;
   });
 }
@@ -450,6 +559,13 @@ async function generateCode(){
     data:{ user }
   } =
   await supabaseClient.auth.getUser();
+
+  if(!user){
+
+    alert("No hay sesión");
+
+    return;
+  }
 
   const code =
   Math.random()
@@ -469,14 +585,17 @@ async function generateCode(){
 
   if(error){
 
+    console.log(error);
+
     alert(error.message);
 
     return;
   }
 
   loadCodes();
-}
 
+  alert("Código generado");
+}
 /* ================================= */
 /* LOAD CODES */
 /* ================================= */
@@ -488,12 +607,24 @@ async function loadCodes(){
   } =
   await supabaseClient.auth.getUser();
 
-  const { data:codes } =
+  if(!user){
+
+    return;
+  }
+
+  const { data:codes,error } =
   await supabaseClient
   .from("invite_codes")
   .select("*")
   .eq("created_by", user.id)
   .order("id",{ ascending:false });
+
+  if(error){
+
+    console.log(error);
+
+    return;
+  }
 
   const codesList =
   document.getElementById("codesList");
@@ -505,16 +636,70 @@ async function loadCodes(){
 
   codesList.innerHTML = "";
 
+  if(codes.length === 0){
+
+    codesList.innerHTML = `
+      <p>
+        No hay códigos todavía
+      </p>
+    `;
+
+    return;
+  }
+
   codes.forEach(code=>{
 
     codesList.innerHTML += `
+
       <div class="routine-card">
 
         <h3>
+
           ${code.code}
+
         </h3>
 
       </div>
+
     `;
   });
 }
+
+/* ================================= */
+/* AUTO REFRESH */
+/* ================================= */
+
+window.addEventListener("resize",()=>{
+
+  const sidebar =
+  document.getElementById("sidebar");
+
+  if(window.innerWidth > 900){
+
+    sidebar.classList.remove("active");
+  }
+});
+
+/* ================================= */
+/* ENTER LOGIN */
+/* ================================= */
+
+document.addEventListener("keydown",(e)=>{
+
+  if(e.key === "Enter"){
+
+    const authScreen =
+    document.getElementById("authScreen");
+
+    if(!authScreen.classList.contains("hidden")){
+
+      login();
+    }
+  }
+});
+
+/* ================================= */
+/* START */
+/* ================================= */
+
+console.log("Gym App cargada correctamente");
