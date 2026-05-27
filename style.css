@@ -2,18 +2,13 @@
   margin:0;
   padding:0;
   box-sizing:border-box;
-  font-family:Arial, Helvetica, sans-serif;
+  font-family:Arial;
 }
 
 body{
   background:#06152f;
   color:white;
-  overflow-x:hidden;
 }
-
-
-
-/* GLOBAL */
 
 .hidden{
   display:none !important;
@@ -23,9 +18,13 @@ body{
   min-height:100vh;
 }
 
-
-
-/* LOGIN */
+.authBox,
+.card{
+  width:400px;
+  background:#162544;
+  padding:40px;
+  border-radius:25px;
+}
 
 #authScreen,
 #profileSetupScreen{
@@ -33,239 +32,71 @@ body{
   justify-content:center;
   align-items:center;
   min-height:100vh;
-  padding:20px;
 }
-
-.authBox,
-.profileBox{
-  width:400px;
-  max-width:100%;
-
-  background:#162544;
-
-  padding:40px;
-
-  border-radius:25px;
-}
-
-
-
-/* INPUTS */
 
 input,
 select{
   width:100%;
-
   padding:15px;
-
   border:none;
-
   border-radius:15px;
-
   margin-bottom:15px;
-
-  background:#20314d;
-
+  background:#263858;
   color:white;
-
-  font-size:16px;
-
-  outline:none;
 }
-
-
-
-/* BUTTONS */
 
 button{
   width:100%;
-
-  border:none;
-
   padding:15px;
-
+  border:none;
   border-radius:15px;
-
-  cursor:pointer;
-
   background:#2563eb;
-
   color:white;
-
-  font-size:16px;
+  cursor:pointer;
+  margin-bottom:15px;
 }
 
-
-
-/* TOPBAR */
-
 .topBar{
-  width:100%;
-
   height:80px;
-
   background:#162544;
-
   display:flex;
-
   align-items:center;
-
   gap:20px;
-
   padding:0 20px;
 }
 
 .menuBtn{
   width:50px;
-
   height:50px;
-
-  min-width:50px;
-
-  font-size:24px;
-
-  padding:0;
+  font-size:22px;
 }
-/* SIDEBAR */
 
 .sidebar{
-
   position:fixed;
-
   top:0;
-
-  left:-280px;
-
-  width:280px;
-
+  left:-300px;
+  width:300px;
   height:100vh;
-
   background:#162544;
-
   padding:25px;
-
-  z-index:9999;
-
-  transition:left 0.3s ease;
-
-  overflow-y:auto;
-
-  display:flex;
-
-  flex-direction:column;
-
-  gap:15px;
+  transition:0.3s;
+  z-index:999;
 }
-
-
-
-/* ABIERTA */
 
 .sidebar.open{
-
   left:0;
-
 }
-
-
-
-/* CONTENT */
 
 .adminSection,
 .clientSection{
   padding:30px;
 }
 
-
-
-/* CARDS */
-
-.exerciseCard{
-  background:#20314d;
-
+.exerciseCard,
+.clientCard{
+  background:#162544;
   padding:20px;
-
   border-radius:20px;
-
-  margin-bottom:20px;
+  margin-top:15px;
 }
 
-
-
-/* PROGRESS */
-
-.progressBar{
-  width:100%;
-
-  height:30px;
-
-  background:#20314d;
-
-  border-radius:20px;
-
-  overflow:hidden;
-
-  margin-bottom:10px;
-}
-
-#progressFill{
-  width:0%;
-
-  height:100%;
-
-  background:#2563eb;
-}
-
-
-
-/* EXERCISE TOP */
-
-.exerciseTop{
-  display:flex;
-
-  justify-content:space-between;
-
-  align-items:center;
-}
-
-.exerciseTop input{
-  width:25px;
-  height:25px;
-}
-
-
-
-/* TEMPLATE */
-
-.exerciseCreator{
-
-  display:grid;
-
-  grid-template-columns:
-    1fr
-    1fr
-    1fr
-    1fr
-    auto;
-
-  gap:10px;
-
-  margin-bottom:20px;
-}
-
-
-
-/* MOBILE */
-
-@media(max-width:700px){
-
-  .authBox,
-  .profileBox{
-    width:100%;
-  }
-
-  .exerciseCreator{
-    grid-template-columns:1fr;
-  }
-
-}
