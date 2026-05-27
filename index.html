@@ -3,21 +3,19 @@
 
 <head>
 
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
 
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
-  />
+  >
 
-  <title>
-    Gym App
-  </title>
+  <title>Gym App</title>
 
   <link
     rel="stylesheet"
     href="style.css"
-  />
+  >
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -34,27 +32,25 @@
 
     <div class="card auth-card">
 
-      <h1>
-        Gym App
-      </h1>
+      <h1>Gym App</h1>
 
       <input
         type="email"
         id="email"
         placeholder="Correo"
-      />
+      >
 
       <input
         type="password"
         id="password"
         placeholder="Contraseña"
-      />
+      >
 
       <input
         type="text"
         id="inviteCode"
         placeholder="Código invitación"
-      />
+      >
 
       <button onclick="login()">
         Iniciar sesión
@@ -85,9 +81,7 @@
 
       <div class="sidebar-top">
 
-        <h2>
-          Gym
-        </h2>
+        <h2>Gym</h2>
 
         <button
           class="close-btn"
@@ -110,6 +104,10 @@
         Rutinas
       </button>
 
+      <button onclick="showSection('codes')">
+        Códigos
+      </button>
+
       <button onclick="showSection('profile')">
         Perfil
       </button>
@@ -121,7 +119,7 @@
     </aside>
 
 
-    <!-- CONTENT -->
+    <!-- MAIN -->
 
     <main class="main-content">
 
@@ -149,13 +147,9 @@
 
         <div class="card">
 
-          <h2>
-            Dashboard
-          </h2>
+          <h2>Dashboard</h2>
 
-          <p>
-            Bienvenido
-          </p>
+          <p>Bienvenido</p>
 
         </div>
 
@@ -171,9 +165,7 @@
 
         <div class="card">
 
-          <h2>
-            Clientes
-          </h2>
+          <h2>Clientes</h2>
 
           <div id="clientsList"></div>
 
@@ -189,19 +181,15 @@
         class="hidden"
       >
 
-        <!-- CREAR -->
-
         <div class="card">
 
-          <h2>
-            Crear rutina
-          </h2>
+          <h2>Crear rutina</h2>
 
           <input
             type="text"
             id="routineName"
             placeholder="Nombre rutina"
-          />
+          >
 
           <textarea
             id="routineExercises"
@@ -214,33 +202,33 @@
 
         </div>
 
+        <div class="card">
 
-        <!-- CODIGOS -->
+          <h2>Rutinas guardadas</h2>
+
+          <div id="routinesList"></div>
+
+        </div>
+
+      </section>
+
+
+      <!-- CODIGOS -->
+
+      <section
+        id="codesSection"
+        class="hidden"
+      >
 
         <div class="card">
 
-          <h2>
-            Códigos Invitación
-          </h2>
+          <h2>Códigos Invitación</h2>
 
           <button onclick="generateCode()">
             Generar código
           </button>
 
           <div id="codesList"></div>
-
-        </div>
-
-
-        <!-- RUTINAS GUARDADAS -->
-
-        <div class="card">
-
-          <h2>
-            Rutinas guardadas
-          </h2>
-
-          <div id="routinesList"></div>
 
         </div>
 
@@ -256,9 +244,7 @@
 
         <div class="card">
 
-          <h2>
-            Perfil
-          </h2>
+          <h2>Perfil</h2>
 
           <div id="profileData"></div>
 
