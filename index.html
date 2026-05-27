@@ -1,24 +1,42 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gym App</title>
 
-  <link rel="stylesheet" href="style.css"/>
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>
+    Gym App
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  />
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 </head>
 
 <body>
 
   <!-- LOGIN -->
 
-  <div id="authScreen" class="center-screen">
+  <div
+    id="authScreen"
+    class="center-screen"
+  >
 
     <div class="card auth-card">
 
-      <h1>Gym App</h1>
+      <h1>
+        Gym App
+      </h1>
 
       <input
         type="email"
@@ -53,17 +71,28 @@
 
   <!-- APP -->
 
-  <div id="appScreen" class="hidden">
+  <div
+    id="appScreen"
+    class="hidden"
+  >
 
     <!-- SIDEBAR -->
 
-    <aside id="sidebar" class="sidebar">
+    <aside
+      id="sidebar"
+      class="sidebar"
+    >
 
       <div class="sidebar-top">
 
-        <h2>Gym</h2>
+        <h2>
+          Gym
+        </h2>
 
-        <button class="close-btn" onclick="toggleSidebar()">
+        <button
+          class="close-btn"
+          onclick="toggleSidebar()"
+        >
           ✕
         </button>
 
@@ -100,11 +129,16 @@
 
       <div class="topbar">
 
-        <button class="menu-btn" onclick="toggleSidebar()">
+        <button
+          class="menu-btn"
+          onclick="toggleSidebar()"
+        >
           ☰
         </button>
 
-        <h1>Panel Entrenador</h1>
+        <h1>
+          Panel Entrenador
+        </h1>
 
       </div>
 
@@ -114,8 +148,15 @@
       <section id="dashboardSection">
 
         <div class="card">
-          <h2>Dashboard</h2>
-          <p>Bienvenido</p>
+
+          <h2>
+            Dashboard
+          </h2>
+
+          <p>
+            Bienvenido
+          </p>
+
         </div>
 
       </section>
@@ -123,11 +164,16 @@
 
       <!-- CLIENTES -->
 
-      <section id="clientsSection" class="hidden">
+      <section
+        id="clientsSection"
+        class="hidden"
+      >
 
         <div class="card">
 
-          <h2>Clientes</h2>
+          <h2>
+            Clientes
+          </h2>
 
           <div id="clientsList"></div>
 
@@ -138,11 +184,18 @@
 
       <!-- RUTINAS -->
 
-      <section id="routinesSection" class="hidden">
+      <section
+        id="routinesSection"
+        class="hidden"
+      >
+
+        <!-- CREAR -->
 
         <div class="card">
 
-          <h2>Crear rutina</h2>
+          <h2>
+            Crear rutina
+          </h2>
 
           <input
             type="text"
@@ -162,9 +215,30 @@
         </div>
 
 
+        <!-- CODIGOS -->
+
         <div class="card">
 
-          <h2>Rutinas guardadas</h2>
+          <h2>
+            Códigos Invitación
+          </h2>
+
+          <button onclick="generateCode()">
+            Generar código
+          </button>
+
+          <div id="codesList"></div>
+
+        </div>
+
+
+        <!-- RUTINAS GUARDADAS -->
+
+        <div class="card">
+
+          <h2>
+            Rutinas guardadas
+          </h2>
 
           <div id="routinesList"></div>
 
@@ -175,11 +249,16 @@
 
       <!-- PERFIL -->
 
-      <section id="profileSection" class="hidden">
+      <section
+        id="profileSection"
+        class="hidden"
+      >
 
         <div class="card">
 
-          <h2>Perfil</h2>
+          <h2>
+            Perfil
+          </h2>
 
           <div id="profileData"></div>
 
