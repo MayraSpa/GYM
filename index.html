@@ -3,260 +3,182 @@
 
 <head>
 
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+<title>Gym SaaS</title>
 
-  <title>Gym App</title>
+<link rel="stylesheet" href="style.css">
 
-  <link
-    rel="stylesheet"
-    href="style.css"
-  >
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 </head>
 
 <body>
 
-  <!-- LOGIN -->
+<div id="authScreen" class="center-screen">
 
-  <div
-    id="authScreen"
-    class="center-screen"
-  >
+  <div class="card auth-card">
 
-    <div class="card auth-card">
+    <h1>Gym SaaS</h1>
 
-      <h1>Gym App</h1>
+    <input type="email" id="email" placeholder="Correo">
 
-      <input
-        type="email"
-        id="email"
-        placeholder="Correo"
-      >
+    <input type="password" id="password" placeholder="Contraseña">
 
-      <input
-        type="password"
-        id="password"
-        placeholder="Contraseña"
-      >
+    <input type="text" id="inviteCode" placeholder="Código invitación">
 
-      <input
-        type="text"
-        id="inviteCode"
-        placeholder="Código invitación"
-      >
+    <button onclick="login()">
+      Iniciar sesión
+    </button>
 
-      <button onclick="login()">
-        Iniciar sesión
-      </button>
+    <button onclick="signUp()">
+      Crear cuenta
+    </button>
 
-      <button onclick="signUp()">
-        Crear cuenta
+  </div>
+
+</div>
+
+<div id="appScreen" class="hidden">
+
+  <aside id="sidebar" class="sidebar">
+
+    <div class="sidebar-top">
+
+      <h2>Gym SaaS</h2>
+
+      <button onclick="toggleSidebar()">
+        ✕
       </button>
 
     </div>
 
-  </div>
+    <button onclick="showSection('dashboard')">
+      Dashboard
+    </button>
 
+    <button onclick="showSection('clients')">
+      Clientes
+    </button>
 
-  <!-- APP -->
+    <button onclick="showSection('routines')">
+      Rutinas
+    </button>
 
-  <div
-    id="appScreen"
-    class="hidden"
-  >
+    <button onclick="showSection('codes')">
+      Códigos
+    </button>
 
-    <!-- SIDEBAR -->
+    <button onclick="showSection('profile')">
+      Perfil
+    </button>
 
-    <aside
-      id="sidebar"
-      class="sidebar"
-    >
+    <button onclick="logout()">
+      Salir
+    </button>
 
-      <div class="sidebar-top">
+  </aside>
 
-        <h2>Gym</h2>
+  <main class="main-content">
 
-        <button
-          class="close-btn"
-          onclick="toggleSidebar()"
-        >
-          ✕
+    <div class="topbar">
+
+      <button class="menu-btn" onclick="toggleSidebar()">
+        ☰
+      </button>
+
+      <h1>Panel</h1>
+
+    </div>
+
+    <section id="dashboardSection">
+
+      <div class="card">
+
+        <h2>Dashboard</h2>
+
+        <p>Bienvenido</p>
+
+      </div>
+
+    </section>
+
+    <section id="clientsSection" class="hidden">
+
+      <div class="card">
+
+        <h2>Clientes</h2>
+
+        <div id="clientsList"></div>
+
+      </div>
+
+    </section>
+
+    <section id="routinesSection" class="hidden">
+
+      <div class="card">
+
+        <h2>Crear rutina</h2>
+
+        <input type="text" id="routineName" placeholder="Nombre rutina">
+
+        <textarea id="routineExercises" placeholder="Ejercicios"></textarea>
+
+        <button onclick="createRoutine()">
+          Guardar rutina
         </button>
 
       </div>
 
-      <button onclick="showSection('dashboard')">
-        Dashboard
-      </button>
+      <div class="card">
 
-      <button onclick="showSection('clients')">
-        Clientes
-      </button>
+        <h2>Rutinas guardadas</h2>
 
-      <button onclick="showSection('routines')">
-        Rutinas
-      </button>
-
-      <button onclick="showSection('codes')">
-        Códigos
-      </button>
-
-      <button onclick="showSection('profile')">
-        Perfil
-      </button>
-
-      <button onclick="logout()">
-        Cerrar sesión
-      </button>
-
-    </aside>
-
-
-    <!-- MAIN -->
-
-    <main class="main-content">
-
-      <!-- TOPBAR -->
-
-      <div class="topbar">
-
-        <button
-          class="menu-btn"
-          onclick="toggleSidebar()"
-        >
-          ☰
-        </button>
-
-        <h1>
-          Panel Entrenador
-        </h1>
+        <div id="routinesList"></div>
 
       </div>
 
+    </section>
 
-      <!-- DASHBOARD -->
+    <section id="codesSection" class="hidden">
 
-      <section id="dashboardSection">
+      <div class="card">
 
-        <div class="card">
+        <h2>Códigos</h2>
 
-          <h2>Dashboard</h2>
+        <button onclick="generateCode()">
+          Generar código
+        </button>
 
-          <p>Bienvenido</p>
+        <div id="codesList"></div>
 
-        </div>
+      </div>
 
-      </section>
+    </section>
 
+    <section id="profileSection" class="hidden">
 
-      <!-- CLIENTES -->
+      <div class="card">
 
-      <section
-        id="clientsSection"
-        class="hidden"
-      >
+        <h2>Perfil</h2>
 
-        <div class="card">
+        <div id="profileData"></div>
 
-          <h2>Clientes</h2>
+        <button onclick="deleteMyAccount()">
+          Eliminar cuenta
+        </button>
 
-          <div id="clientsList"></div>
+      </div>
 
-        </div>
+    </section>
 
-      </section>
+  </main>
 
+</div>
 
-      <!-- RUTINAS -->
-
-      <section
-        id="routinesSection"
-        class="hidden"
-      >
-
-        <div class="card">
-
-          <h2>Crear rutina</h2>
-
-          <input
-            type="text"
-            id="routineName"
-            placeholder="Nombre rutina"
-          >
-
-          <textarea
-            id="routineExercises"
-            placeholder="Ejercicios..."
-          ></textarea>
-
-          <button onclick="createRoutine()">
-            Guardar rutina
-          </button>
-
-        </div>
-
-        <div class="card">
-
-          <h2>Rutinas guardadas</h2>
-
-          <div id="routinesList"></div>
-
-        </div>
-
-      </section>
-
-
-      <!-- CODIGOS -->
-
-      <section
-        id="codesSection"
-        class="hidden"
-      >
-
-        <div class="card">
-
-          <h2>Códigos Invitación</h2>
-
-          <button onclick="generateCode()">
-            Generar código
-          </button>
-
-          <div id="codesList"></div>
-
-        </div>
-
-      </section>
-
-
-      <!-- PERFIL -->
-
-      <section
-        id="profileSection"
-        class="hidden"
-      >
-
-        <div class="card">
-
-          <h2>Perfil</h2>
-
-          <div id="profileData"></div>
-
-        </div>
-
-      </section>
-
-    </main>
-
-  </div>
-
-  <script src="app.js"></script>
+<script src="app.js"></script>
 
 </body>
 </html>
