@@ -1,0 +1,315 @@
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+  background:#06152f;
+  color:white;
+}
+
+
+
+/* ========================= */
+/* GLOBAL */
+/* ========================= */
+
+.hidden{
+  display:none !important;
+}
+
+.screen{
+  min-height:100vh;
+}
+
+
+
+/* ========================= */
+/* LOGIN */
+/* ========================= */
+
+#authScreen,
+#profileSetupScreen{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+}
+
+.authBox,
+.profileBox{
+  width:400px;
+  background:#162544;
+  padding:40px;
+  border-radius:25px;
+  box-shadow:0 0 25px rgba(0,0,0,0.3);
+}
+
+.authBox h1{
+  font-size:55px;
+  margin-bottom:30px;
+}
+
+.profileBox h2{
+  font-size:35px;
+  margin-bottom:25px;
+}
+
+
+
+/* ========================= */
+/* INPUTS */
+/* ========================= */
+
+input,
+select{
+  width:100%;
+  padding:16px;
+  border:none;
+  border-radius:15px;
+  margin-bottom:15px;
+  background:#2a3b5c;
+  color:white;
+  font-size:16px;
+}
+
+input::placeholder{
+  color:#c2cad7;
+}
+
+
+
+/* ========================= */
+/* BUTTONS */
+/* ========================= */
+
+button{
+  border:none;
+  border-radius:15px;
+  padding:16px;
+  background:#2563eb;
+  color:white;
+  cursor:pointer;
+  transition:0.3s;
+  font-size:16px;
+}
+
+button:hover{
+  transform:scale(1.02);
+}
+
+
+
+/* ========================= */
+/* TOPBAR */
+/* ========================= */
+
+.topBar{
+  width:100%;
+  height:80px;
+  background:#162544;
+  display:flex;
+  align-items:center;
+  gap:20px;
+  padding:0 25px;
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+
+.topBar h2{
+  font-size:30px;
+}
+
+
+
+/* ========================= */
+/* MENU BTN */
+/* ========================= */
+
+.menuBtn{
+  width:50px;
+  height:50px;
+  font-size:25px;
+  padding:0;
+}
+/* ========================= */
+/* SIDEBAR */
+/* ========================= */
+
+.sidebar{
+  width:260px;
+  height:100vh;
+  background:#162544;
+
+  position:fixed;
+  top:0;
+  left:-260px;
+
+  z-index:999;
+
+  padding:25px;
+
+  transition:0.3s ease;
+
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+}
+
+.sidebarOpen{
+  left:0 !important;
+}
+
+.sidebar h3{
+  font-size:30px;
+  margin-bottom:20px;
+}
+
+.sidebar button{
+  width:100%;
+  text-align:left;
+}
+
+
+
+/* ========================= */
+/* SECTIONS */
+/* ========================= */
+
+.adminSection,
+.clientSection{
+  padding:30px;
+}
+
+.adminSection h2,
+.clientSection h2{
+  margin-bottom:20px;
+  font-size:35px;
+}
+
+
+
+/* ========================= */
+/* CARDS */
+/* ========================= */
+
+.exerciseCard{
+  background:#20314d;
+  padding:25px;
+  border-radius:20px;
+  margin-bottom:20px;
+}
+
+.exerciseCard h3{
+  font-size:28px;
+  margin-bottom:10px;
+}
+
+.exerciseCard p{
+  margin-bottom:10px;
+}
+
+
+
+/* ========================= */
+/* EXERCISE TOP */
+/* ========================= */
+
+.exerciseTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.exerciseTop input{
+  width:25px;
+  height:25px;
+}
+
+
+
+/* ========================= */
+/* PROGRESS */
+/* ========================= */
+
+.progressBar{
+  width:100%;
+  height:30px;
+  background:#20314d;
+  border-radius:20px;
+  overflow:hidden;
+  margin-bottom:10px;
+}
+
+#progressFill{
+  width:0%;
+  height:100%;
+  background:#2563eb;
+  transition:0.3s;
+}
+
+
+
+/* ========================= */
+/* TEMPLATE */
+/* ========================= */
+
+.exerciseCreator{
+  display:grid;
+  grid-template-columns:
+    1fr
+    1fr
+    1fr
+    1fr
+    auto;
+
+  gap:10px;
+
+  margin-bottom:20px;
+}
+
+
+
+/* ========================= */
+/* PROFILE */
+/* ========================= */
+
+#profileData{
+  background:#20314d;
+  padding:25px;
+  border-radius:20px;
+}
+
+#profileData p{
+  margin-bottom:15px;
+  font-size:18px;
+}
+/* ========================= */
+/* MOBILE */
+/* ========================= */
+
+@media(max-width:700px){
+
+  .authBox,
+  .profileBox{
+    width:90%;
+  }
+
+  .topBar h2{
+    font-size:24px;
+  }
+
+  .exerciseCreator{
+    grid-template-columns:1fr;
+  }
+
+  .adminSection,
+  .clientSection{
+    padding:20px;
+  }
+
+}

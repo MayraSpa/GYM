@@ -1,830 +1,392 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Mayra Spa Estética Facial</title>
+<head>
+
+  <meta charset="UTF-8">
 
   <meta
-    name="description"
-    content="Mayra Spa Estética Facial - Limpieza facial profesional, hidratación y tratamientos premium."
-  />
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <title>Gym App</title>
+
+  <link rel="stylesheet" href="style.css">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <link
-    rel="preconnect"
-    href="https://fonts.googleapis.com"
-  />
-
-  <link
-    rel="preconnect"
-    href="https://fonts.gstatic.com"
-    crossorigin
-  />
-
-  <link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-    rel="stylesheet"
-  />
-
-  <style>
-    *{
-      font-family:'Poppins',sans-serif;
-    }
-
-    html{
-      scroll-behavior:smooth;
-    }
-
-    body{
-      background:
-      radial-gradient(circle at top left,#7c3aed 0%,#4c1d95 30%,#0f172a 100%);
-      overflow-x:hidden;
-    }
-
-    .glass{
-      backdrop-filter: blur(18px);
-      background: rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.15);
-    }
-
-    .glow{
-      box-shadow:
-      0 0 25px rgba(168,85,247,.35);
-    }
-
-    .fade-in{
-      animation:fade .8s ease;
-    }
-
-    @keyframes fade{
-      from{
-        opacity:0;
-        transform:translateY(20px);
-      }
-      to{
-        opacity:1;
-        transform:translateY(0);
-      }
-    }
-
-    .service-card:hover{
-      transform:translateY(-5px);
-      transition:.3s;
-    }
-
-    .hidden-admin{
-      display:none;
-    }
-  </style>
 </head>
 
-<body class="text-white">
+<body>
 
-  <!-- NAVBAR -->
-  <nav class="fixed top-0 w-full z-50 glass">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
 
-      <div>
-        <h1 class="text-2xl font-bold">
-          Mayra Spa
-        </h1>
-      </div>
 
-      <div class="hidden md:flex gap-6 text-sm">
-        <a href="#inicio" class="hover:text-violet-300">
-          Inicio
-        </a>
+<!-- ========================= -->
+<!-- LOGIN -->
+<!-- ========================= -->
 
-        <a href="#servicios" class="hover:text-violet-300">
-          Servicios
-        </a>
+<div
+  id="authScreen"
+  class="screen"
+>
 
-        <a href="#reservas" class="hover:text-violet-300">
-          Reservar
-        </a>
+  <div class="authBox">
 
-        <a href="#contacto" class="hover:text-violet-300">
-          Contacto
-        </a>
-      </div>
+    <h1>Gym App</h1>
 
-    </div>
-  </nav>
-
-  <!-- HERO -->
-  <section
-    id="inicio"
-    class="min-h-screen flex items-center justify-center px-6 pt-24"
-  >
-
-    <div class="max-w-6xl w-full grid lg:grid-cols-2 gap-12 items-center">
-
-      <div class="fade-in">
-
-        <div class="mb-4 inline-block px-4 py-2 rounded-full bg-violet-500/20 border border-violet-300/20">
-          ✨ Estética Facial Premium
-        </div>
-
-        <h1 class="text-5xl lg:text-7xl font-bold leading-tight mb-6">
-          Mayra Spa
-          <span class="text-violet-300">
-            Estética Facial
-          </span>
-        </h1>
-
-        <p class="text-lg text-violet-100 mb-8 leading-relaxed">
-          Tratamientos faciales profesionales, hidratación,
-          limpieza profunda y cuidado premium para tu piel.
-        </p>
-
-        <div class="flex flex-wrap gap-4">
-
-          <a
-            href="#reservas"
-            class="px-8 py-4 rounded-2xl bg-violet-500 hover:bg-violet-600 transition glow font-semibold"
-          >
-            Reservar cita
-          </a>
-
-          <a
-            href="https://wa.me/5359740626"
-            target="_blank"
-            class="px-8 py-4 rounded-2xl glass hover:bg-white/10 transition"
-          >
-            WhatsApp
-          </a>
-
-        </div>
-
-      </div>
-
-      <!-- CARD -->
-      <div class="glass rounded-3xl p-8 glow fade-in">
-
-        <div class="aspect-square rounded-3xl bg-gradient-to-br from-violet-400/30 to-fuchsia-300/10 flex items-center justify-center">
-
-          <div class="text-center">
-
-            <div class="text-7xl mb-4">
-              ✨
-            </div>
-
-            <h2 class="text-3xl font-bold mb-3">
-              Belleza & Relax
-            </h2>
-
-            <p class="text-violet-100">
-              Experiencia premium de cuidado facial.
-            </p>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </section>
-
-  <!-- SERVICIOS -->
-  <section
-    id="servicios"
-    class="py-24 px-6"
-  >
-
-    <div class="max-w-7xl mx-auto">
-
-      <div class="text-center mb-16">
-
-        <h2 class="text-5xl font-bold mb-4">
-          Servicios
-        </h2>
-
-        <p class="text-violet-100">
-          Tratamientos personalizados para tu piel
-        </p>
-
-      </div>
-
-      <div
-        id="services-container"
-        class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
-      >
-
-      </div>
-
-    </div>
-
-  </section>
-
-  <!-- RESERVAS -->
-  <section
-    id="reservas"
-    class="py-24 px-6"
-  >
-
-    <div class="max-w-4xl mx-auto glass rounded-3xl p-10 glow">
-
-      <div class="text-center mb-10">
-
-        <h2 class="text-4xl font-bold mb-4">
-          Reserva tu cita
-        </h2>
-
-        <p class="text-violet-100">
-          Agenda fácilmente tu tratamiento facial
-        </p>
-
-      </div>
-
-      <form
-        id="booking-form"
-        class="grid md:grid-cols-2 gap-6"
-      >
-
-        <input
-          id="cliente"
-          type="text"
-          placeholder="Nombre"
-          required
-          class="p-4 rounded-2xl bg-white/10 border border-white/10 outline-none"
-        />
-
-        <input
-          id="telefono"
-          type="text"
-          placeholder="Teléfono"
-          required
-          class="p-4 rounded-2xl bg-white/10 border border-white/10 outline-none"
-        />
-
-        <select
-          id="servicio"
-          class="p-4 rounded-2xl bg-slate-900 border border-white/10 outline-none"
-        >
-        </select>
-
-        <input
-          id="fecha"
-          type="date"
-          required
-          class="p-4 rounded-2xl bg-white/10 border border-white/10 outline-none"
-        />
-
-        <textarea
-          id="mensaje"
-          placeholder="Mensaje adicional"
-          class="md:col-span-2 p-4 rounded-2xl bg-white/10 border border-white/10 outline-none h-32"
-        ></textarea>
-
-        <button
-          class="md:col-span-2 bg-violet-500 hover:bg-violet-600 transition rounded-2xl py-4 font-semibold text-lg"
-        >
-          Reservar ahora
-        </button>
-
-      </form>
-
-      <div
-        id="booking-status"
-        class="mt-6 text-center font-semibold"
-      ></div>
-
-    </div>
-
-  </section>
-
-  <!-- TESTIMONIOS -->
-  <section class="py-24 px-6">
-
-    <div class="max-w-7xl mx-auto">
-
-      <div class="text-center mb-16">
-
-        <h2 class="text-5xl font-bold mb-4">
-          Clientes felices
-        </h2>
-
-      </div>
-
-      <div class="grid md:grid-cols-3 gap-8">
-
-        <div class="glass p-8 rounded-3xl">
-          <div class="text-3xl mb-4">⭐️⭐️⭐️⭐️⭐️</div>
-          <p class="text-violet-100">
-            Excelente atención y resultados increíbles.
-          </p>
-        </div>
-
-        <div class="glass p-8 rounded-3xl">
-          <div class="text-3xl mb-4">⭐️⭐️⭐️⭐️⭐️</div>
-          <p class="text-violet-100">
-            El mejor spa facial que he visitado.
-          </p>
-        </div>
-
-        <div class="glass p-8 rounded-3xl">
-          <div class="text-3xl mb-4">⭐️⭐️⭐️⭐️⭐️</div>
-          <p class="text-violet-100">
-            Ambiente premium y muy relajante.
-          </p>
-        </div>
-
-      </div>
-
-    </div>
-
-  </section>
-
-  <!-- ADMIN -->
-  <section
-    id="admin-panel"
-    class="hidden-admin py-24 px-6"
-  >
-
-    <div class="max-w-7xl mx-auto">
-
-      <div class="flex justify-between items-center mb-8">
-
-        <h2 class="text-4xl font-bold">
-          Panel Admin
-        </h2>
-
-        <button
-          id="logout-btn"
-          class="bg-red-500 px-5 py-3 rounded-xl"
-        >
-          Cerrar sesión
-        </button>
-
-      </div>
-
-      <!-- LOGIN -->
-      <div
-        id="login-box"
-        class="glass p-8 rounded-3xl mb-10"
-      >
-
-        <h3 class="text-2xl font-bold mb-6">
-          Login administrador
-        </h3>
-
-        <form id="login-form" class="grid md:grid-cols-3 gap-4">
-
-          <input
-            id="admin-email"
-            type="email"
-            placeholder="Email"
-            class="p-4 rounded-2xl bg-white/10 border border-white/10"
-          />
-
-          <input
-            id="admin-password"
-            type="password"
-            placeholder="Password"
-            class="p-4 rounded-2xl bg-white/10 border border-white/10"
-          />
-
-          <button
-            class="bg-violet-500 rounded-2xl"
-          >
-            Entrar
-          </button>
-
-        </form>
-
-        <div
-          id="login-status"
-          class="mt-4"
-        ></div>
-
-      </div>
-
-      <!-- ADMIN CONTENT -->
-      <div
-        id="admin-content"
-        class="hidden"
-      >
-
-        <!-- AGREGAR SERVICIO -->
-        <div class="glass p-8 rounded-3xl mb-10">
-
-          <h3 class="text-2xl font-bold mb-6">
-            Agregar servicio
-          </h3>
-
-          <form
-            id="service-form"
-            class="grid md:grid-cols-3 gap-4"
-          >
-
-            <input
-              id="service-name"
-              placeholder="Nombre"
-              class="p-4 rounded-2xl bg-white/10 border border-white/10"
-            />
-
-            <input
-              id="service-price"
-              placeholder="Precio"
-              class="p-4 rounded-2xl bg-white/10 border border-white/10"
-            />
-
-            <button
-              class="bg-violet-500 rounded-2xl"
-            >
-              Guardar
-            </button>
-
-          </form>
-
-        </div>
-
-        <!-- CITAS -->
-        <div class="glass p-8 rounded-3xl">
-
-          <h3 class="text-2xl font-bold mb-6">
-            Reservas
-          </h3>
-
-          <div
-            id="appointments-container"
-            class="space-y-4"
-          ></div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </section>
-
-  <!-- FOOTER -->
-  <footer
-    id="contacto"
-    class="py-12 px-6 text-center border-t border-white/10"
-  >
-
-    <h3 class="text-3xl font-bold mb-4">
-      Mayra Spa Estética Facial
-    </h3>
-
-    <p class="text-violet-100 mb-6">
-      Belleza, relajación y cuidado profesional.
-    </p>
-
-    <a
-      href="https://wa.me/5359740626"
-      target="_blank"
-      class="inline-block px-8 py-4 rounded-2xl bg-violet-500 hover:bg-violet-600 transition"
+    <input
+      type="email"
+      id="email"
+      placeholder="Correo"
     >
-      Contactar por WhatsApp
-    </a>
 
-  </footer>
+    <input
+      type="password"
+      id="password"
+      placeholder="Contraseña"
+    >
 
-  <!-- FLOAT BUTTON -->
-  <a
-    href="https://wa.me/5359740626"
-    target="_blank"
-    class="fixed bottom-6 right-6 w-16 h-16 rounded-full bg-green-500 flex items-center justify-center text-3xl shadow-2xl hover:scale-110 transition"
+    <input
+      type="text"
+      id="inviteCode"
+      placeholder="Código invitación"
+    >
+
+    <button onclick="login()">
+      Iniciar sesión
+    </button>
+
+    <button onclick="signUp()">
+      Crear cuenta
+    </button>
+
+  </div>
+
+</div>
+
+
+
+<!-- ========================= -->
+<!-- PROFILE SETUP -->
+<!-- ========================= -->
+
+<div
+  id="profileSetupScreen"
+  class="screen hidden"
+>
+
+  <div class="profileBox">
+
+    <h2>Completa tu perfil</h2>
+
+    <input
+      type="text"
+      id="fullName"
+      placeholder="Nombre completo"
+    >
+
+    <input
+      type="text"
+      id="weight"
+      placeholder="Peso"
+    >
+
+    <input
+      type="text"
+      id="height"
+      placeholder="Altura"
+    >
+
+    <input
+      type="text"
+      id="age"
+      placeholder="Edad"
+    >
+
+    <input
+      type="text"
+      id="goal"
+      placeholder="Objetivo"
+    >
+
+    <button onclick="saveProfile()">
+      Guardar perfil
+    </button>
+
+  </div>
+
+</div>
+
+
+
+<!-- ========================= -->
+<!-- ADMIN DASHBOARD -->
+<!-- ========================= -->
+
+<div
+  id="adminDashboard"
+  class="screen hidden"
+>
+
+  <div class="topBar">
+
+    <button
+      class="menuBtn"
+      onclick="toggleSidebar('adminSidebar')"
+    >
+      ☰
+    </button>
+
+    <h2>Panel Entrenador</h2>
+
+  </div>
+
+
+
+  <!-- SIDEBAR -->
+
+  <div
+    id="adminSidebar"
+    class="sidebar"
   >
-    💬
-  </a>
 
-  <script>
+    <button onclick="showAdminSection('adminClients')">
+      Clientes
+    </button>
 
-    // ======================
-    // SUPABASE
-    // ======================
+    <button onclick="showAdminSection('adminTemplates')">
+      Rutinas
+    </button>
 
-    const SUPABASE_URL =
-      "https://qwlxsvzhxvvdbhiwxlbb.supabase.co";
+    <button onclick="showAdminSection('adminAssign')">
+      Asignar Rutina
+    </button>
 
-    const SUPABASE_KEY =
-      "sb_publishable_ieNxKvgX7nTROGOmHNpBbw_GSTTJ9Os";
+    <button onclick="showAdminSection('adminCodes')">
+      Códigos
+    </button>
 
-    const client =
-      supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-      );
+    <button onclick="logout()">
+      Cerrar sesión
+    </button>
 
-    // ======================
-    // ELEMENTOS
-    // ======================
+  </div>
 
-    const servicesContainer =
-      document.getElementById("services-container");
 
-    const serviceSelect =
-      document.getElementById("servicio");
 
-    const bookingForm =
-      document.getElementById("booking-form");
+  <!-- CLIENTES -->
 
-    const bookingStatus =
-      document.getElementById("booking-status");
+  <div
+    id="adminClients"
+    class="adminSection"
+  >
 
-    const loginForm =
-      document.getElementById("login-form");
+    <h2>Clientes</h2>
 
-    const loginStatus =
-      document.getElementById("login-status");
+    <div id="clientsList"></div>
 
-    const adminContent =
-      document.getElementById("admin-content");
+  </div>
 
-    const serviceForm =
-      document.getElementById("service-form");
 
-    const appointmentsContainer =
-      document.getElementById("appointments-container");
 
-    // ======================
-    // MOSTRAR ADMIN
-    // ======================
+  <!-- RUTINAS -->
 
-    if(window.location.hash === "#admin"){
-      document
-        .getElementById("admin-panel")
-        .classList.remove("hidden-admin");
-    }
+  <div
+    id="adminTemplates"
+    class="adminSection hidden"
+  >
 
-    // ======================
-    // CARGAR SERVICIOS
-    // ======================
+    <h2>Crear Rutina</h2>
 
-    async function loadServices(){
+    <input
+      type="text"
+      id="templateName"
+      placeholder="Nombre rutina"
+    >
 
-      const { data, error } =
-        await client
-        .from("servicios")
-        .select("*")
-        .order("id",{ascending:false});
 
-      if(error){
-        console.error(error);
-        return;
-      }
+    <div class="exerciseCreator">
 
-      servicesContainer.innerHTML = "";
-      serviceSelect.innerHTML = "";
+      <input
+        type="text"
+        id="templateExercise"
+        placeholder="Ejercicio"
+      >
 
-      data.forEach(service => {
+      <input
+        type="text"
+        id="templateSets"
+        placeholder="Series"
+      >
 
-        servicesContainer.innerHTML += `
-          <div class="glass rounded-3xl p-8 service-card">
-            <div class="text-5xl mb-6">✨</div>
+      <input
+        type="text"
+        id="templateReps"
+        placeholder="Repeticiones"
+      >
 
-            <h3 class="text-2xl font-bold mb-3">
-              ${service.nombre}
-            </h3>
+      <input
+        type="text"
+        id="templateDay"
+        placeholder="Día"
+      >
 
-            <p class="text-violet-100 mb-5">
-              ${service.descripcion || "Tratamiento facial premium"}
-            </p>
+      <button onclick="addTemplateExercise()">
+        Agregar
+      </button>
 
-            <div class="text-3xl font-bold text-violet-300">
-              ${service.precio || ""}
-            </div>
-          </div>
-        `;
+    </div>
 
-        serviceSelect.innerHTML += `
-          <option value="${service.nombre}">
-            ${service.nombre}
-          </option>
-        `;
-      });
 
-    }
+    <div id="templateExerciseList"></div>
 
-    loadServices();
 
-    // ======================
-    // RESERVA
-    // ======================
+    <button onclick="createTemplate()">
+      Guardar rutina
+    </button>
 
-    bookingForm.addEventListener(
-      "submit",
-      async(e)=>{
 
-        e.preventDefault();
+    <h2>Rutinas guardadas</h2>
 
-        bookingStatus.innerHTML =
-          "Enviando reserva...";
+    <div id="templatesList"></div>
 
-        const payload = {
+  </div>
 
-          cliente:
-            document.getElementById("cliente").value,
 
-          telefono:
-            document.getElementById("telefono").value,
 
-          servicio:
-            document.getElementById("servicio").value,
+  <!-- ASIGNAR -->
 
-          fecha:
-            document.getElementById("fecha").value,
+  <div
+    id="adminAssign"
+    class="adminSection hidden"
+  >
 
-          mensaje:
-            document.getElementById("mensaje").value
+    <h2>Asignar Rutina</h2>
 
-        };
+    <select id="assignClient"></select>
 
-        const { error } =
-          await client
-          .from("citas")
-          .insert([payload]);
+    <select id="assignTemplate"></select>
 
-        if(error){
+    <button onclick="assignTemplateToClient()">
+      Asignar
+    </button>
 
-          console.error(error);
+  </div>
 
-          bookingStatus.innerHTML =
-            "❌ Error enviando reserva";
 
-        }else{
 
-          bookingStatus.innerHTML =
-            "✅ Reserva enviada correctamente";
+  <!-- CODIGOS -->
 
-          bookingForm.reset();
+  <div
+    id="adminCodes"
+    class="adminSection hidden"
+  >
 
-        }
+    <h2>Códigos Invitación</h2>
 
-      }
-    );
+    <button onclick="generateCode()">
+      Generar código
+    </button>
 
-    // ======================
-    // LOGIN ADMIN
-    // ======================
+    <div id="codesList"></div>
 
-    loginForm.addEventListener(
-      "submit",
-      async(e)=>{
+  </div>
 
-        e.preventDefault();
+</div>
 
-        const email =
-          document.getElementById("admin-email").value;
 
-        const password =
-          document.getElementById("admin-password").value;
 
-        const { error } =
-          await client.auth.signInWithPassword({
-            email,
-            password
-          });
+<!-- ========================= -->
+<!-- CLIENT DASHBOARD -->
+<!-- ========================= -->
 
-        if(error){
+<div
+  id="clientDashboard"
+  class="screen hidden"
+>
 
-          loginStatus.innerHTML =
-            "❌ Login incorrecto";
+  <div class="topBar">
 
-        }else{
+    <button
+      class="menuBtn"
+      onclick="toggleSidebar('clientSidebar')"
+    >
+      ☰
+    </button>
 
-          loginStatus.innerHTML =
-            "✅ Login correcto";
+    <h2 id="welcomeName"></h2>
 
-          adminContent.classList.remove("hidden");
+  </div>
 
-          loadAppointments();
 
-        }
 
-      }
-    );
+  <!-- SIDEBAR -->
 
-    // ======================
-    // CARGAR CITAS
-    // ======================
+  <div
+    id="clientSidebar"
+    class="sidebar"
+  >
 
-    async function loadAppointments(){
+    <h3 id="sidebarUserName"></h3>
 
-      const { data, error } =
-        await client
-        .from("citas")
-        .select("*")
-        .order("id",{ascending:false});
+    <button onclick="showClientSection('clientExercises')">
+      Rutina
+    </button>
 
-      if(error){
-        console.error(error);
-        return;
-      }
+    <button onclick="showClientSection('clientProfile')">
+      Perfil
+    </button>
 
-      appointmentsContainer.innerHTML = "";
+    <button onclick="logout()">
+      Cerrar sesión
+    </button>
 
-      data.forEach(item => {
+  </div>
 
-        appointmentsContainer.innerHTML += `
-          <div class="glass p-6 rounded-2xl">
 
-            <div class="flex justify-between mb-4">
-              <h4 class="font-bold text-xl">
-                ${item.cliente}
-              </h4>
 
-              <span class="text-violet-300">
-                ${item.estado}
-              </span>
-            </div>
+  <!-- EJERCICIOS -->
 
-            <p>
-              📞 ${item.telefono}
-            </p>
+  <div
+    id="clientExercises"
+    class="clientSection"
+  >
 
-            <p>
-              ✨ ${item.servicio}
-            </p>
+    <h2>Rutina semanal</h2>
 
-            <p>
-              📅 ${item.fecha}
-            </p>
+    <div class="progressBar">
 
-            <p class="mt-3 text-violet-100">
-              ${item.mensaje || ""}
-            </p>
+      <div id="progressFill"></div>
 
-          </div>
-        `;
-      });
+    </div>
 
-    }
+    <p id="progressText">0%</p>
 
-    // ======================
-    // AGREGAR SERVICIO
-    // ======================
+    <div id="exerciseList"></div>
 
-    serviceForm.addEventListener(
-      "submit",
-      async(e)=>{
+  </div>
 
-        e.preventDefault();
 
-        const nombre =
-          document.getElementById("service-name").value;
 
-        const precio =
-          document.getElementById("service-price").value;
+  <!-- PERFIL -->
 
-        const { error } =
-          await client
-          .from("servicios")
-          .insert([
-            {
-              nombre,
-              precio
-            }
-          ]);
+  <div
+    id="clientProfile"
+    class="clientSection hidden"
+  >
 
-        if(error){
+    <h2>Perfil</h2>
 
-          alert("Error");
+    <div id="profileData"></div>
 
-          console.error(error);
+  </div>
 
-        }else{
+</div>
 
-          alert("Servicio agregado");
 
-          serviceForm.reset();
 
-          loadServices();
-
-        }
-
-      }
-    );
-
-    // ======================
-    // LOGOUT
-    // ======================
-
-    document
-      .getElementById("logout-btn")
-      .addEventListener(
-        "click",
-        async()=>{
-
-          await client.auth.signOut();
-
-          location.reload();
-
-        }
-      );
-
-  </script>
+<script src="app.js"></script>
 
 </body>
 </html>
