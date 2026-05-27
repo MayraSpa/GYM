@@ -22,7 +22,9 @@
 
 
 
+<!-- ========================= -->
 <!-- LOGIN -->
+<!-- ========================= -->
 
 <div
   id="authScreen"
@@ -65,7 +67,9 @@
 
 
 
-<!-- PERFIL -->
+<!-- ========================= -->
+<!-- PROFILE SETUP -->
+<!-- ========================= -->
 
 <div
   id="profileSetupScreen"
@@ -116,7 +120,9 @@
 
 
 
-<!-- ADMIN -->
+<!-- ========================= -->
+<!-- ADMIN DASHBOARD -->
+<!-- ========================= -->
 
 <div
   id="adminDashboard"
@@ -132,32 +138,42 @@
       ☰
     </button>
 
-    <h2>Panel Entrenador</h2>
+    <h2>
+      Panel Entrenador
+    </h2>
 
   </div>
 
 
 
-  <!-- SIDEBAR -->
+  <!-- SIDEBAR ADMIN -->
 
   <div
     id="adminSidebar"
     class="sidebar"
   >
 
-    <button onclick="showAdminSection('adminClients')">
+    <button
+      onclick="showAdminSection('adminClients')"
+    >
       Clientes
     </button>
 
-    <button onclick="showAdminSection('adminTemplates')">
+    <button
+      onclick="showAdminSection('adminTemplates')"
+    >
       Rutinas
     </button>
 
-    <button onclick="showAdminSection('adminAssign')">
+    <button
+      onclick="showAdminSection('adminAssign')"
+    >
       Asignar Rutina
     </button>
 
-    <button onclick="showAdminSection('adminCodes')">
+    <button
+      onclick="showAdminSection('adminCodes')"
+    >
       Códigos
     </button>
 
@@ -166,199 +182,3 @@
     </button>
 
   </div>
-
-
-
-  <div
-    id="adminClients"
-    class="adminSection"
-  >
-
-    <h2>Clientes</h2>
-
-    <div id="clientsList"></div>
-
-  </div>
-
-
-
-  <div
-    id="adminTemplates"
-    class="adminSection hidden"
-  >
-
-    <h2>Crear Rutina</h2>
-
-    <input
-      type="text"
-      id="templateName"
-      placeholder="Nombre rutina"
-    >
-
-    <div class="exerciseCreator">
-
-      <input
-        type="text"
-        id="templateExercise"
-        placeholder="Ejercicio"
-      >
-
-      <input
-        type="text"
-        id="templateSets"
-        placeholder="Series"
-      >
-
-      <input
-        type="text"
-        id="templateReps"
-        placeholder="Repeticiones"
-      >
-
-      <input
-        type="text"
-        id="templateDay"
-        placeholder="Día"
-      >
-
-      <button onclick="addTemplateExercise()">
-        Agregar
-      </button>
-
-    </div>
-
-    <div id="templateExerciseList"></div>
-
-    <button onclick="createTemplate()">
-      Guardar rutina
-    </button>
-
-    <div id="templatesList"></div>
-
-  </div>
-
-
-
-  <div
-    id="adminAssign"
-    class="adminSection hidden"
-  >
-
-    <h2>Asignar Rutina</h2>
-
-    <select id="assignClient"></select>
-
-    <select id="assignTemplate"></select>
-
-    <button onclick="assignTemplateToClient()">
-      Asignar
-    </button>
-
-  </div>
-
-
-
-  <div
-    id="adminCodes"
-    class="adminSection hidden"
-  >
-
-    <h2>Códigos</h2>
-
-    <button onclick="generateCode()">
-      Generar código
-    </button>
-
-    <div id="codesList"></div>
-
-  </div>
-
-</div>
-
-
-
-<!-- CLIENTE -->
-
-<div
-  id="clientDashboard"
-  class="screen hidden"
->
-
-  <div class="topBar">
-
-    <button
-      class="menuBtn"
-      onclick="toggleSidebar('clientSidebar')"
-    >
-      ☰
-    </button>
-
-    <h2 id="welcomeName"></h2>
-
-  </div>
-
-
-
-  <div
-    id="clientSidebar"
-    class="sidebar"
-  >
-
-    <h3 id="sidebarUserName"></h3>
-
-    <button onclick="showClientSection('clientExercises')">
-      Rutina
-    </button>
-
-    <button onclick="showClientSection('clientProfile')">
-      Perfil
-    </button>
-
-    <button onclick="logout()">
-      Cerrar sesión
-    </button>
-
-  </div>
-
-
-
-  <div
-    id="clientExercises"
-    class="clientSection"
-  >
-
-    <h2>Rutina semanal</h2>
-
-    <div class="progressBar">
-
-      <div id="progressFill"></div>
-
-    </div>
-
-    <p id="progressText">0%</p>
-
-    <div id="exerciseList"></div>
-
-  </div>
-
-
-
-  <div
-    id="clientProfile"
-    class="clientSection hidden"
-  >
-
-    <h2>Perfil</h2>
-
-    <div id="profileData"></div>
-
-  </div>
-
-</div>
-
-
-
-<script src="app.js"></script>
-
-</body>
-</html>
