@@ -10,15 +10,15 @@ supabase.createClient(
   SUPABASE_KEY
 );
 
-/* ===================================== */
+/* ================================= */
 /* INIT */
-/* ===================================== */
+/* ================================= */
 
 checkSession();
 
-/* ===================================== */
+/* ================================= */
 /* SIDEBAR */
-/* ===================================== */
+/* ================================= */
 
 function toggleSidebar(){
 
@@ -28,9 +28,9 @@ function toggleSidebar(){
   sidebar.classList.toggle("active");
 }
 
-/* ===================================== */
+/* ================================= */
 /* SECTIONS */
-/* ===================================== */
+/* ================================= */
 
 function showSection(section){
 
@@ -84,9 +84,9 @@ function showSection(section){
   }
 }
 
-/* ===================================== */
-/* REGISTER */
-/* ===================================== */
+/* ================================= */
+/* SIGN UP */
+/* ================================= */
 
 async function signUp(){
 
@@ -162,9 +162,9 @@ async function signUp(){
   alert("Cuenta creada");
 }
 
-/* ===================================== */
+/* ================================= */
 /* LOGIN */
-/* ===================================== */
+/* ================================= */
 
 async function login(){
 
@@ -175,7 +175,9 @@ async function login(){
   document.getElementById("password").value;
 
   const { error } =
-  await supabaseClient.auth.signInWithPassword({
+  await supabaseClient
+  .auth
+  .signInWithPassword({
 
     email,
     password
@@ -191,9 +193,9 @@ async function login(){
   checkSession();
 }
 
-/* ===================================== */
+/* ================================= */
 /* LOGOUT */
-/* ===================================== */
+/* ================================= */
 
 async function logout(){
 
@@ -202,9 +204,9 @@ async function logout(){
   location.reload();
 }
 
-/* ===================================== */
+/* ================================= */
 /* SESSION */
-/* ===================================== */
+/* ================================= */
 
 async function checkSession(){
 
@@ -235,9 +237,9 @@ async function checkSession(){
   loadCodes();
 }
 
-/* ===================================== */
+/* ================================= */
 /* PROFILE */
-/* ===================================== */
+/* ================================= */
 
 async function loadProfile(userId){
 
@@ -288,9 +290,9 @@ async function loadProfile(userId){
   `;
 }
 
-/* ===================================== */
+/* ================================= */
 /* CLIENTES */
-/* ===================================== */
+/* ================================= */
 
 async function loadClients(userId){
 
@@ -352,9 +354,9 @@ async function loadClients(userId){
   }
 }
 
-/* ===================================== */
+/* ================================= */
 /* CREAR RUTINA */
-/* ===================================== */
+/* ================================= */
 
 async function createRoutine(){
 
@@ -402,9 +404,9 @@ async function createRoutine(){
   loadRoutines(user.id);
 }
 
-/* ===================================== */
+/* ================================= */
 /* LOAD RUTINAS */
-/* ===================================== */
+/* ================================= */
 
 async function loadRoutines(userId){
 
@@ -438,9 +440,9 @@ ${routine.exercises}
   });
 }
 
-/* ===================================== */
+/* ================================= */
 /* GENERAR CODIGO */
-/* ===================================== */
+/* ================================= */
 
 async function generateCode(){
 
@@ -475,9 +477,9 @@ async function generateCode(){
   loadCodes();
 }
 
-/* ===================================== */
+/* ================================= */
 /* LOAD CODES */
-/* ===================================== */
+/* ================================= */
 
 async function loadCodes(){
 
@@ -493,32 +495,19 @@ async function loadCodes(){
   .eq("created_by", user.id)
   .order("id",{ ascending:false });
 
-  const routinesSection =
-  document.getElementById("routinesSection");
+  const codesList =
+  document.getElementById("codesList");
 
-  const oldCodes =
-  document.getElementById("codesCard");
+  if(!codesList){
 
-  if(oldCodes){
-
-    oldCodes.remove();
+    return;
   }
 
-  let html = `
-    <div class="card" id="codesCard">
-
-      <h2>
-        Códigos Invitación
-      </h2>
-
-      <button onclick="generateCode()">
-        Generar código
-      </button>
-  `;
+  codesList.innerHTML = "";
 
   codes.forEach(code=>{
 
-    html += `
+    codesList.innerHTML += `
       <div class="routine-card">
 
         <h3>
@@ -528,10 +517,4 @@ async function loadCodes(){
       </div>
     `;
   });
-
-  html += `
-    </div>
-  `;
-
-  routinesSection.innerHTML += html;
 }
