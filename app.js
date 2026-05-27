@@ -9,53 +9,79 @@ supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
-let templateExercises = [];
 
-loadDashboard();
+/* ------------------------- */
+/* INIT */
+/* ------------------------- */
 
+checkSession();
 
-function toggleSidebar(id){
+/* ------------------------- */
+/* SIDEBAR */
+/* ------------------------- */
+
+function toggleSidebar(){
 
   const sidebar =
-  document.getElementById(id);
+  document.getElementById("sidebar");
 
-  sidebar.classList.toggle("open");
+  sidebar.classList.toggle("active");
 }
 
+/* ------------------------- */
+/* SECTIONS */
+/* ------------------------- */
 
-document.addEventListener(
-  "click",
-  function(event){
+function showSection(section){
 
-    const sidebars =
-    document.querySelectorAll(".sidebar");
+  document
+  .getElementById("dashboardSection")
+  .classList.add("hidden");
 
-    const menuBtns =
-    document.querySelectorAll(".menuBtn");
+  document
+  .getElementById("clientsSection")
+  .classList.add("hidden");
 
-    let clickedBtn = false;
+  document
+  .getElementById("routinesSection")
+  .classList.add("hidden");
 
-    menuBtns.forEach(btn=>{
-      if(btn.contains(event.target)){
-        clickedBtn = true;
-      }
-    });
+  document
+  .getElementById("profileSection")
+  .classList.add("hidden");
 
-    sidebars.forEach(sidebar=>{
-
-      if(
-        !sidebar.contains(event.target)
-        &&
-        !clickedBtn
-      ){
-        sidebar.classList.remove("open");
-      }
-
-    });
-
+  if(section === "dashboard"){
+    document
+    .getElementById("dashboardSection")
+    .classList.remove("hidden");
   }
-);
 
+  if(section === "clients"){
+    document
+    .getElementById("clientsSection")
+    .classList.remove("hidden");
+  }
+
+  if(section === "routines"){
+    document
+    .getElementById("routinesSection")
+    .classList.remove("hidden");
+  }
+
+  if(section === "profile"){
+    document
+    .getElementById("profileSection")
+    .classList.remove("hidden");
+  }
+
+  if(window.innerWidth < 900){
+    toggleSidebar();
+  }
+}
+
+/* ------------------------- */
+/* AUTH */
+/* ------------------------- */
 
 async function signUp(){
 
@@ -68,18 +94,23 @@ async function signUp(){
   const inviteCode =
   document.getElementById("inviteCode").value;
 
-  const isMainAdmin =
+  if(!email || !password){
+    alert("Completa todos los campos");
+    return;
+  }
+
+  const isAdmin =
   email === "yeraariel0@gmail.com";
 
   let trainerId = null;
 
-  if(!isMainAdmin){
+  if(!isAdmin){
 
     const { data:codeData } =
     await supabaseClient
     .from("invite_codes")
     .select("*")
-    .eq("code",inviteCode)
+    .eq("code", inviteCode)
     .maybeSingle();
 
     if(!codeData){
@@ -90,7 +121,7 @@ async function signUp(){
     trainerId = codeData.created_by;
   }
 
-  const { data,error } =
+  const { data, error } =
   await supabaseClient.auth.signUp({
     email,
     password
@@ -105,14 +136,14 @@ async function signUp(){
   .from("users")
   .insert({
     id:data.user.id,
-    email,
-    role:isMainAdmin ? "admin" : "client",
+    email:email,
+    role:isAdmin ? "admin" : "client",
     trainer_id:trainerId
   });
 
   alert("Cuenta creada");
-}
 
+}
 
 async function login(){
 
@@ -133,9 +164,8 @@ async function login(){
     return;
   }
 
-  loadDashboard();
+  checkSession();
 }
-
 
 async function logout(){
 
@@ -144,459 +174,202 @@ async function logout(){
   location.reload();
 }
 
+/* ------------------------- */
+/* SESSION */
+/* ------------------------- */
 
-async function loadDashboard(){
+async function checkSession(){
 
-  document.querySelectorAll(".screen")
-  .forEach(screen=>{
-    screen.classList.add("hidden");
-  });
-
-  const authData =
+  const {
+    data:{ user }
+  } =
   await supabaseClient.auth.getUser();
 
-  const user = authData.data.user;
-
   if(!user){
-
-    document
-    .getElementById("authScreen")
-    .classList.remove("hidden");
-
     return;
   }
+
+  document
+  .getElementById("authScreen")
+  .classList.add("hidden");
+
+  document
+  .getElementById("appScreen")
+  .classList.remove("hidden");
+
+  loadProfile(user.id);
+
+  loadClients(user.id);
+
+  loadRoutines(user.id);
+}
+
+/* ------------------------- */
+/* PROFILE */
+/* ------------------------- */
+
+async function loadProfile(userId){
 
   const { data:userData } =
   await supabaseClient
   .from("users")
   .select("*")
-  .eq("id",user.id)
+  .eq("id", userId)
   .maybeSingle();
 
   const { data:profile } =
   await supabaseClient
   .from("profiles")
   .select("*")
-  .eq("user_id",user.id)
+  .eq("user_id", userId)
   .maybeSingle();
 
-  if(!profile){
+  const profileBox =
+  document.getElementById("profileData");
 
-    document
-    .getElementById("profileSetupScreen")
-    .classList.remove("hidden");
-
-    return;
-  }
-
-  if(userData.role === "admin"){
-
-    document
-    .getElementById("adminDashboard")
-    .classList.remove("hidden");
-
-    loadClients();
-    loadCodes();
-    loadTemplates();
-    loadAssignData();
-
-  }else{
-
-    document
-    .getElementById("clientDashboard")
-    .classList.remove("hidden");
-
-    document
-    .getElementById("welcomeName")
-    .innerText = profile.full_name;
-
-    document
-    .getElementById("profileData")
-    .innerHTML = `
-      <p>Nombre: ${profile.full_name}</p>
-      <p>Peso: ${profile.weight}</p>
-      <p>Altura: ${profile.height}</p>
-      <p>Edad: ${profile.age}</p>
-      <p>Objetivo: ${profile.goal}</p>
-    `;
-
-    loadClientRoutine();
-  }
+  profileBox.innerHTML = `
+    <p><strong>Email:</strong> ${userData?.email || ""}</p>
+    <br>
+    <p><strong>Nombre:</strong> ${profile?.full_name || "-"}</p>
+    <p><strong>Peso:</strong> ${profile?.weight || "-"}</p>
+    <p><strong>Altura:</strong> ${profile?.height || "-"}</p>
+    <p><strong>Objetivo:</strong> ${profile?.goal || "-"}</p>
+  `;
 }
 
+/* ------------------------- */
+/* CLIENTS */
+/* ------------------------- */
 
-async function saveProfile(){
+async function loadClients(userId){
 
-  const authData =
-  await supabaseClient.auth.getUser();
-
-  const user = authData.data.user;
-
-  await supabaseClient
-  .from("profiles")
-  .upsert({
-    user_id:user.id,
-    full_name:document.getElementById("fullName").value,
-    weight:document.getElementById("weight").value,
-    height:document.getElementById("height").value,
-    age:document.getElementById("age").value,
-    goal:document.getElementById("goal").value
-  });
-
-  loadDashboard();
-}
-
-
-function showAdminSection(id){
-
-  document.querySelectorAll(".adminSection")
-  .forEach(section=>{
-    section.classList.add("hidden");
-  });
-
-  document
-  .getElementById(id)
-  .classList.remove("hidden");
-}
-
-
-function showClientSection(id){
-
-  document.querySelectorAll(".clientSection")
-  .forEach(section=>{
-    section.classList.add("hidden");
-  });
-
-  document
-  .getElementById(id)
-  .classList.remove("hidden");
-}
-
-
-async function generateCode(){
-
-  const authData =
-  await supabaseClient.auth.getUser();
-
-  const user = authData.data.user;
-
-  const code =
-  Math.random()
-  .toString(36)
-  .substring(2,8)
-  .toUpperCase();
-
-  await supabaseClient
-  .from("invite_codes")
-  .insert({
-    code,
-    created_by:user.id
-  });
-
-  loadCodes();
-}
-
-
-async function loadCodes(){
-
-  const authData =
-  await supabaseClient.auth.getUser();
-
-  const user = authData.data.user;
-
-  const { data } =
-  await supabaseClient
-  .from("invite_codes")
-  .select("*")
-  .eq("created_by",user.id);
-
-  const list =
-  document.getElementById("codesList");
-
-  list.innerHTML = "";
-
-  data.forEach(code=>{
-
-    list.innerHTML += `
-      <div class="exerciseCard">
-        <h3>${code.code}</h3>
-      </div>
-    `;
-
-  });
-}
-
-
-function addExercise(){
-
-  const name =
-  document.getElementById("exerciseName").value;
-
-  const sets =
-  document.getElementById("exerciseSets").value;
-
-  const reps =
-  document.getElementById("exerciseReps").value;
-
-  const rest =
-  document.getElementById("exerciseRest").value;
-
-  templateExercises.push({
-    name,
-    sets,
-    reps,
-    rest
-  });
-
-  renderExercisePreview();
-}
-
-
-function renderExercisePreview(){
-
-  const preview =
-  document.getElementById("exercisePreview");
-
-  preview.innerHTML = "";
-
-  templateExercises.forEach(ex=>{
-
-    preview.innerHTML += `
-      <div class="exerciseCard">
-        <h3>${ex.name}</h3>
-        <p>${ex.sets} series</p>
-        <p>${ex.reps} reps</p>
-        <p>${ex.rest} descanso</p>
-      </div>
-    `;
-
-  });
-}
-
-
-async function saveTemplate(){
-
-  const authData =
-  await supabaseClient.auth.getUser();
-
-  const user = authData.data.user;
-
-  const name =
-  document.getElementById("routineName").value;
-
-  const { data } =
-  await supabaseClient
-  .from("routine_templates")
-  .insert({
-    trainer_id:user.id,
-    name
-  })
-  .select()
-  .single();
-
-  for(const ex of templateExercises){
-
-    await supabaseClient
-    .from("template_exercises")
-    .insert({
-      template_id:data.id,
-      exercise_name:ex.name,
-      sets:ex.sets,
-      reps:ex.reps,
-      rest_time:ex.rest
-    });
-
-  }
-
-  templateExercises = [];
-
-  renderExercisePreview();
-
-  loadTemplates();
-}
-
-
-async function loadTemplates(){
-
-  const authData =
-  await supabaseClient.auth.getUser();
-
-  const user = authData.data.user;
-
-  const { data } =
-  await supabaseClient
-  .from("routine_templates")
-  .select("*")
-  .eq("trainer_id",user.id);
-
-  const list =
-  document.getElementById("templatesList");
-
-  list.innerHTML = "";
-
-  data.forEach(template=>{
-
-    list.innerHTML += `
-      <div class="exerciseCard">
-        <h3>${template.name}</h3>
-      </div>
-    `;
-
-  });
-}
-
-
-async function loadClients(){
-
-  const authData =
-  await supabaseClient.auth.getUser();
-
-  const user = authData.data.user;
-
-  const { data } =
+  const { data:userData } =
   await supabaseClient
   .from("users")
-  .select(`
-    *,
-    profiles(*)
-  `)
-  .eq("trainer_id",user.id);
+  .select("*")
+  .eq("id", userId)
+  .maybeSingle();
 
-  const list =
-  document.getElementById("clientsList");
-
-  list.innerHTML = "";
-
-  data.forEach(client=>{
-
-    const profile = client.profiles?.[0];
-
-    list.innerHTML += `
-      <div class="clientCard">
-
-        <h3>
-          ${profile?.full_name || 'Sin nombre'}
-        </h3>
-
-        <p>${client.email}</p>
-
-        <p>Peso: ${profile?.weight || '-'}</p>
-
-        <p>Objetivo: ${profile?.goal || '-'}</p>
-
-      </div>
-    `;
-
-  });
-}
-
-
-async function loadAssignData(){
-
-  const authData =
-  await supabaseClient.auth.getUser();
-
-  const user = authData.data.user;
+  if(userData.role !== "admin"){
+    return;
+  }
 
   const { data:clients } =
   await supabaseClient
   .from("users")
   .select("*")
-  .eq("trainer_id",user.id);
+  .eq("trainer_id", userId);
 
-  const { data:templates } =
-  await supabaseClient
-  .from("routine_templates")
-  .select("*")
-  .eq("trainer_id",user.id);
+  const clientsList =
+  document.getElementById("clientsList");
 
-  const clientSelect =
-  document.getElementById("assignClient");
+  clientsList.innerHTML = "";
 
-  const templateSelect =
-  document.getElementById("assignTemplate");
+  for(const client of clients){
 
-  clientSelect.innerHTML = "";
-  templateSelect.innerHTML = "";
+    const { data:profile } =
+    await supabaseClient
+    .from("profiles")
+    .select("*")
+    .eq("user_id", client.id)
+    .maybeSingle();
 
-  clients.forEach(client=>{
+    clientsList.innerHTML += `
+      <div class="client-card">
 
-    clientSelect.innerHTML += `
-      <option value="${client.id}">
-        ${client.email}
-      </option>
+        <h3>
+          ${profile?.full_name || "Sin nombre"}
+        </h3>
+
+        <p>
+          ${client.email}
+        </p>
+
+        <p>
+          Peso:
+          ${profile?.weight || "-"}
+        </p>
+
+        <p>
+          Objetivo:
+          ${profile?.goal || "-"}
+        </p>
+
+      </div>
     `;
-
-  });
-
-  templates.forEach(template=>{
-
-    templateSelect.innerHTML += `
-      <option value="${template.id}">
-        ${template.name}
-      </option>
-    `;
-
-  });
+  }
 }
 
+/* ------------------------- */
+/* ROUTINES */
+/* ------------------------- */
 
-async function assignRoutine(){
+async function createRoutine(){
 
-  const clientId =
-  document.getElementById("assignClient").value;
-
-  const templateId =
-  document.getElementById("assignTemplate").value;
-
-  const weekLabel =
-  document.getElementById("weekLabel").value;
-
-  await supabaseClient
-  .from("assigned_routines")
-  .insert({
-    client_id:clientId,
-    template_id:templateId,
-    week_label:weekLabel
-  });
-
-  alert("Rutina asignada");
-}
-
-
-async function loadClientRoutine(){
-
-  const authData =
+  const {
+    data:{ user }
+  } =
   await supabaseClient.auth.getUser();
 
-  const user = authData.data.user;
+  const routineName =
+  document.getElementById("routineName").value;
+
+  const routineExercises =
+  document.getElementById("routineExercises").value;
+
+  if(!routineName || !routineExercises){
+    alert("Completa todo");
+    return;
+  }
+
+  const { error } =
+  await supabaseClient
+  .from("routine_templates")
+  .insert({
+    trainer_id:user.id,
+    name:routineName,
+    exercises:routineExercises
+  });
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  document.getElementById("routineName").value = "";
+  document.getElementById("routineExercises").value = "";
+
+  loadRoutines(user.id);
+}
+
+async function loadRoutines(userId){
 
   const { data:routines } =
   await supabaseClient
-  .from("assigned_routines")
-  .select(`
-    *,
-    routine_templates(*),
-    template_exercises(*)
-  `)
-  .eq("client_id",user.id);
+  .from("routine_templates")
+  .select("*")
+  .eq("trainer_id", userId)
+  .order("id", { ascending:false });
 
-  const list =
-  document.getElementById("routineList");
+  const routinesList =
+  document.getElementById("routinesList");
 
-  list.innerHTML = "";
+  routinesList.innerHTML = "";
 
   routines.forEach(routine=>{
 
-    list.innerHTML += `
-      <div class="exerciseCard">
+    routinesList.innerHTML += `
+      <div class="routine-card">
+
         <h3>
-          ${routine.routine_templates.name}
+          ${routine.name}
         </h3>
 
-        <p>${routine.week_label}</p>
+        <pre>
+${routine.exercises}
+        </pre>
+
       </div>
     `;
-
   });
 }
