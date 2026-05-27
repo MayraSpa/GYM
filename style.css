@@ -2,101 +2,253 @@
   margin:0;
   padding:0;
   box-sizing:border-box;
-  font-family:Arial;
+  font-family:Arial, Helvetica, sans-serif;
 }
 
 body{
-  background:#06152f;
+  background:#07173a;
   color:white;
 }
+
+/* UTIL */
 
 .hidden{
   display:none !important;
 }
 
-.screen{
+.center-screen{
+  width:100%;
   min-height:100vh;
-}
-
-.authBox,
-.card{
-  width:400px;
-  background:#162544;
-  padding:40px;
-  border-radius:25px;
-}
-
-#authScreen,
-#profileSetupScreen{
   display:flex;
   justify-content:center;
   align-items:center;
+  padding:20px;
+}
+
+/* CARD */
+
+.card{
+  background:#1a2947;
+  border-radius:25px;
+  padding:25px;
+  margin-bottom:25px;
+  box-shadow:0 0 20px rgba(0,0,0,.2);
+}
+
+/* AUTH */
+
+.auth-card{
+  width:100%;
+  max-width:420px;
+}
+
+.auth-card h1{
+  font-size:52px;
+  margin-bottom:25px;
+}
+
+.auth-card input{
+  width:100%;
+  border:none;
+  outline:none;
+  margin-bottom:15px;
+  padding:18px;
+  border-radius:16px;
+  background:#24385d;
+  color:white;
+  font-size:16px;
+}
+
+.auth-card button{
+  width:100%;
+  border:none;
+  margin-top:10px;
+  padding:16px;
+  border-radius:16px;
+  background:#3167e3;
+  color:white;
+  font-size:18px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.auth-card button:hover{
+  opacity:.8;
+}
+
+/* APP */
+
+#appScreen{
+  display:flex;
   min-height:100vh;
 }
 
-input,
-select{
-  width:100%;
-  padding:15px;
-  border:none;
-  border-radius:15px;
-  margin-bottom:15px;
-  background:#263858;
-  color:white;
-}
-
-button{
-  width:100%;
-  padding:15px;
-  border:none;
-  border-radius:15px;
-  background:#2563eb;
-  color:white;
-  cursor:pointer;
-  margin-bottom:15px;
-}
-
-.topBar{
-  height:80px;
-  background:#162544;
-  display:flex;
-  align-items:center;
-  gap:20px;
-  padding:0 20px;
-}
-
-.menuBtn{
-  width:50px;
-  height:50px;
-  font-size:22px;
-}
+/* SIDEBAR */
 
 .sidebar{
+  width:260px;
+  background:#132240;
+  padding:20px;
   position:fixed;
   top:0;
-  left:-300px;
-  width:300px;
-  height:100vh;
-  background:#162544;
-  padding:25px;
-  transition:0.3s;
-  z-index:999;
-}
-
-.sidebar.open{
   left:0;
+  bottom:0;
+  z-index:1000;
+  transition:.3s;
+  overflow:auto;
 }
 
-.adminSection,
-.clientSection{
-  padding:30px;
+.sidebar.hiddenSidebar{
+  transform:translateX(-100%);
 }
 
-.exerciseCard,
-.clientCard{
-  background:#162544;
+.sidebar-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:30px;
+}
+
+.sidebar h2{
+  font-size:32px;
+}
+
+.close-btn{
+  border:none;
+  background:none;
+  color:white;
+  font-size:24px;
+  cursor:pointer;
+}
+
+.sidebar button{
+  width:100%;
+  border:none;
+  margin-bottom:12px;
+  padding:16px;
+  border-radius:14px;
+  background:#24385d;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.sidebar button:hover{
+  background:#3167e3;
+}
+
+/* MAIN */
+
+.main-content{
+  flex:1;
+  margin-left:260px;
+  padding:25px;
+  transition:.3s;
+}
+
+/* TOPBAR */
+
+.topbar{
+  display:flex;
+  align-items:center;
+  gap:15px;
+  margin-bottom:25px;
+  background:#132240;
+  padding:20px;
+  border-radius:25px;
+}
+
+.menu-btn{
+  border:none;
+  background:#3167e3;
+  color:white;
+  width:55px;
+  height:55px;
+  border-radius:14px;
+  cursor:pointer;
+  font-size:26px;
+}
+
+/* INPUTS */
+
+input,
+textarea{
+  width:100%;
+  border:none;
+  outline:none;
+  margin-bottom:15px;
+  padding:16px;
+  border-radius:14px;
+  background:#24385d;
+  color:white;
+  font-size:16px;
+}
+
+textarea{
+  resize:none;
+  min-height:160px;
+}
+
+.card button{
+  border:none;
+  padding:14px 20px;
+  border-radius:14px;
+  background:#3167e3;
+  color:white;
+  cursor:pointer;
+  font-size:16px;
+}
+
+/* CLIENTES */
+
+.client-card{
+  background:#24385d;
   padding:20px;
   border-radius:20px;
   margin-top:15px;
 }
 
+.client-card h3{
+  margin-bottom:10px;
+}
+
+.client-card p{
+  margin-bottom:5px;
+}
+
+/* RUTINAS */
+
+.routine-card{
+  background:#24385d;
+  padding:20px;
+  border-radius:20px;
+  margin-top:15px;
+}
+
+.routine-card h3{
+  margin-bottom:10px;
+}
+
+.routine-card pre{
+  white-space:pre-wrap;
+  margin-top:10px;
+}
+
+/* MOBILE */
+
+@media(max-width:900px){
+
+  .sidebar{
+    transform:translateX(-100%);
+  }
+
+  .sidebar.active{
+    transform:translateX(0);
+  }
+
+  .main-content{
+    margin-left:0;
+  }
+
+}
