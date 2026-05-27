@@ -310,22 +310,9 @@ function toggleSidebar(id){
     document.getElementById(id);
 
 
-  if(
-    sidebar.classList.contains(
-      "sidebarOpen"
-    )
-  ){
-
-    sidebar.classList.remove(
-      "sidebarOpen"
-    );
-
-  }else{
-
-    sidebar.classList.add(
-      "sidebarOpen"
-    );
-  }
+  sidebar.classList.toggle(
+    "sidebarOpen"
+  );
 }
 
 
