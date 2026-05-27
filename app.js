@@ -9,7 +9,6 @@ supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
-
 let templateExercises = [];
 
 loadDashboard();
