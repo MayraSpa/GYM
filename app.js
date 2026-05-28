@@ -865,10 +865,10 @@ async function createRoutine(){
   .auth
   .getUser();
 
-  if(!user){
-
-    return;
-  }
+  const day =
+  document
+  .getElementById("routineDay")
+  .value;
 
   const routineName =
   document
@@ -886,14 +886,13 @@ async function createRoutine(){
   .value;
 
   if(
+    !day ||
     !routineName ||
     !routineExercises ||
     !clientId
   ){
 
-    alert(
-      "Completa todo"
-    );
+    alert("Completa todo");
 
     return;
   }
@@ -906,22 +905,14 @@ async function createRoutine(){
 
     client_id:clientId,
 
+    day,
+
     routine_name:routineName,
 
     exercises:routineExercises
   });
 
-  alert(
-    "Rutina creada"
-  );
-
-  document
-  .getElementById("routineName")
-  .value = "";
-
-  document
-  .getElementById("routineExercises")
-  .value = "";
+  alert("Rutina creada");
 
   loadTrainerRoutines();
 }
@@ -1102,15 +1093,22 @@ async function loadMyRoutines(userId){
     return;
   }
 
+  const today =
+  new Date()
+  .toLocaleDateString(
+    "en-US",
+    {
+
+      weekday:"long"
+    }
+  );
+
   const response =
   await supabaseClient
   .from("client_routines")
   .select("*")
   .eq("client_id", userId)
-  .order("id",{
-
-    ascending:false
-  });
+  .eq("day", today);
 
   const routines =
   response.data || [];
@@ -1120,18 +1118,23 @@ async function loadMyRoutines(userId){
     "dashboardContent"
   );
 
-  if(!dashboard){
+  dashboard.innerHTML = `
 
-    return;
-  }
+    <h2>
 
-  dashboard.innerHTML = "";
+      Rutina de hoy
+
+    </h2>
+  `;
 
   if(routines.length === 0){
 
-    dashboard.innerHTML = `
+    dashboard.innerHTML += `
+
       <p>
-        No tienes rutinas
+
+        Hoy no tienes rutina
+
       </p>
     `;
 
@@ -1145,21 +1148,27 @@ async function loadMyRoutines(userId){
       <div class="routine-card">
 
         <h3>
+
           ${routine.routine_name}
+
         </h3>
 
         <pre>
+
 ${routine.exercises}
+
         </pre>
 
         <button
           onclick="completeRoutine(${routine.id})"
         >
+
           ${
             routine.completed
             ? "Completada"
             : "Marcar completada"
           }
+
         </button>
 
       </div>
