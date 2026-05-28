@@ -256,132 +256,156 @@ async function logout(){
 
 async function checkSession(){
 
-  const {
-    data:{ session }
-  } =
-  await supabaseClient.auth.getSession();
+  try{
 
-  /* NO LOGIN */
+    const {
+      data:{ session }
+    } =
+    await supabaseClient.auth.getSession();
 
-  if(!session){
+    const authScreen =
+    document.getElementById(
+      "authScreen"
+    );
 
-    document
-    .getElementById("authScreen")
-    .classList.remove("hidden");
+    const appScreen =
+    document.getElementById(
+      "appScreen"
+    );
 
-    document
-    .getElementById("appScreen")
-    .classList.add("hidden");
+    /* NO SESSION */
 
-    return;
-  }
+    if(!session){
 
-  const user =
-  session.user;
+      authScreen.style.display =
+      "flex";
 
-  /* OCULTAR LOGIN */
+      appScreen.style.display =
+      "none";
 
-  document
-  .getElementById("authScreen")
-  .classList.add("hidden");
+      return;
+    }
 
-  document
-  .getElementById("appScreen")
-  .classList.remove("hidden");
+    /* OCULTAR LOGIN */
 
-  /* BUSCAR USER */
+    authScreen.style.display =
+    "none";
 
-  let response =
-  await supabaseClient
-  .from("users")
-  .select("*")
-  .eq("id", user.id)
-  .maybeSingle();
+    appScreen.style.display =
+    "block";
 
-  let userData =
-  response.data;
+    const user =
+    session.user;
 
-  /* CREAR SI NO EXISTE */
+    /* USER TABLE */
 
-  if(!userData){
-
-    await supabaseClient
-    .from("users")
-    .insert({
-
-      id:user.id,
-
-      email:user.email,
-
-      role:
-        user.email === "yeraariel0@gmail.com"
-        ? "super_admin"
-        : "client"
-    });
-
-    response =
+    let response =
     await supabaseClient
     .from("users")
     .select("*")
     .eq("id", user.id)
     .maybeSingle();
 
-    userData =
+    let userData =
     response.data;
+
+    /* CREAR USER */
+
+    if(!userData){
+
+      const role =
+      user.email ===
+      "yeraariel0@gmail.com"
+
+      ? "super_admin"
+
+      : "client";
+
+      await supabaseClient
+      .from("users")
+      .insert({
+
+        id:user.id,
+
+        email:user.email,
+
+        role
+      });
+
+      response =
+      await supabaseClient
+      .from("users")
+      .select("*")
+      .eq("id", user.id)
+      .maybeSingle();
+
+      userData =
+      response.data;
+    }
+
+    if(!userData){
+
+      alert(
+        "Error cargando usuario"
+      );
+
+      return;
+    }
+
+    /* CLIENT */
+
+    if(userData.role === "client"){
+
+      document
+      .getElementById("clientsBtn")
+      ?.classList.add("hidden");
+
+      document
+      .getElementById("codesBtn")
+      ?.classList.add("hidden");
+
+      document
+      .getElementById("routinesBtn")
+      ?.classList.add("hidden");
+    }
+
+    else{
+
+      document
+      .getElementById("clientsBtn")
+      ?.classList.remove("hidden");
+
+      document
+      .getElementById("codesBtn")
+      ?.classList.remove("hidden");
+
+      document
+      .getElementById("routinesBtn")
+      ?.classList.remove("hidden");
+    }
+
+    /* LOAD */
+
+    loadProfile(user.id);
+
+    loadClientsPage();
+
+    loadTrainerRoutines();
+
+    loadCodes();
+
+    loadMyRoutines(user.id);
+
   }
 
-  /* ERROR */
+  catch(error){
 
-  if(!userData){
+    console.error(error);
 
-    alert("Error cargando usuario");
-
-    return;
+    alert(
+      "Error iniciando sesión"
+    );
   }
-
-  /* CLIENT */
-
-  if(userData.role === "client"){
-
-    document
-    .getElementById("clientsBtn")
-    ?.classList.add("hidden");
-
-    document
-    .getElementById("codesBtn")
-    ?.classList.add("hidden");
-
-    document
-    .getElementById("routinesBtn")
-    ?.classList.add("hidden");
-  }
-
-  else{
-
-    document
-    .getElementById("clientsBtn")
-    ?.classList.remove("hidden");
-
-    document
-    .getElementById("codesBtn")
-    ?.classList.remove("hidden");
-
-    document
-    .getElementById("routinesBtn")
-    ?.classList.remove("hidden");
-  }
-
-  /* LOAD */
-
-  loadProfile(user.id);
-
-  loadClientsPage();
-
-  loadTrainerRoutines();
-
-  loadCodes();
-
-  loadMyRoutines(user.id);
 }
 /* ================================= */
 /* PROFILE */
@@ -652,11 +676,23 @@ async function loadClientsPage(){
           ${profile?.goal || "-"}
         </p>
 
-        <button
-          onclick="deleteClient('${client.id}')"
-        >
-          Eliminar cliente
-        </button>
+       <button
+  onclick="makeTrainer('${client.id}')"
+>
+  Hacer entrenador
+</button>
+
+<button
+  onclick="makeTrainer('${client.id}')"
+>
+  Hacer entrenador
+</button>
+
+<button
+  onclick="deleteClient('${client.id}')"
+>
+  Eliminar cliente
+</button>
 
       </div>
     `;
@@ -1214,11 +1250,6 @@ async function makeTrainer(userId){
   .auth
   .getUser();
 
-  if(!user){
-
-    return;
-  }
-
   const {
     data:me
   } =
@@ -1234,7 +1265,7 @@ async function makeTrainer(userId){
   ){
 
     alert(
-      "No permitido"
+      "Solo super admin"
     );
 
     return;
