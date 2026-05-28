@@ -4,12 +4,6 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
 "sb_publishable_IhVAJzBwBkLyuMcvyVtQSA_bZ9tTdRP";
 
-const SUPABASE_URL =
-"https://TU-PROYECTO.supabase.co";
-
-const SUPABASE_KEY =
-"TU_SUPABASE_ANON_KEY";
-
 const supabaseClient =
 supabase.createClient(
   SUPABASE_URL,
@@ -47,7 +41,6 @@ function showSection(section){
     "routinesSection",
     "codesSection",
     "profileSection"
-
   ];
 
   sections.forEach(id=>{
@@ -70,6 +63,16 @@ function showSection(section){
     loadCodes();
   }
 
+  if(section === "clients"){
+
+    loadClientsPage();
+  }
+
+  if(section === "routines"){
+
+    loadTrainerRoutines();
+  }
+
   if(window.innerWidth < 900){
 
     document
@@ -79,7 +82,7 @@ function showSection(section){
 }
 
 /* ================================= */
-/* SIGNUP */
+/* SIGN UP */
 /* ================================= */
 
 async function signUp(){
@@ -95,7 +98,7 @@ async function signUp(){
 
   if(!email || !password){
 
-    alert("Completa todo");
+    alert("Completa todos los campos");
 
     return;
   }
@@ -107,16 +110,13 @@ async function signUp(){
 
   let trainerId = null;
 
-  let codeData = null;
+  let inviteData = null;
 
-  if(isSuperAdmin){
+  /* CLIENTE */
 
-    role = "super_admin";
-  }
+  if(!isSuperAdmin){
 
-  else{
-
-    const { data } =
+    const response =
     await supabaseClient
     .from("invite_codes")
     .select("*")
@@ -124,19 +124,30 @@ async function signUp(){
     .eq("used", false)
     .maybeSingle();
 
-    codeData = data;
+    inviteData = response.data;
 
-    if(!codeData){
+    if(!inviteData){
 
       alert("Código inválido");
 
       return;
     }
 
-    trainerId = codeData.created_by;
+    trainerId =
+    inviteData.created_by;
   }
 
-  const { data,error } =
+  else{
+
+    role = "super_admin";
+  }
+
+  /* AUTH */
+
+  const {
+    data,
+    error
+  } =
   await supabaseClient.auth.signUp({
 
     email,
@@ -150,20 +161,27 @@ async function signUp(){
     return;
   }
 
+  const user =
+  data.user;
+
+  /* USERS TABLE */
+
   await supabaseClient
   .from("users")
   .insert({
 
-    id:data.user.id,
+    id:user.id,
 
-    email,
+    email:user.email,
 
     role,
 
     trainer_id:trainerId
   });
 
-  if(codeData){
+  /* USAR CODIGO */
+
+  if(inviteData){
 
     await supabaseClient
     .from("invite_codes")
@@ -172,10 +190,12 @@ async function signUp(){
       used:true
 
     })
-    .eq("id", codeData.id);
+    .eq("id", inviteData.id);
   }
 
   alert("Cuenta creada");
+
+  checkSession();
 }
 
 /* ================================= */
@@ -190,7 +210,9 @@ async function login(){
   const password =
   document.getElementById("password").value;
 
-  const { error } =
+  const {
+    error
+  } =
   await supabaseClient
   .auth
   .signInWithPassword({
@@ -215,13 +237,15 @@ async function login(){
 
 async function logout(){
 
-  await supabaseClient.auth.signOut();
+  await supabaseClient
+  .auth
+  .signOut();
 
   location.reload();
 }
 
 /* ================================= */
-/* SESSION */
+/* CHECK SESSION */
 /* ================================= */
 
 async function checkSession(){
@@ -230,6 +254,8 @@ async function checkSession(){
     data:{ session }
   } =
   await supabaseClient.auth.getSession();
+
+  /* NO LOGIN */
 
   if(!session){
 
@@ -244,16 +270,32 @@ async function checkSession(){
     return;
   }
 
-  const user = session.user;
+  const user =
+  session.user;
 
-  const { data:userData } =
+  /* OCULTAR LOGIN */
+
+  document
+  .getElementById("authScreen")
+  .classList.add("hidden");
+
+  document
+  .getElementById("appScreen")
+  .classList.remove("hidden");
+
+  /* BUSCAR USER */
+
+  let response =
   await supabaseClient
   .from("users")
   .select("*")
   .eq("id", user.id)
   .maybeSingle();
 
-  /* FIX USER NULL */
+  let userData =
+  response.data;
+
+  /* CREAR SI NO EXISTE */
 
   if(!userData){
 
@@ -271,10 +313,27 @@ async function checkSession(){
         : "client"
     });
 
-    return checkSession();
+    response =
+    await supabaseClient
+    .from("users")
+    .select("*")
+    .eq("id", user.id)
+    .maybeSingle();
+
+    userData =
+    response.data;
   }
 
-  /* CLIENTE */
+  /* ERROR */
+
+  if(!userData){
+
+    alert("Error cargando usuario");
+
+    return;
+  }
+
+  /* CLIENT */
 
   if(userData.role === "client"){
 
@@ -291,32 +350,42 @@ async function checkSession(){
     ?.classList.add("hidden");
   }
 
-  document
-  .getElementById("authScreen")
-  .classList.add("hidden");
+  else{
 
-  document
-  .getElementById("appScreen")
-  .classList.remove("hidden");
+    document
+    .getElementById("clientsBtn")
+    ?.classList.remove("hidden");
+
+    document
+    .getElementById("codesBtn")
+    ?.classList.remove("hidden");
+
+    document
+    .getElementById("routinesBtn")
+    ?.classList.remove("hidden");
+  }
+
+  /* LOAD */
 
   loadProfile(user.id);
 
-  loadClients(user.id);
+  loadClientsPage();
 
-  loadRoutines(user.id);
+  loadTrainerRoutines();
 
   loadCodes();
 
   loadMyRoutines(user.id);
 }
-
 /* ================================= */
 /* PROFILE */
 /* ================================= */
 
 async function loadProfile(userId){
 
-  const { data:profile } =
+  const {
+    data:profile
+  } =
   await supabaseClient
   .from("profiles")
   .select("*")
@@ -331,7 +400,7 @@ async function loadProfile(userId){
     <input
       type="text"
       id="fullName"
-      placeholder="Nombre"
+      placeholder="Nombre completo"
       value="${profile?.full_name || ""}"
     >
 
@@ -387,7 +456,9 @@ async function saveProfile(){
   const {
     data:{ user }
   } =
-  await supabaseClient.auth.getUser();
+  await supabaseClient
+  .auth
+  .getUser();
 
   await supabaseClient
   .from("profiles")
@@ -418,16 +489,70 @@ async function saveProfile(){
 }
 
 /* ================================= */
-/* LOAD CLIENTS */
+/* DELETE ACCOUNT */
 /* ================================= */
 
-async function loadClients(userId){
+async function deleteMyAccount(){
 
-  const { data:userData } =
+  const confirmDelete =
+  confirm(
+    "¿Eliminar cuenta?"
+  );
+
+  if(!confirmDelete){
+
+    return;
+  }
+
+  const {
+    data:{ user }
+  } =
+  await supabaseClient
+  .auth
+  .getUser();
+
+  await supabaseClient
+  .from("profiles")
+  .delete()
+  .eq("user_id", user.id);
+
+  await supabaseClient
+  .from("users")
+  .delete()
+  .eq("id", user.id);
+
+  alert(
+    "Cuenta eliminada"
+  );
+
+  logout();
+}
+
+/* ================================= */
+/* CLIENTS */
+/* ================================= */
+
+async function loadClientsPage(){
+
+  const {
+    data:{ user }
+  } =
+  await supabaseClient
+  .auth
+  .getUser();
+
+  if(!user){
+
+    return;
+  }
+
+  const {
+    data:userData
+  } =
   await supabaseClient
   .from("users")
   .select("*")
-  .eq("id", userId)
+  .eq("id", user.id)
   .maybeSingle();
 
   if(
@@ -440,35 +565,38 @@ async function loadClients(userId){
 
   let clients = [];
 
-  if(userData.role === "super_admin"){
+  /* SUPER ADMIN */
 
-    const { data } =
+  if(
+    userData.role === "super_admin"
+  ){
+
+    const response =
     await supabaseClient
     .from("users")
     .select("*")
     .eq("role","client");
 
-    clients = data || [];
+    clients =
+    response.data || [];
   }
+
+  /* TRAINER */
 
   else{
 
-    const { data } =
+    const response =
     await supabaseClient
     .from("users")
     .select("*")
-    .eq("trainer_id", userId);
+    .eq("trainer_id", user.id);
 
-    clients = data || [];
+    clients =
+    response.data || [];
   }
 
   const clientsList =
   document.getElementById("clientsList");
-
-  if(!clientsList){
-
-    return;
-  }
 
   clientsList.innerHTML = "";
 
@@ -482,7 +610,9 @@ async function loadClients(userId){
 
   for(const client of clients){
 
-    const { data:profile } =
+    const {
+      data:profile
+    } =
     await supabaseClient
     .from("profiles")
     .select("*")
@@ -501,13 +631,614 @@ async function loadClients(userId){
           ${client.email}
         </p>
 
-        <button onclick="deleteClient('${client.id}')">
-          Eliminar
+        <p>
+          Peso:
+          ${profile?.weight || "-"}
+        </p>
+
+        <p>
+          Altura:
+          ${profile?.height || "-"}
+        </p>
+
+        <p>
+          Objetivo:
+          ${profile?.goal || "-"}
+        </p>
+
+        <button
+          onclick="deleteClient('${client.id}')"
+        >
+          Eliminar cliente
         </button>
 
       </div>
     `;
   }
+}
+
+/* ================================= */
+/* DELETE CLIENT */
+/* ================================= */
+
+async function deleteClient(clientId){
+
+  const confirmDelete =
+  confirm(
+    "¿Eliminar cliente?"
+  );
+
+  if(!confirmDelete){
+
+    return;
+  }
+
+  await supabaseClient
+  .from("profiles")
+  .delete()
+  .eq("user_id", clientId);
+
+  await supabaseClient
+  .from("client_routines")
+  .delete()
+  .eq("client_id", clientId);
+
+  await supabaseClient
+  .from("users")
+  .delete()
+  .eq("id", clientId);
+
+  loadClientsPage();
+
+  alert("Cliente eliminado");
+}
+/* ================================= */
+/* GENERATE CODE */
+/* ================================= */
+
+async function generateCode(){
+
+  const {
+    data:{ user }
+  } =
+  await supabaseClient
+  .auth
+  .getUser();
+
+  if(!user){
+
+    return;
+  }
+
+  const {
+    data:userData
+  } =
+  await supabaseClient
+  .from("users")
+  .select("*")
+  .eq("id", user.id)
+  .maybeSingle();
+
+  /* CLIENTES NO */
+
+  if(
+    !userData ||
+    userData.role === "client"
+  ){
+
+    alert(
+      "No permitido"
+    );
+
+    return;
+  }
+
+  const code =
+  Math.random()
+  .toString(36)
+  .substring(2,8)
+  .toUpperCase();
+
+  await supabaseClient
+  .from("invite_codes")
+  .insert({
+
+    code,
+
+    created_by:user.id,
+
+    used:false
+  });
+
+  loadCodes();
+
+  alert(
+    "Código generado"
+  );
+}
+
+/* ================================= */
+/* LOAD CODES */
+/* ================================= */
+
+async function loadCodes(){
+
+  const {
+    data:{ user }
+  } =
+  await supabaseClient
+  .auth
+  .getUser();
+
+  if(!user){
+
+    return;
+  }
+
+  const {
+    data:userData
+  } =
+  await supabaseClient
+  .from("users")
+  .select("*")
+  .eq("id", user.id)
+  .maybeSingle();
+
+  if(
+    !userData ||
+    userData.role === "client"
+  ){
+
+    return;
+  }
+
+  const response =
+  await supabaseClient
+  .from("invite_codes")
+  .select("*")
+  .eq("created_by", user.id)
+  .order("id",{
+
+    ascending:false
+  });
+
+  const codes =
+  response.data || [];
+
+  const codesList =
+  document.getElementById("codesList");
+
+  if(!codesList){
+
+    return;
+  }
+
+  codesList.innerHTML = "";
+
+  if(codes.length === 0){
+
+    codesList.innerHTML =
+    "<p>No hay códigos</p>";
+
+    return;
+  }
+
+  codes.forEach(code=>{
+
+    codesList.innerHTML += `
+
+      <div class="routine-card">
+
+        <h3>
+          ${code.code}
+        </h3>
+
+        <p>
+          ${
+            code.used
+            ? "USADO"
+            : "DISPONIBLE"
+          }
+        </p>
+
+      </div>
+    `;
+  });
+}
+
+/* ================================= */
+/* CREATE ROUTINE */
+/* ================================= */
+
+async function createRoutine(){
+
+  const {
+    data:{ user }
+  } =
+  await supabaseClient
+  .auth
+  .getUser();
+
+  if(!user){
+
+    return;
+  }
+
+  const routineName =
+  document
+  .getElementById("routineName")
+  .value;
+
+  const routineExercises =
+  document
+  .getElementById("routineExercises")
+  .value;
+
+  const clientId =
+  document
+  .getElementById("routineClient")
+  .value;
+
+  if(
+    !routineName ||
+    !routineExercises ||
+    !clientId
+  ){
+
+    alert(
+      "Completa todo"
+    );
+
+    return;
+  }
+
+  await supabaseClient
+  .from("client_routines")
+  .insert({
+
+    trainer_id:user.id,
+
+    client_id:clientId,
+
+    routine_name:routineName,
+
+    exercises:routineExercises
+  });
+
+  alert(
+    "Rutina creada"
+  );
+
+  document
+  .getElementById("routineName")
+  .value = "";
+
+  document
+  .getElementById("routineExercises")
+  .value = "";
+
+  loadTrainerRoutines();
+}
+
+/* ================================= */
+/* LOAD CLIENTS SELECT */
+/* ================================= */
+
+async function loadClientsSelect(){
+
+  const {
+    data:{ user }
+  } =
+  await supabaseClient
+  .auth
+  .getUser();
+
+  if(!user){
+
+    return;
+  }
+
+  const response =
+  await supabaseClient
+  .from("users")
+  .select("*")
+  .eq("trainer_id", user.id);
+
+  const clients =
+  response.data || [];
+
+  const select =
+  document.getElementById(
+    "routineClient"
+  );
+
+  if(!select){
+
+    return;
+  }
+
+  select.innerHTML = `
+
+    <option value="">
+      Selecciona cliente
+    </option>
+  `;
+
+  clients.forEach(client=>{
+
+    select.innerHTML += `
+
+      <option value="${client.id}">
+        ${client.email}
+      </option>
+    `;
+  });
+}
+/* ================================= */
+/* LOAD TRAINER ROUTINES */
+/* ================================= */
+
+async function loadTrainerRoutines(){
+
+  const {
+    data:{ user }
+  } =
+  await supabaseClient
+  .auth
+  .getUser();
+
+  if(!user){
+
+    return;
+  }
+
+  const {
+    data:userData
+  } =
+  await supabaseClient
+  .from("users")
+  .select("*")
+  .eq("id", user.id)
+  .maybeSingle();
+
+  if(
+    !userData ||
+    userData.role === "client"
+  ){
+
+    return;
+  }
+
+  const response =
+  await supabaseClient
+  .from("client_routines")
+  .select("*")
+  .eq("trainer_id", user.id)
+  .order("id",{
+
+    ascending:false
+  });
+
+  const routines =
+  response.data || [];
+
+  const routinesList =
+  document.getElementById(
+    "routinesList"
+  );
+
+  if(!routinesList){
+
+    return;
+  }
+
+  routinesList.innerHTML = "";
+
+  if(routines.length === 0){
+
+    routinesList.innerHTML =
+    "<p>No hay rutinas</p>";
+
+    loadClientsSelect();
+
+    return;
+  }
+
+  routines.forEach(routine=>{
+
+    routinesList.innerHTML += `
+
+      <div class="routine-card">
+
+        <h3>
+          ${routine.routine_name}
+        </h3>
+
+        <pre>
+${routine.exercises}
+        </pre>
+
+        <p>
+          ${
+            routine.completed
+            ? "COMPLETADA"
+            : "PENDIENTE"
+          }
+        </p>
+
+      </div>
+    `;
+  });
+
+  loadClientsSelect();
+}
+
+/* ================================= */
+/* LOAD MY ROUTINES */
+/* ================================= */
+
+async function loadMyRoutines(userId){
+
+  const {
+    data:userData
+  } =
+  await supabaseClient
+  .from("users")
+  .select("*")
+  .eq("id", userId)
+  .maybeSingle();
+
+  if(
+    !userData ||
+    userData.role !== "client"
+  ){
+
+    return;
+  }
+
+  const response =
+  await supabaseClient
+  .from("client_routines")
+  .select("*")
+  .eq("client_id", userId)
+  .order("id",{
+
+    ascending:false
+  });
+
+  const routines =
+  response.data || [];
+
+  const dashboard =
+  document.getElementById(
+    "dashboardContent"
+  );
+
+  if(!dashboard){
+
+    return;
+  }
+
+  dashboard.innerHTML = "";
+
+  if(routines.length === 0){
+
+    dashboard.innerHTML = `
+      <p>
+        No tienes rutinas
+      </p>
+    `;
+
+    return;
+  }
+
+  routines.forEach(routine=>{
+
+    dashboard.innerHTML += `
+
+      <div class="routine-card">
+
+        <h3>
+          ${routine.routine_name}
+        </h3>
+
+        <pre>
+${routine.exercises}
+        </pre>
+
+        <button
+          onclick="completeRoutine(${routine.id})"
+        >
+          ${
+            routine.completed
+            ? "Completada"
+            : "Marcar completada"
+          }
+        </button>
+
+      </div>
+    `;
+  });
+}
+
+/* ================================= */
+/* COMPLETE ROUTINE */
+/* ================================= */
+
+async function completeRoutine(routineId){
+
+  await supabaseClient
+  .from("client_routines")
+  .update({
+
+    completed:true
+
+  })
+  .eq("id", routineId);
+
+  const {
+    data:{ user }
+  } =
+  await supabaseClient
+  .auth
+  .getUser();
+
+  loadMyRoutines(user.id);
+}
+
+/* ================================= */
+/* MAKE TRAINER */
+/* ================================= */
+
+async function makeTrainer(userId){
+
+  const {
+    data:{ user }
+  } =
+  await supabaseClient
+  .auth
+  .getUser();
+
+  if(!user){
+
+    return;
+  }
+
+  const {
+    data:me
+  } =
+  await supabaseClient
+  .from("users")
+  .select("*")
+  .eq("id", user.id)
+  .maybeSingle();
+
+  if(
+    !me ||
+    me.role !== "super_admin"
+  ){
+
+    alert(
+      "No permitido"
+    );
+
+    return;
+  }
+
+  await supabaseClient
+  .from("users")
+  .update({
+
+    role:"trainer"
+
+  })
+  .eq("id", userId);
+
+  alert(
+    "Ahora es entrenador"
+  );
+
+  loadClientsPage();
 }
 
 /* ================================= */
@@ -521,4 +1252,62 @@ supabaseClient
   checkSession();
 });
 
-console.log("Gym SaaS listo");
+/* ================================= */
+/* RESPONSIVE */
+/* ================================= */
+
+window.addEventListener(
+  "resize",
+  ()=>{
+
+    const sidebar =
+    document.getElementById(
+      "sidebar"
+    );
+
+    if(
+      window.innerWidth > 900
+    ){
+
+      sidebar
+      ?.classList
+      .remove("active");
+    }
+  }
+);
+
+/* ================================= */
+/* ENTER LOGIN */
+/* ================================= */
+
+document.addEventListener(
+  "keydown",
+  (e)=>{
+
+    if(e.key === "Enter"){
+
+      const authScreen =
+      document.getElementById(
+        "authScreen"
+      );
+
+      if(
+        authScreen &&
+        !authScreen
+        .classList
+        .contains("hidden")
+      ){
+
+        login();
+      }
+    }
+  }
+);
+
+/* ================================= */
+/* READY */
+/* ================================= */
+
+console.log(
+  "Gym SaaS listo"
+);
