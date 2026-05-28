@@ -14,7 +14,13 @@ supabase.createClient(
 /* INIT */
 /* ================================= */
 
-checkSession();
+window.addEventListener(
+  "DOMContentLoaded",
+  ()=>{
+
+    checkSession();
+  }
+);
 
 /* ================================= */
 /* SIDEBAR */
