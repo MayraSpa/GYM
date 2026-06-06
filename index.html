@@ -2,263 +2,464 @@
 <html lang="es">
 <head>
 
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
 
-  <title>Gym SaaS</title>
+<title>Gym Pro</title>
 
-  <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css">
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 </head>
 <body>
 
-  <!-- AUTH -->
+<!-- LOGIN -->
 
-  <div id="authScreen" class="auth-screen">
+<div id="authScreen" class="auth-screen">
 
-    <div class="card auth-card">
+  <div class="login-card">
 
-      <h1>Gym SaaS</h1>
+    <div class="logo-area">
 
-      <input
-        type="email"
-        id="email"
-        placeholder="Correo"
-      >
+      <h1>GYM PRO</h1>
 
-      <input
-        type="password"
-        id="password"
-        placeholder="Contraseña"
-      >
-
-      <input
-        type="text"
-        id="inviteCode"
-        placeholder="Código invitación"
-      >
-
-      <button onclick="login()">
-        Iniciar sesión
-      </button>
-
-      <button onclick="signUp()">
-        Crear cuenta
-      </button>
+      <p>
+        Gestión completa de gimnasio
+      </p>
 
     </div>
+
+    <input
+      type="email"
+      id="email"
+      placeholder="Correo electrónico"
+    >
+
+    <input
+      type="password"
+      id="password"
+      placeholder="Contraseña"
+    >
+
+    <input
+      type="text"
+      id="inviteCode"
+      placeholder="Código de invitación"
+    >
+
+    <button onclick="login()">
+      Iniciar sesión
+    </button>
+
+    <button onclick="signUp()">
+      Crear cuenta
+    </button>
 
   </div>
 
-  <!-- APP -->
+</div>
 
-  <div id="appScreen" class="hidden">
+<!-- APP -->
 
-    <div class="topbar">
+<div id="appScreen" class="hidden">
 
-      <button class="menu-btn" onclick="toggleSidebar()">
-        ☰
-      </button>
+<header class="topbar">
 
-      <h1>Panel</h1>
+  <button
+    class="menu-btn"
+    onclick="toggleSidebar()"
+  >
+    ☰
+  </button>
 
-    </div>
+  <h2>
+    Gym Pro
+  </h2>
 
-    <!-- SIDEBAR -->
+  <div id="alertBadge">
+    🔔
+  </div>
 
-    <aside id="sidebar" class="sidebar">
+</header>
 
-      <h2>Gym SaaS</h2>
+<!-- SIDEBAR -->
 
-      <button onclick="showSection('dashboard')">
-        Dashboard
-      </button>
-
-      <button
-        id="clientsBtn"
-        onclick="showSection('clients')"
-      >
-        Clientes
-      </button>
-
-      <button
-        id="routinesBtn"
-        onclick="showSection('routines')"
-      >
-        Rutinas
-      </button>
-
-      <button
-        id="codesBtn"
-        onclick="showSection('codes')"
-      >
-        Códigos
-      </button>
-
-      <button onclick="showSection('profile')">
-        Perfil
-      </button>
-
-      <button onclick="logout()">
-        Salir
-      </button>
-
-    </aside>
-
-    <!-- CONTENT -->
-
-    <main class="main-content">
-
-      <!-- DASHBOARD -->
-
-      <section id="dashboardSection">
-
-        <div class="card">
-
-          <h2>Dashboard</h2>
-
-          <div id="dashboardContent"></div>
-
-        </div>
-
-      </section>
-
-      <!-- CLIENTS -->
-
-      <section
-        id="clientsSection"
-        class="hidden"
-      >
-
-        <div class="card">
-
-          <h2>Clientes</h2>
-
-          <div id="clientsList"></div>
-
-        </div>
-
-      </section>
-
-      <!-- ROUTINES -->
-
-      <section
-        id="routinesSection"
-        class="hidden"
-      >
-
-        <div class="card">
-
-          <h2>Rutinas</h2>
-
-         <select id="routineDay">
-
-  <option value="">
-    Día
-  </option>
-
-  <option value="Monday">
-    Lunes
-  </option>
-
-  <option value="Tuesday">
-    Martes
-  </option>
-
-  <option value="Wednesday">
-    Miércoles
-  </option>
-
-  <option value="Thursday">
-    Jueves
-  </option>
-
-  <option value="Friday">
-    Viernes
-  </option>
-
-  <option value="Saturday">
-    Sábado
-  </option>
-
-  <option value="Sunday">
-    Domingo
-  </option>
-
-</select>
-
-<input
-  type="text"
-  id="routineName"
-  placeholder="Nombre rutina"
+<aside
+  id="sidebar"
+  class="sidebar"
 >
 
-<textarea
-  id="routineExercises"
-  placeholder="Ejercicios"
-></textarea>
+  <div class="sidebar-logo">
 
-          <select id="routineClient"></select>
-
-          <button onclick="createRoutine()">
-            Crear rutina
-          </button>
-
-          <div id="routinesList"></div>
-
-        </div>
-
-      </section>
-
-      <!-- CODES -->
-
-      <section
-        id="codesSection"
-        class="hidden"
-      >
-
-        <div class="card">
-
-          <h2>Códigos</h2>
-
-          <button onclick="generateCode()">
-            Generar código
-          </button>
-
-          <div id="codesList"></div>
-
-        </div>
-
-      </section>
-
-      <!-- PROFILE -->
-
-      <section
-        id="profileSection"
-        class="hidden"
-      >
-
-        <div class="card">
-
-          <h2>Perfil</h2>
-
-          <div id="profileData"></div>
-
-        </div>
-
-      </section>
-
-    </main>
+    <h2>
+      GYM PRO
+    </h2>
 
   </div>
 
-  <script src="app.js"></script>
+  <button
+    onclick="showSection('dashboard')"
+  >
+    🏠 Dashboard
+  </button>
+
+  <button
+    id="clientsBtn"
+    onclick="showSection('clients')"
+  >
+    👥 Clientes
+  </button>
+
+  <button
+    id="routinesBtn"
+    onclick="showSection('routines')"
+  >
+    📅 Rutinas
+  </button>
+
+  <button
+    id="paymentsBtn"
+    onclick="showSection('payments')"
+  >
+    💰 Pagos
+  </button>
+
+  <button
+    id="codesBtn"
+    onclick="showSection('codes')"
+  >
+    🎟 Códigos
+  </button>
+
+  <button
+    onclick="showSection('profile')"
+  >
+    ⚙ Perfil
+  </button>
+
+  <button
+    onclick="logout()"
+  >
+    🚪 Salir
+  </button>
+
+</aside>
+
+<main class="main-content">
+
+<section id="dashboardSection">
+
+<div class="stats-grid">
+
+<div class="stat-card">
+
+<h3>
+Ingresos
+</h3>
+
+<span id="incomeCard">
+$0
+</span>
+
+</div>
+
+<div class="stat-card">
+
+<h3>
+Clientes
+</h3>
+
+<span id="clientsCard">
+0
+</span>
+
+</div>
+
+<div class="stat-card">
+
+<h3>
+Pagos pendientes
+</h3>
+
+<span id="pendingCard">
+0
+</span>
+
+</div>
+
+<div class="stat-card">
+
+<h3>
+Rutinas hoy
+</h3>
+
+<span id="routinesCard">
+0
+</span>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>
+Alertas
+</h2>
+
+<div id="alertsContainer">
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>
+Actividad
+</h2>
+
+<div id="dashboardContent">
+</div>
+
+</div>
+
+</section>
+<!-- CLIENTES -->
+
+<section
+  id="clientsSection"
+  class="hidden"
+>
+
+  <div class="card">
+
+    <h2>
+      Clientes
+    </h2>
+
+    <div
+      id="clientsList"
+      class="cards-grid"
+    >
+    </div>
+
+  </div>
+
+</section>
+
+<!-- RUTINAS -->
+
+<section
+  id="routinesSection"
+  class="hidden"
+>
+
+  <div class="card">
+
+    <h2>
+      Crear rutina
+    </h2>
+
+    <select id="routineClient">
+    </select>
+
+    <select id="routineDay">
+
+      <option value="">
+        Seleccionar día
+      </option>
+
+      <option value="Monday">
+        Lunes
+      </option>
+
+      <option value="Tuesday">
+        Martes
+      </option>
+
+      <option value="Wednesday">
+        Miércoles
+      </option>
+
+      <option value="Thursday">
+        Jueves
+      </option>
+
+      <option value="Friday">
+        Viernes
+      </option>
+
+      <option value="Saturday">
+        Sábado
+      </option>
+
+      <option value="Sunday">
+        Domingo
+      </option>
+
+    </select>
+
+    <input
+      type="text"
+      id="routineName"
+      placeholder="Nombre de la rutina"
+    >
+
+    <textarea
+      id="routineExercises"
+      placeholder="Ejercicios"
+    ></textarea>
+
+    <button
+      onclick="createRoutine()"
+    >
+      Guardar rutina
+    </button>
+
+  </div>
+
+  <div
+    id="routinesList"
+    class="cards-grid"
+  >
+  </div>
+
+</section>
+
+<!-- PAGOS -->
+
+<section
+  id="paymentsSection"
+  class="hidden"
+>
+
+  <div class="card">
+
+    <h2>
+      Gestión de pagos
+    </h2>
+
+    <select id="paymentClient">
+    </select>
+
+    <input
+      type="number"
+      id="monthlyAmount"
+      placeholder="Mensualidad"
+    >
+
+    <input
+      type="date"
+      id="nextDueDate"
+    >
+
+    <button
+      onclick="createPayment()"
+    >
+      Guardar mensualidad
+    </button>
+
+  </div>
+
+  <div
+    id="paymentsList"
+    class="cards-grid"
+  >
+  </div>
+
+</section>
+
+<!-- CODIGOS -->
+
+<section
+  id="codesSection"
+  class="hidden"
+>
+
+  <div class="card">
+
+    <h2>
+      Códigos de invitación
+    </h2>
+
+    <button
+      onclick="generateCode()"
+    >
+      Generar código
+    </button>
+
+    <div id="codesList">
+    </div>
+
+  </div>
+
+</section>
+<!-- PERFIL -->
+
+<section
+  id="profileSection"
+  class="hidden"
+>
+
+  <div class="card">
+
+    <h2>
+      Mi Perfil
+    </h2>
+
+    <div id="profileData">
+    </div>
+
+  </div>
+
+</section>
+
+</main>
+
+<!-- MENU MOVIL -->
+
+<nav class="mobile-nav">
+
+  <button
+    onclick="showSection('dashboard')"
+  >
+    🏠
+  </button>
+
+  <button
+    onclick="showSection('clients')"
+  >
+    👥
+  </button>
+
+  <button
+    onclick="showSection('routines')"
+  >
+    📅
+  </button>
+
+  <button
+    onclick="showSection('payments')"
+  >
+    💰
+  </button>
+
+  <button
+    onclick="showSection('profile')"
+  >
+    ⚙
+  </button>
+
+</nav>
+
+</div>
+
+<script src="app.js"></script>
 
 </body>
 </html>

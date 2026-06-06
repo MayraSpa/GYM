@@ -1,3 +1,7 @@
+/* ================================= */
+/* SUPABASE */
+/* ================================= */
+
 const SUPABASE_URL =
 "https://afutdksveitsuqtwdfaz.supabase.co";
 
@@ -11,198 +15,23 @@ supabase.createClient(
 );
 
 /* ================================= */
+/* GLOBALS */
+/* ================================= */
+
+let currentUser = null;
+let currentUserData = null;
+
+/* ================================= */
 /* INIT */
 /* ================================= */
 
 window.addEventListener(
   "DOMContentLoaded",
-  ()=>{
+  async ()=>{
 
-    checkSession();
+    await checkSession();
   }
 );
-
-/* ================================= */
-/* SIDEBAR */
-/* ================================= */
-
-function toggleSidebar(){
-
-  const sidebar =
-  document.getElementById("sidebar");
-
-  sidebar.classList.toggle("active");
-}
-
-/* ================================= */
-/* SECTIONS */
-/* ================================= */
-
-function showSection(section){
-
-  const sections = [
-
-    "dashboardSection",
-    "clientsSection",
-    "routinesSection",
-    "codesSection",
-    "profileSection"
-  ];
-
-  sections.forEach(id=>{
-
-    const el =
-    document.getElementById(id);
-
-    if(el){
-
-      el.classList.add("hidden");
-    }
-  });
-
-  document
-  .getElementById(section + "Section")
-  ?.classList.remove("hidden");
-
-  if(section === "codes"){
-
-    loadCodes();
-  }
-
-  if(section === "clients"){
-
-    loadClientsPage();
-  }
-
-  if(section === "routines"){
-
-    loadTrainerRoutines();
-  }
-
-  if(window.innerWidth < 900){
-
-    document
-    .getElementById("sidebar")
-    .classList.remove("active");
-  }
-}
-
-/* ================================= */
-/* SIGN UP */
-/* ================================= */
-
-async function signUp(){
-
-  const email =
-  document.getElementById("email").value;
-
-  const password =
-  document.getElementById("password").value;
-
-  const inviteCode =
-  document.getElementById("inviteCode").value;
-
-  if(!email || !password){
-
-    alert("Completa todos los campos");
-
-    return;
-  }
-
-  const isSuperAdmin =
-  email === "yeraariel0@gmail.com";
-
-  let role = "client";
-
-  let trainerId = null;
-
-  let inviteData = null;
-
-  /* CLIENTE */
-
-  if(!isSuperAdmin){
-
-    const response =
-    await supabaseClient
-    .from("invite_codes")
-    .select("*")
-    .eq("code", inviteCode)
-    .eq("used", false)
-    .maybeSingle();
-
-    inviteData = response.data;
-
-    if(!inviteData){
-
-      alert("Código inválido");
-
-      return;
-    }
-
-    trainerId =
-    inviteData.created_by;
-  }
-
-  else{
-
-    role = "super_admin";
-  }
-
-  /* AUTH */
-
-  const {
-    data,
-    error
-  } =
-  await supabaseClient.auth.signUp({
-
-    email,
-    password
-  });
-
-  if(error){
-
-    alert(error.message);
-
-    return;
-  }
-
-  const user =
-  data.user;
-
-  /* USERS TABLE */
-
-  await supabaseClient
-  .from("users")
-  .insert({
-
-    id:user.id,
-
-    email:user.email,
-
-    role,
-
-    trainer_id:trainerId
-  });
-
-  /* USAR CODIGO */
-
-  if(inviteData){
-
-    await supabaseClient
-    .from("invite_codes")
-    .update({
-
-      used:true
-
-    })
-    .eq("id", inviteData.id);
-  }
-
-  alert("Cuenta creada");
-
-  checkSession();
-}
 
 /* ================================= */
 /* LOGIN */
@@ -210,33 +39,202 @@ async function signUp(){
 
 async function login(){
 
-  const email =
-  document.getElementById("email").value;
+  try{
 
-  const password =
-  document.getElementById("password").value;
+    const email =
+    document
+    .getElementById("email")
+    .value
+    .trim();
 
-  const {
-    error
-  } =
-  await supabaseClient
-  .auth
-  .signInWithPassword({
+    const password =
+    document
+    .getElementById("password")
+    .value
+    .trim();
 
-    email,
-    password
-  });
+    if(!email || !password){
 
-  if(error){
+      alert(
+        "Completa todos los campos"
+      );
 
-    alert(error.message);
+      return;
+    }
 
-    return;
+    const {
+      error
+    } =
+    await supabaseClient
+    .auth
+    .signInWithPassword({
+
+      email,
+      password
+
+    });
+
+    if(error){
+
+      alert(error.message);
+
+      return;
+    }
+
+    await checkSession();
+
   }
 
-  checkSession();
+  catch(error){
+
+    console.error(error);
+
+    alert(
+      "Error iniciando sesión"
+    );
+  }
 }
 
+/* ================================= */
+/* REGISTRO */
+/* ================================= */
+
+async function signUp(){
+
+  try{
+
+    const email =
+    document
+    .getElementById("email")
+    .value
+    .trim();
+
+    const password =
+    document
+    .getElementById("password")
+    .value
+    .trim();
+
+    const inviteCode =
+    document
+    .getElementById("inviteCode")
+    .value
+    .trim();
+
+    if(!email || !password){
+
+      alert(
+        "Completa todos los campos"
+      );
+
+      return;
+    }
+
+    const isSuperAdmin =
+    email.toLowerCase() ===
+    "yeraariel0@gmail.com";
+
+    let role = "client";
+
+    let trainerId = null;
+
+    let inviteData = null;
+
+    if(!isSuperAdmin){
+
+      const {
+        data
+      } =
+      await supabaseClient
+      .from("invite_codes")
+      .select("*")
+      .eq("code", inviteCode)
+      .eq("used", false)
+      .maybeSingle();
+
+      inviteData = data;
+
+      if(!inviteData){
+
+        alert(
+          "Código inválido"
+        );
+
+        return;
+      }
+
+      trainerId =
+      inviteData.created_by;
+    }
+
+    else{
+
+      role =
+      "super_admin";
+    }
+
+    const {
+      data,
+      error
+    } =
+    await supabaseClient
+    .auth
+    .signUp({
+
+      email,
+      password
+    });
+
+    if(error){
+
+      alert(error.message);
+
+      return;
+    }
+
+    const user =
+    data.user;
+
+    await supabaseClient
+    .from("users")
+    .insert({
+
+      id:user.id,
+
+      email:user.email,
+
+      role,
+
+      trainer_id:trainerId
+    });
+
+    if(inviteData){
+
+      await supabaseClient
+      .from("invite_codes")
+      .update({
+
+        used:true
+
+      })
+      .eq("id", inviteData.id);
+    }
+
+    alert(
+      "Cuenta creada"
+    );
+
+  }
+
+  catch(error){
+
+    console.error(error);
+
+    alert(
+      "Error creando cuenta"
+    );
+  }
+}
 /* ================================= */
 /* LOGOUT */
 /* ================================= */
@@ -251,162 +249,211 @@ async function logout(){
 }
 
 /* ================================= */
-/* CHECK SESSION */
+/* SESSION */
 /* ================================= */
 
 async function checkSession(){
 
-  try{
+  const {
+    data:{ session }
+  } =
+  await supabaseClient
+  .auth
+  .getSession();
 
-    const {
-      data:{ session }
-    } =
-    await supabaseClient.auth.getSession();
+  const authScreen =
+  document.getElementById(
+    "authScreen"
+  );
 
-    const authScreen =
-    document.getElementById(
-      "authScreen"
-    );
+  const appScreen =
+  document.getElementById(
+    "appScreen"
+  );
 
-    const appScreen =
-    document.getElementById(
-      "appScreen"
-    );
+  if(!session){
 
-    /* NO SESSION */
+    authScreen
+    ?.classList
+    .remove("hidden");
 
-    if(!session){
+    appScreen
+    ?.classList
+    .add("hidden");
 
-      authScreen.style.display =
-      "flex";
-
-      appScreen.style.display =
-      "none";
-
-      return;
-    }
-
-    /* OCULTAR LOGIN */
-
-    authScreen.style.display =
-    "none";
-
-    appScreen.style.display =
-    "block";
-
-    const user =
-    session.user;
-
-    /* USER TABLE */
-
-    let response =
-    await supabaseClient
-    .from("users")
-    .select("*")
-    .eq("id", user.id)
-    .maybeSingle();
-
-    let userData =
-    response.data;
-
-    /* CREAR USER */
-
-    if(!userData){
-
-      const role =
-      user.email ===
-      "yeraariel0@gmail.com"
-
-      ? "super_admin"
-
-      : "client";
-
-      await supabaseClient
-      .from("users")
-      .insert({
-
-        id:user.id,
-
-        email:user.email,
-
-        role
-      });
-
-      response =
-      await supabaseClient
-      .from("users")
-      .select("*")
-      .eq("id", user.id)
-      .maybeSingle();
-
-      userData =
-      response.data;
-    }
-
-    if(!userData){
-
-      alert(
-        "Error cargando usuario"
-      );
-
-      return;
-    }
-
-    /* CLIENT */
-
-    if(userData.role === "client"){
-
-      document
-      .getElementById("clientsBtn")
-      ?.classList.add("hidden");
-
-      document
-      .getElementById("codesBtn")
-      ?.classList.add("hidden");
-
-      document
-      .getElementById("routinesBtn")
-      ?.classList.add("hidden");
-    }
-
-    else{
-
-      document
-      .getElementById("clientsBtn")
-      ?.classList.remove("hidden");
-
-      document
-      .getElementById("codesBtn")
-      ?.classList.remove("hidden");
-
-      document
-      .getElementById("routinesBtn")
-      ?.classList.remove("hidden");
-    }
-
-    /* LOAD */
-
-    loadProfile(user.id);
-
-    loadClientsPage();
-
-    loadTrainerRoutines();
-
-    loadCodes();
-
-    loadMyRoutines(user.id);
-
+    return;
   }
 
-  catch(error){
+  currentUser =
+  session.user;
 
-    console.error(error);
+  authScreen
+  ?.classList
+  .add("hidden");
 
-    alert(
-      "Error iniciando sesión"
-    );
+  appScreen
+  ?.classList
+  .remove("hidden");
+
+  await loadCurrentUser();
+
+  await applyRoleUI();
+
+  showSection(
+    "dashboard"
+  );
+
+  await loadDashboard();
+
+  await loadProfile(
+    currentUser.id
+  );
+}
+
+/* ================================= */
+/* CURRENT USER */
+/* ================================= */
+
+async function loadCurrentUser(){
+
+  const {
+    data
+  } =
+  await supabaseClient
+  .from("users")
+  .select("*")
+  .eq(
+    "id",
+    currentUser.id
+  )
+  .maybeSingle();
+
+  currentUserData =
+  data;
+}
+
+/* ================================= */
+/* ROLE UI */
+/* ================================= */
+
+async function applyRoleUI(){
+
+  const isClient =
+  currentUserData.role ===
+  "client";
+
+  document
+  .getElementById(
+    "clientsBtn"
+  )
+  ?.classList
+  .toggle(
+    "hidden",
+    isClient
+  );
+
+  document
+  .getElementById(
+    "routinesBtn"
+  )
+  ?.classList
+  .toggle(
+    "hidden",
+    isClient
+  );
+
+  document
+  .getElementById(
+    "codesBtn"
+  )
+  ?.classList
+  .toggle(
+    "hidden",
+    isClient
+  );
+
+  document
+  .getElementById(
+    "paymentsBtn"
+  )
+  ?.classList
+  .toggle(
+    "hidden",
+    isClient
+  );
+}
+
+/* ================================= */
+/* SIDEBAR */
+/* ================================= */
+
+function toggleSidebar(){
+
+  document
+  .getElementById(
+    "sidebar"
+  )
+  ?.classList
+  .toggle("active");
+}
+
+/* ================================= */
+/* SECTIONS */
+/* ================================= */
+
+function showSection(
+  section
+){
+
+  const sections = [
+
+    "dashboardSection",
+    "clientsSection",
+    "routinesSection",
+    "paymentsSection",
+    "codesSection",
+    "profileSection"
+  ];
+
+  sections.forEach(id=>{
+
+    document
+    .getElementById(id)
+    ?.classList
+    .add("hidden");
+  });
+
+  document
+  .getElementById(
+    section + "Section"
+  )
+  ?.classList
+  .remove("hidden");
+
+  if(
+    window.innerWidth < 900
+  ){
+
+    document
+    .getElementById(
+      "sidebar"
+    )
+    ?.classList
+    .remove("active");
   }
 }
+
+/* ================================= */
+/* AUTH LISTENER */
+/* ================================= */
+
+supabaseClient
+.auth
+.onAuthStateChange(
+  async ()=>{
+    await checkSession();
+  }
+);
 /* ================================= */
 /* PROFILE */
 /* ================================= */
@@ -414,7 +461,7 @@ async function checkSession(){
 async function loadProfile(userId){
 
   const {
-    data:profile
+    data
   } =
   await supabaseClient
   .from("profiles")
@@ -422,82 +469,92 @@ async function loadProfile(userId){
   .eq("user_id", userId)
   .maybeSingle();
 
-  const profileData =
-  document.getElementById("profileData");
+  const profile =
+  data || {};
 
-  profileData.innerHTML = `
+  const container =
+  document.getElementById(
+    "profileData"
+  );
 
-    <input
-      type="text"
-      id="fullName"
-      placeholder="Nombre completo"
-      value="${profile?.full_name || ""}"
-    >
+  if(!container) return;
 
-    <input
-      type="text"
-      id="weight"
-      placeholder="Peso"
-      value="${profile?.weight || ""}"
-    >
+  container.innerHTML = `
 
-    <input
-      type="text"
-      id="height"
-      placeholder="Altura"
-      value="${profile?.height || ""}"
-    >
+  <input
+    id="fullName"
+    placeholder="Nombre completo"
+    value="${profile.full_name || ""}"
+  >
 
-    <input
-      type="text"
-      id="bodyFat"
-      placeholder="Grasa corporal"
-      value="${profile?.body_fat || ""}"
-    >
+  <input
+    id="phone"
+    placeholder="Teléfono"
+    value="${profile.phone || ""}"
+  >
 
-    <input
-      type="text"
-      id="goal"
-      placeholder="Objetivo"
-      value="${profile?.goal || ""}"
-    >
+  <input
+    id="age"
+    placeholder="Edad"
+    value="${profile.age || ""}"
+  >
 
-    <textarea
-      id="injuries"
-      placeholder="Lesiones"
-    >${profile?.injuries || ""}</textarea>
+  <input
+    id="weight"
+    placeholder="Peso"
+    value="${profile.weight || ""}"
+  >
 
-    <button onclick="saveProfile()">
-      Guardar perfil
-    </button>
+  <input
+    id="height"
+    placeholder="Altura"
+    value="${profile.height || ""}"
+  >
 
-    <button onclick="deleteMyAccount()">
-      Eliminar cuenta
-    </button>
+  <input
+    id="bodyFat"
+    placeholder="% grasa"
+    value="${profile.body_fat || ""}"
+  >
+
+  <input
+    id="goal"
+    placeholder="Objetivo"
+    value="${profile.goal || ""}"
+  >
+
+  <textarea
+    id="injuries"
+    placeholder="Lesiones"
+  >${profile.injuries || ""}</textarea>
+
+  <button onclick="saveProfile()">
+    Guardar perfil
+  </button>
+
+  <button onclick="deleteMyAccount()">
+    Eliminar cuenta
+  </button>
   `;
 }
 
-/* ================================= */
-/* SAVE PROFILE */
-/* ================================= */
-
 async function saveProfile(){
-
-  const {
-    data:{ user }
-  } =
-  await supabaseClient
-  .auth
-  .getUser();
 
   await supabaseClient
   .from("profiles")
   .upsert({
 
-    user_id:user.id,
+    user_id:
+    currentUser.id,
 
     full_name:
     document.getElementById("fullName").value,
+
+    phone:
+    document.getElementById("phone").value,
+
+    age:
+    document.getElementById("age").value,
 
     weight:
     document.getElementById("weight").value,
@@ -515,7 +572,9 @@ async function saveProfile(){
     document.getElementById("injuries").value
   });
 
-  alert("Perfil guardado");
+  alert(
+    "Perfil actualizado"
+  );
 }
 
 /* ================================= */
@@ -524,32 +583,29 @@ async function saveProfile(){
 
 async function deleteMyAccount(){
 
-  const confirmDelete =
-  confirm(
-    "¿Eliminar cuenta?"
-  );
-
-  if(!confirmDelete){
-
+  if(
+    !confirm(
+      "¿Eliminar cuenta?"
+    )
+  ){
     return;
   }
-
-  const {
-    data:{ user }
-  } =
-  await supabaseClient
-  .auth
-  .getUser();
 
   await supabaseClient
   .from("profiles")
   .delete()
-  .eq("user_id", user.id);
+  .eq(
+    "user_id",
+    currentUser.id
+  );
 
   await supabaseClient
   .from("users")
   .delete()
-  .eq("id", user.id);
+  .eq(
+    "id",
+    currentUser.id
+  );
 
   alert(
     "Cuenta eliminada"
@@ -564,81 +620,60 @@ async function deleteMyAccount(){
 
 async function loadClientsPage(){
 
-  const {
-    data:{ user }
-  } =
-  await supabaseClient
-  .auth
-  .getUser();
-
-  if(!user){
-
+  if(
+    currentUserData.role ===
+    "client"
+  ){
     return;
   }
 
-  const {
-    data:userData
-  } =
-  await supabaseClient
+  let query =
+  supabaseClient
   .from("users")
-  .select("*")
-  .eq("id", user.id)
-  .maybeSingle();
+  .select("*");
 
   if(
-    !userData ||
-    userData.role === "client"
+    currentUserData.role ===
+    "trainer"
   ){
 
-    return;
+    query =
+    query.eq(
+      "trainer_id",
+      currentUser.id
+    );
   }
-
-  let clients = [];
-
-  /* SUPER ADMIN */
 
   if(
-    userData.role === "super_admin"
+    currentUserData.role ===
+    "super_admin"
   ){
 
-    const response =
-    await supabaseClient
-    .from("users")
-    .select("*")
-    .eq("role","client");
-
-    clients =
-    response.data || [];
+    query =
+    query.eq(
+      "role",
+      "client"
+    );
   }
 
-  /* TRAINER */
+  const {
+    data:clients
+  } =
+  await query;
 
-  else{
+  const container =
+  document.getElementById(
+    "clientsList"
+  );
 
-    const response =
-    await supabaseClient
-    .from("users")
-    .select("*")
-    .eq("trainer_id", user.id);
+  if(!container) return;
 
-    clients =
-    response.data || [];
-  }
+  container.innerHTML = "";
 
-  const clientsList =
-  document.getElementById("clientsList");
-
-  clientsList.innerHTML = "";
-
-  if(clients.length === 0){
-
-    clientsList.innerHTML =
-    "<p>No hay clientes</p>";
-
-    return;
-  }
-
-  for(const client of clients){
+  for(
+    const client
+    of (clients || [])
+  ){
 
     const {
       data:profile
@@ -646,55 +681,61 @@ async function loadClientsPage(){
     await supabaseClient
     .from("profiles")
     .select("*")
-    .eq("user_id", client.id)
+    .eq(
+      "user_id",
+      client.id
+    )
     .maybeSingle();
 
-    clientsList.innerHTML += `
+    container.innerHTML += `
 
-      <div class="client-card">
+    <div class="client-card">
 
-        <h3>
-          ${profile?.full_name || "Sin nombre"}
-        </h3>
+      <h3>
+        ${
+          profile?.full_name
+          || "Sin nombre"
+        }
+      </h3>
 
-        <p>
-          ${client.email}
-        </p>
+      <p>
+        ${client.email}
+      </p>
 
-        <p>
-          Peso:
-          ${profile?.weight || "-"}
-        </p>
+      <p>
+        Peso:
+        ${profile?.weight || "-"}
+      </p>
 
-        <p>
-          Altura:
-          ${profile?.height || "-"}
-        </p>
+      <p>
+        Objetivo:
+        ${profile?.goal || "-"}
+      </p>
 
-        <p>
-          Objetivo:
-          ${profile?.goal || "-"}
-        </p>
+      ${
+        currentUserData.role ===
+        "super_admin"
 
-       <button
-  onclick="makeTrainer('${client.id}')"
->
-  Hacer entrenador
-</button>
+        ?
 
-<button
-  onclick="makeTrainer('${client.id}')"
->
-  Hacer entrenador
-</button>
+        `<button
+          onclick="makeTrainer('${client.id}')"
+        >
+          Hacer entrenador
+        </button>`
 
-<button
-  onclick="deleteClient('${client.id}')"
->
-  Eliminar cliente
-</button>
+        :
 
-      </div>
+        ""
+      }
+
+      <button
+        onclick="deleteClient('${client.id}')"
+      >
+        Eliminar cliente
+      </button>
+
+    </div>
     `;
   }
 }
@@ -703,565 +744,48 @@ async function loadClientsPage(){
 /* DELETE CLIENT */
 /* ================================= */
 
-async function deleteClient(clientId){
+async function deleteClient(
+  clientId
+){
 
-  const confirmDelete =
-  confirm(
-    "¿Eliminar cliente?"
-  );
-
-  if(!confirmDelete){
-
+  if(
+    !confirm(
+      "¿Eliminar cliente?"
+    )
+  ){
     return;
   }
 
   await supabaseClient
   .from("profiles")
   .delete()
-  .eq("user_id", clientId);
-
-  await supabaseClient
-  .from("client_routines")
-  .delete()
-  .eq("client_id", clientId);
+  .eq(
+    "user_id",
+    clientId
+  );
 
   await supabaseClient
   .from("users")
   .delete()
-  .eq("id", clientId);
-
-  loadClientsPage();
-
-  alert("Cliente eliminado");
-}
-/* ================================= */
-/* GENERATE CODE */
-/* ================================= */
-
-async function generateCode(){
-
-  const {
-    data:{ user }
-  } =
-  await supabaseClient
-  .auth
-  .getUser();
-
-  if(!user){
-
-    return;
-  }
-
-  const {
-    data:userData
-  } =
-  await supabaseClient
-  .from("users")
-  .select("*")
-  .eq("id", user.id)
-  .maybeSingle();
-
-  /* CLIENTES NO */
-
-  if(
-    !userData ||
-    userData.role === "client"
-  ){
-
-    alert(
-      "No permitido"
-    );
-
-    return;
-  }
-
-  const code =
-  Math.random()
-  .toString(36)
-  .substring(2,8)
-  .toUpperCase();
-
-  await supabaseClient
-  .from("invite_codes")
-  .insert({
-
-    code,
-
-    created_by:user.id,
-
-    used:false
-  });
-
-  loadCodes();
-
-  alert(
-    "Código generado"
-  );
-}
-
-/* ================================= */
-/* LOAD CODES */
-/* ================================= */
-
-async function loadCodes(){
-
-  const {
-    data:{ user }
-  } =
-  await supabaseClient
-  .auth
-  .getUser();
-
-  if(!user){
-
-    return;
-  }
-
-  const {
-    data:userData
-  } =
-  await supabaseClient
-  .from("users")
-  .select("*")
-  .eq("id", user.id)
-  .maybeSingle();
-
-  if(
-    !userData ||
-    userData.role === "client"
-  ){
-
-    return;
-  }
-
-  const response =
-  await supabaseClient
-  .from("invite_codes")
-  .select("*")
-  .eq("created_by", user.id)
-  .order("id",{
-
-    ascending:false
-  });
-
-  const codes =
-  response.data || [];
-
-  const codesList =
-  document.getElementById("codesList");
-
-  if(!codesList){
-
-    return;
-  }
-
-  codesList.innerHTML = "";
-
-  if(codes.length === 0){
-
-    codesList.innerHTML =
-    "<p>No hay códigos</p>";
-
-    return;
-  }
-
-  codes.forEach(code=>{
-
-    codesList.innerHTML += `
-
-      <div class="routine-card">
-
-        <h3>
-          ${code.code}
-        </h3>
-
-        <p>
-          ${
-            code.used
-            ? "USADO"
-            : "DISPONIBLE"
-          }
-        </p>
-
-      </div>
-    `;
-  });
-}
-
-/* ================================= */
-/* CREATE ROUTINE */
-/* ================================= */
-
-async function createRoutine(){
-
-  const {
-    data:{ user }
-  } =
-  await supabaseClient
-  .auth
-  .getUser();
-
-  const day =
-  document
-  .getElementById("routineDay")
-  .value;
-
-  const routineName =
-  document
-  .getElementById("routineName")
-  .value;
-
-  const routineExercises =
-  document
-  .getElementById("routineExercises")
-  .value;
-
-  const clientId =
-  document
-  .getElementById("routineClient")
-  .value;
-
-  if(
-    !day ||
-    !routineName ||
-    !routineExercises ||
-    !clientId
-  ){
-
-    alert("Completa todo");
-
-    return;
-  }
-
-  await supabaseClient
-  .from("client_routines")
-  .insert({
-
-    trainer_id:user.id,
-
-    client_id:clientId,
-
-    day,
-
-    routine_name:routineName,
-
-    exercises:routineExercises
-  });
-
-  alert("Rutina creada");
-
-  loadTrainerRoutines();
-}
-
-/* ================================= */
-/* LOAD CLIENTS SELECT */
-/* ================================= */
-
-async function loadClientsSelect(){
-
-  const {
-    data:{ user }
-  } =
-  await supabaseClient
-  .auth
-  .getUser();
-
-  if(!user){
-
-    return;
-  }
-
-  const response =
-  await supabaseClient
-  .from("users")
-  .select("*")
-  .eq("trainer_id", user.id);
-
-  const clients =
-  response.data || [];
-
-  const select =
-  document.getElementById(
-    "routineClient"
+  .eq(
+    "id",
+    clientId
   );
 
-  if(!select){
-
-    return;
-  }
-
-  select.innerHTML = `
-
-    <option value="">
-      Selecciona cliente
-    </option>
-  `;
-
-  clients.forEach(client=>{
-
-    select.innerHTML += `
-
-      <option value="${client.id}">
-        ${client.email}
-      </option>
-    `;
-  });
-}
-/* ================================= */
-/* LOAD TRAINER ROUTINES */
-/* ================================= */
-
-async function loadTrainerRoutines(){
-
-  const {
-    data:{ user }
-  } =
-  await supabaseClient
-  .auth
-  .getUser();
-
-  if(!user){
-
-    return;
-  }
-
-  const {
-    data:userData
-  } =
-  await supabaseClient
-  .from("users")
-  .select("*")
-  .eq("id", user.id)
-  .maybeSingle();
-
-  if(
-    !userData ||
-    userData.role === "client"
-  ){
-
-    return;
-  }
-
-  const response =
-  await supabaseClient
-  .from("client_routines")
-  .select("*")
-  .eq("trainer_id", user.id)
-  .order("id",{
-
-    ascending:false
-  });
-
-  const routines =
-  response.data || [];
-
-  const routinesList =
-  document.getElementById(
-    "routinesList"
-  );
-
-  if(!routinesList){
-
-    return;
-  }
-
-  routinesList.innerHTML = "";
-
-  if(routines.length === 0){
-
-    routinesList.innerHTML =
-    "<p>No hay rutinas</p>";
-
-    loadClientsSelect();
-
-    return;
-  }
-
-  routines.forEach(routine=>{
-
-    routinesList.innerHTML += `
-
-      <div class="routine-card">
-
-        <h3>
-          ${routine.routine_name}
-        </h3>
-
-        <pre>
-${routine.exercises}
-        </pre>
-
-        <p>
-          ${
-            routine.completed
-            ? "COMPLETADA"
-            : "PENDIENTE"
-          }
-        </p>
-
-      </div>
-    `;
-  });
-
-  loadClientsSelect();
-}
-
-/* ================================= */
-/* LOAD MY ROUTINES */
-/* ================================= */
-
-async function loadMyRoutines(userId){
-
-  const {
-    data:userData
-  } =
-  await supabaseClient
-  .from("users")
-  .select("*")
-  .eq("id", userId)
-  .maybeSingle();
-
-  if(
-    !userData ||
-    userData.role !== "client"
-  ){
-
-    return;
-  }
-
-  const today =
-  new Date()
-  .toLocaleDateString(
-    "en-US",
-    {
-
-      weekday:"long"
-    }
-  );
-
-  const response =
-  await supabaseClient
-  .from("client_routines")
-  .select("*")
-  .eq("client_id", userId)
-  .eq("day", today);
-
-  const routines =
-  response.data || [];
-
-  const dashboard =
-  document.getElementById(
-    "dashboardContent"
-  );
-
-  dashboard.innerHTML = `
-
-    <h2>
-
-      Rutina de hoy
-
-    </h2>
-  `;
-
-  if(routines.length === 0){
-
-    dashboard.innerHTML += `
-
-      <p>
-
-        Hoy no tienes rutina
-
-      </p>
-    `;
-
-    return;
-  }
-
-  routines.forEach(routine=>{
-
-    dashboard.innerHTML += `
-
-      <div class="routine-card">
-
-        <h3>
-
-          ${routine.routine_name}
-
-        </h3>
-
-        <pre>
-
-${routine.exercises}
-
-        </pre>
-
-        <button
-          onclick="completeRoutine(${routine.id})"
-        >
-
-          ${
-            routine.completed
-            ? "Completada"
-            : "Marcar completada"
-          }
-
-        </button>
-
-      </div>
-    `;
-  });
-}
-
-/* ================================= */
-/* COMPLETE ROUTINE */
-/* ================================= */
-
-async function completeRoutine(routineId){
-
-  await supabaseClient
-  .from("client_routines")
-  .update({
-
-    completed:true
-
-  })
-  .eq("id", routineId);
-
-  const {
-    data:{ user }
-  } =
-  await supabaseClient
-  .auth
-  .getUser();
-
-  loadMyRoutines(user.id);
+  await loadClientsPage();
 }
 
 /* ================================= */
 /* MAKE TRAINER */
 /* ================================= */
 
-async function makeTrainer(userId){
-
-  const {
-    data:{ user }
-  } =
-  await supabaseClient
-  .auth
-  .getUser();
-
-  const {
-    data:me
-  } =
-  await supabaseClient
-  .from("users")
-  .select("*")
-  .eq("id", user.id)
-  .maybeSingle();
+async function makeTrainer(
+  userId
+){
 
   if(
-    !me ||
-    me.role !== "super_admin"
+    currentUserData.role !==
+    "super_admin"
   ){
 
     alert(
@@ -1278,28 +802,1032 @@ async function makeTrainer(userId){
     role:"trainer"
 
   })
-  .eq("id", userId);
-
-  alert(
-    "Ahora es entrenador"
+  .eq(
+    "id",
+    userId
   );
 
-  loadClientsPage();
+  alert(
+    "Usuario ascendido"
+  );
+
+  await loadClientsPage();
+}
+/* ================================= */
+/* GENERAR CODIGO */
+/* ================================= */
+
+async function generateCode(){
+
+  if(
+    currentUserData.role ===
+    "client"
+  ){
+
+    alert(
+      "No autorizado"
+    );
+
+    return;
+  }
+
+  const code =
+
+  Math.random()
+  .toString(36)
+  .substring(2,8)
+  .toUpperCase();
+
+  const {
+    error
+  } =
+  await supabaseClient
+  .from("invite_codes")
+  .insert({
+
+    code,
+
+    created_by:
+    currentUser.id,
+
+    used:false
+
+  });
+
+  if(error){
+
+    alert(error.message);
+
+    return;
+  }
+
+  await loadCodes();
+
+  alert(
+    "Código generado"
+  );
 }
 
 /* ================================= */
-/* AUTH LISTENER */
+/* LOAD CODES */
 /* ================================= */
 
-supabaseClient
-.auth
-.onAuthStateChange(()=>{
+async function loadCodes(){
 
-  checkSession();
-});
+  if(
+    currentUserData.role ===
+    "client"
+  ){
+    return;
+  }
+
+  let query =
+  supabaseClient
+  .from("invite_codes")
+  .select("*")
+  .order(
+    "id",
+    {
+      ascending:false
+    }
+  );
+
+  if(
+    currentUserData.role ===
+    "trainer"
+  ){
+
+    query =
+    query.eq(
+      "created_by",
+      currentUser.id
+    );
+  }
+
+  const {
+    data:codes
+  } =
+  await query;
+
+  const container =
+  document.getElementById(
+    "codesList"
+  );
+
+  if(!container) return;
+
+  container.innerHTML = "";
+
+  if(
+    !codes ||
+    codes.length === 0
+  ){
+
+    container.innerHTML =
+    "<p>No hay códigos</p>";
+
+    return;
+  }
+
+  codes.forEach(code=>{
+
+    container.innerHTML += `
+
+    <div class="routine-card">
+
+      <h3>
+        ${code.code}
+      </h3>
+
+      <p>
+
+      ${
+        code.used
+        ? "USADO"
+        : "DISPONIBLE"
+      }
+
+      </p>
+
+      <p>
+        ${new Date(
+          code.created_at
+        ).toLocaleDateString()}
+      </p>
+
+    </div>
+    `;
+  });
+}
 
 /* ================================= */
-/* RESPONSIVE */
+/* CLIENTES SELECT */
+/* ================================= */
+
+async function loadClientsSelect(){
+
+  if(
+    currentUserData.role ===
+    "client"
+  ){
+    return;
+  }
+
+  let query =
+  supabaseClient
+  .from("users")
+  .select("*");
+
+  if(
+    currentUserData.role ===
+    "trainer"
+  ){
+
+    query =
+    query.eq(
+      "trainer_id",
+      currentUser.id
+    );
+  }
+
+  const {
+    data:clients
+  } =
+  await query;
+
+  const routineSelect =
+  document.getElementById(
+    "routineClient"
+  );
+
+  const paymentSelect =
+  document.getElementById(
+    "paymentClient"
+  );
+
+  if(routineSelect){
+
+    routineSelect.innerHTML =
+
+    `<option value="">
+      Seleccionar cliente
+    </option>`;
+
+    clients?.forEach(client=>{
+
+      routineSelect.innerHTML += `
+
+      <option
+        value="${client.id}"
+      >
+
+        ${client.email}
+
+      </option>
+      `;
+    });
+  }
+
+  if(paymentSelect){
+
+    paymentSelect.innerHTML =
+
+    `<option value="">
+      Seleccionar cliente
+    </option>`;
+
+    clients?.forEach(client=>{
+
+      paymentSelect.innerHTML += `
+
+      <option
+        value="${client.id}"
+      >
+
+        ${client.email}
+
+      </option>
+      `;
+    });
+  }
+}
+
+/* ================================= */
+/* INIT DATA */
+/* ================================= */
+
+async function loadInitialData(){
+
+  await loadClientsPage();
+
+  await loadClientsSelect();
+
+  await loadCodes();
+}
+/* ================================= */
+/* CREATE ROUTINE */
+/* ================================= */
+
+async function createRoutine(){
+
+  if(
+    currentUserData.role ===
+    "client"
+  ){
+
+    alert(
+      "No permitido"
+    );
+
+    return;
+  }
+
+  const clientId =
+  document.getElementById(
+    "routineClient"
+  ).value;
+
+  const day =
+  document.getElementById(
+    "routineDay"
+  ).value;
+
+  const routineName =
+  document.getElementById(
+    "routineName"
+  ).value;
+
+  const exercises =
+  document.getElementById(
+    "routineExercises"
+  ).value;
+
+  if(
+    !clientId ||
+    !day ||
+    !routineName ||
+    !exercises
+  ){
+
+    alert(
+      "Completa todos los campos"
+    );
+
+    return;
+  }
+
+  const {
+    error
+  } =
+  await supabaseClient
+  .from("client_routines")
+  .insert({
+
+    trainer_id:
+    currentUser.id,
+
+    client_id:
+    clientId,
+
+    day,
+
+    routine_name:
+    routineName,
+
+    exercises,
+
+    completed:false
+
+  });
+
+  if(error){
+
+    alert(error.message);
+
+    return;
+  }
+
+  alert(
+    "Rutina creada"
+  );
+
+  loadTrainerRoutines();
+}
+
+/* ================================= */
+/* TRAINER ROUTINES */
+/* ================================= */
+
+async function loadTrainerRoutines(){
+
+  if(
+    currentUserData.role ===
+    "client"
+  ){
+    return;
+  }
+
+  const {
+    data:routines
+  } =
+  await supabaseClient
+  .from("client_routines")
+  .select("*")
+  .eq(
+    "trainer_id",
+    currentUser.id
+  )
+  .order(
+    "id",
+    {
+      ascending:false
+    }
+  );
+
+  const container =
+  document.getElementById(
+    "routinesList"
+  );
+
+  if(!container) return;
+
+  container.innerHTML = "";
+
+  if(
+    !routines ||
+    routines.length === 0
+  ){
+
+    container.innerHTML =
+    "<p>No hay rutinas</p>";
+
+    return;
+  }
+
+  routines.forEach(routine=>{
+
+    container.innerHTML += `
+
+    <div class="routine-card">
+
+      <h3>
+        ${routine.routine_name}
+      </h3>
+
+      <p>
+        Día:
+        ${routine.day}
+      </p>
+
+      <pre>
+${routine.exercises}
+      </pre>
+
+      <p>
+
+      ${
+        routine.completed
+        ? "✅ Completada"
+        : "⏳ Pendiente"
+      }
+
+      </p>
+
+    </div>
+    `;
+  });
+}
+
+/* ================================= */
+/* MY ROUTINES */
+/* ================================= */
+
+async function loadMyRoutines(){
+
+  if(
+    currentUserData.role !==
+    "client"
+  ){
+    return;
+  }
+
+  const today =
+  new Date()
+  .toLocaleDateString(
+    "en-US",
+    {
+      weekday:"long"
+    }
+  );
+
+  const {
+    data:routines
+  } =
+  await supabaseClient
+  .from("client_routines")
+  .select("*")
+  .eq(
+    "client_id",
+    currentUser.id
+  )
+  .eq(
+    "day",
+    today
+  );
+
+  const dashboard =
+  document.getElementById(
+    "dashboardContent"
+  );
+
+  if(!dashboard) return;
+
+  dashboard.innerHTML =
+
+  `<h2>
+    Rutina de hoy
+  </h2>`;
+
+  if(
+    !routines ||
+    routines.length === 0
+  ){
+
+    dashboard.innerHTML +=
+
+    `<p>
+      No tienes rutina hoy
+    </p>`;
+
+    return;
+  }
+
+  routines.forEach(routine=>{
+
+    dashboard.innerHTML += `
+
+    <div class="routine-card">
+
+      <h3>
+        ${routine.routine_name}
+      </h3>
+
+      <pre>
+${routine.exercises}
+      </pre>
+
+      <button
+      onclick="
+      completeRoutine(
+      ${routine.id}
+      )">
+
+      ${
+        routine.completed
+        ? "Completada"
+        : "Marcar completada"
+      }
+
+      </button>
+
+    </div>
+    `;
+  });
+}
+
+/* ================================= */
+/* COMPLETE ROUTINE */
+/* ================================= */
+
+async function completeRoutine(
+  routineId
+){
+
+  await supabaseClient
+  .from("client_routines")
+  .update({
+
+    completed:true
+
+  })
+  .eq(
+    "id",
+    routineId
+  );
+
+  loadMyRoutines();
+}
+/* ================================= */
+/* CREATE PAYMENT */
+/* ================================= */
+
+async function createPayment(){
+
+  if(
+    currentUserData.role ===
+    "client"
+  ){
+
+    return;
+  }
+
+  const clientId =
+  document.getElementById(
+    "paymentClient"
+  ).value;
+
+  const amount =
+  document.getElementById(
+    "monthlyAmount"
+  ).value;
+
+  const dueDate =
+  document.getElementById(
+    "nextDueDate"
+  ).value;
+
+  if(
+    !clientId ||
+    !amount ||
+    !dueDate
+  ){
+
+    alert(
+      "Completa todos los campos"
+    );
+
+    return;
+  }
+
+  const {
+    error
+  } =
+  await supabaseClient
+  .from("client_payments")
+  .insert({
+
+    trainer_id:
+    currentUser.id,
+
+    client_id:
+    clientId,
+
+    amount,
+
+    due_date:
+    dueDate,
+
+    paid:false
+
+  });
+
+  if(error){
+
+    alert(error.message);
+
+    return;
+  }
+
+  alert(
+    "Mensualidad creada"
+  );
+
+  loadPayments();
+}
+
+/* ================================= */
+/* LOAD PAYMENTS */
+/* ================================= */
+
+async function loadPayments(){
+
+  if(
+    currentUserData.role ===
+    "client"
+  ){
+    return;
+  }
+
+  const {
+    data:payments
+  } =
+  await supabaseClient
+  .from("client_payments")
+  .select("*")
+  .eq(
+    "trainer_id",
+    currentUser.id
+  )
+  .order(
+    "due_date",
+    {
+      ascending:true
+    }
+  );
+
+  const container =
+  document.getElementById(
+    "paymentsList"
+  );
+
+  if(!container) return;
+
+  container.innerHTML = "";
+
+  if(
+    !payments ||
+    payments.length === 0
+  ){
+
+    container.innerHTML =
+    "<p>No hay pagos</p>";
+
+    return;
+  }
+
+  payments.forEach(payment=>{
+
+    const vencido =
+
+    !payment.paid &&
+    new Date(payment.due_date)
+    <
+    new Date();
+
+    container.innerHTML += `
+
+    <div class="client-card">
+
+      <h3>
+
+        $${payment.amount}
+
+      </h3>
+
+      <p>
+
+        Vence:
+        ${payment.due_date}
+
+      </p>
+
+      <p>
+
+        ${
+          payment.paid
+          ? "✅ Pagado"
+          : vencido
+          ? "🔴 Vencido"
+          : "🟡 Pendiente"
+        }
+
+      </p>
+
+      ${
+        !payment.paid
+
+        ?
+
+        `<button
+          onclick="
+          markPaymentPaid(
+          ${payment.id}
+          )"
+        >
+          Marcar pagado
+        </button>`
+
+        :
+
+        ""
+      }
+
+    </div>
+    `;
+  });
+}
+
+/* ================================= */
+/* MARK PAID */
+/* ================================= */
+
+async function markPaymentPaid(
+  paymentId
+){
+
+  await supabaseClient
+  .from("client_payments")
+  .update({
+
+    paid:true,
+
+    paid_at:
+    new Date()
+    .toISOString()
+
+  })
+  .eq(
+    "id",
+    paymentId
+  );
+
+  loadPayments();
+
+  loadDashboard();
+}
+
+/* ================================= */
+/* CLIENT PAYMENTS */
+/* ================================= */
+
+async function loadClientPayments(){
+
+  if(
+    currentUserData.role !==
+    "client"
+  ){
+
+    return;
+  }
+
+  const {
+    data:payments
+  } =
+  await supabaseClient
+  .from("client_payments")
+  .select("*")
+  .eq(
+    "client_id",
+    currentUser.id
+  );
+
+  const dashboard =
+  document.getElementById(
+    "dashboardContent"
+  );
+
+  if(!dashboard) return;
+
+  payments?.forEach(payment=>{
+
+    const vencido =
+
+    !payment.paid &&
+    new Date(payment.due_date)
+    <
+    new Date();
+
+    dashboard.innerHTML += `
+
+    <div class="routine-card">
+
+      <h3>
+        Mensualidad
+      </h3>
+
+      <p>
+        Monto:
+        $${payment.amount}
+      </p>
+
+      <p>
+        Vence:
+        ${payment.due_date}
+      </p>
+
+      <p>
+
+      ${
+        payment.paid
+        ? "✅ Pagado"
+        : vencido
+        ? "🔴 Vencido"
+        : "🟡 Pendiente"
+      }
+
+      </p>
+
+    </div>
+    `;
+  });
+}
+
+/* ================================= */
+/* ALERTS */
+/* ================================= */
+
+async function loadAlerts(){
+
+  if(
+    currentUserData.role ===
+    "client"
+  ){
+
+    return;
+  }
+
+  const {
+    data:payments
+  } =
+  await supabaseClient
+  .from("client_payments")
+  .select("*")
+  .eq(
+    "trainer_id",
+    currentUser.id
+  );
+
+  const container =
+  document.getElementById(
+    "alertsContainer"
+  );
+
+  if(!container) return;
+
+  container.innerHTML = "";
+
+  const today =
+  new Date();
+
+  payments?.forEach(payment=>{
+
+    const due =
+    new Date(
+      payment.due_date
+    );
+
+    const diff =
+
+    Math.ceil(
+
+      (
+        due - today
+      )
+
+      /
+
+      86400000
+
+    );
+
+    if(
+      !payment.paid &&
+      diff <= 5
+    ){
+
+      container.innerHTML += `
+
+      <div class="routine-card">
+
+        🔔 Pago próximo a vencer
+
+        (${diff} días)
+
+      </div>
+      `;
+    }
+  });
+}
+/* ================================= */
+/* DASHBOARD */
+/* ================================= */
+
+async function loadDashboard(){
+
+  if(!currentUserData){
+    return;
+  }
+
+  /* CLIENTE */
+
+  if(
+    currentUserData.role ===
+    "client"
+  ){
+
+    await loadMyRoutines();
+
+    await loadClientPayments();
+
+    return;
+  }
+
+  /* ENTRENADOR / SUPER ADMIN */
+
+  const {
+    data:clients
+  } =
+  await supabaseClient
+  .from("users")
+  .select("*")
+  .eq(
+    "trainer_id",
+    currentUser.id
+  );
+
+  const {
+    data:payments
+  } =
+  await supabaseClient
+  .from("client_payments")
+  .select("*")
+  .eq(
+    "trainer_id",
+    currentUser.id
+  );
+
+  const {
+    data:routines
+  } =
+  await supabaseClient
+  .from("client_routines")
+  .select("*")
+  .eq(
+    "trainer_id",
+    currentUser.id
+  );
+
+  let totalIncome = 0;
+  let pending = 0;
+
+  payments?.forEach(payment=>{
+
+    if(payment.paid){
+
+      totalIncome +=
+      Number(payment.amount || 0);
+
+    }else{
+
+      pending++;
+    }
+  });
+
+  document.getElementById(
+    "incomeCard"
+  ).textContent =
+  "$" + totalIncome;
+
+  document.getElementById(
+    "clientsCard"
+  ).textContent =
+  clients?.length || 0;
+
+  document.getElementById(
+    "pendingCard"
+  ).textContent =
+  pending;
+
+  document.getElementById(
+    "routinesCard"
+  ).textContent =
+  routines?.length || 0;
+
+  await loadAlerts();
+}
+
+/* ================================= */
+/* MOBILE FIX */
 /* ================================= */
 
 window.addEventListener(
@@ -1328,20 +1856,22 @@ window.addEventListener(
 
 document.addEventListener(
   "keydown",
-  (e)=>{
+  event=>{
 
-    if(e.key === "Enter"){
+    if(
+      event.key === "Enter"
+    ){
 
-      const authScreen =
+      const auth =
       document.getElementById(
         "authScreen"
       );
 
       if(
-        authScreen &&
-        !authScreen
-        .classList
-        .contains("hidden")
+        auth &&
+        !auth.classList.contains(
+          "hidden"
+        )
       ){
 
         login();
@@ -1351,9 +1881,102 @@ document.addEventListener(
 );
 
 /* ================================= */
-/* READY */
+/* LOAD APP DATA */
+/* ================================= */
+
+async function loadAppData(){
+
+  await loadClientsPage();
+
+  await loadClientsSelect();
+
+  await loadTrainerRoutines();
+
+  await loadPayments();
+
+  await loadCodes();
+
+  await loadDashboard();
+}
+
+/* ================================= */
+/* FIX LOGIN SCREEN */
+/* ================================= */
+
+async function checkSession(){
+
+  const {
+    data:{session}
+  } =
+  await supabaseClient
+  .auth
+  .getSession();
+
+  const authScreen =
+  document.getElementById(
+    "authScreen"
+  );
+
+  const appScreen =
+  document.getElementById(
+    "appScreen"
+  );
+
+  if(!session){
+
+    authScreen.classList.remove(
+      "hidden"
+    );
+
+    appScreen.classList.add(
+      "hidden"
+    );
+
+    return;
+  }
+
+  currentUser =
+  session.user;
+
+  authScreen.classList.add(
+    "hidden"
+  );
+
+  appScreen.classList.remove(
+    "hidden"
+  );
+
+  await loadCurrentUser();
+
+  await applyRoleUI();
+
+  await loadProfile(
+    currentUser.id
+  );
+
+  await loadAppData();
+
+  showSection(
+    "dashboard"
+  );
+}
+
+/* ================================= */
+/* AUTH CHANGE */
+/* ================================= */
+
+supabaseClient
+.auth
+.onAuthStateChange(
+  async ()=>{
+    await checkSession();
+  }
+);
+
+/* ================================= */
+/* START */
 /* ================================= */
 
 console.log(
-  "Gym SaaS listo"
+  "GYM PRO READY"
 );
